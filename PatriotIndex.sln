@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PatriotIndex.Ingestion", "PatriotIndex.Ingestion\PatriotIndex.Ingestion.csproj", "{2507660C-2312-4525-A19D-5AC732247D11}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PatriotIndex.Domain", "PatriotIndex.Domain\PatriotIndex.Domain.csproj", "{4177E5C6-512F-4E38-B891-831AA16D2B0D}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{2507660C-2312-4525-A19D-5AC732247D11}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2507660C-2312-4525-A19D-5AC732247D11}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2507660C-2312-4525-A19D-5AC732247D11}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2507660C-2312-4525-A19D-5AC732247D11}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4177E5C6-512F-4E38-B891-831AA16D2B0D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4177E5C6-512F-4E38-B891-831AA16D2B0D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4177E5C6-512F-4E38-B891-831AA16D2B0D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4177E5C6-512F-4E38-B891-831AA16D2B0D}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
