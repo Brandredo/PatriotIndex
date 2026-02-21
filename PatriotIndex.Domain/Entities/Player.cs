@@ -1,3 +1,5 @@
+using PatriotIndex.Domain.Enums;
+
 namespace PatriotIndex.Domain.Entities;
 
 public class Player
@@ -8,7 +10,7 @@ public class Player
     public string? LastName { get; set; }
     public string? Name { get; set; }
     public string? Jersey { get; set; }
-    public string? Position { get; set; }
+    public PlayerPosition? Position { get; set; }
     public int? Height { get; set; }
     public int? Weight { get; set; }
     public DateOnly? BirthDate { get; set; }

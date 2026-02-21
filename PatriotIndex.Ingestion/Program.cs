@@ -13,6 +13,7 @@ public class Program
         builder.Services.AddDbContextFactory<PatriotIndexDbContext>(options =>
         {
             options.UseNpgsql(builder.Configuration.GetConnectionString("PatriotIndexDb"));
+            options.UseSnakeCaseNamingConvention();
             options.EnableDetailedErrors();
             options.EnableSensitiveDataLogging();
         });
