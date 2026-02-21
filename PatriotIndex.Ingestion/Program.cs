@@ -5,7 +5,7 @@ namespace PatriotIndex.Ingestion;
 
 public class Program
 {
-    public static void Main(string[] args)
+    public static async Task Main(string[] args)
     {
         var builder = Host.CreateApplicationBuilder(args);
         
@@ -30,6 +30,14 @@ public class Program
         builder.Services.AddHostedService<Worker>();
         
         var host = builder.Build();
-        host.Run();
+        
+        // Apply any pending migrations at startup
+        using (var scope = host.Services.CreateScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<PatriotIndexDbContext>();
+            await db.Database.MigrateAsync();
+        }
+        
+        await host.RunAsync();
     }
 }
