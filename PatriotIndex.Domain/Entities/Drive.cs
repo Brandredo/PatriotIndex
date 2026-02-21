@@ -32,5 +32,5 @@ public class Drive
     public Game? Game { get; set; }
     public Team? OffensiveTeam { get; set; }
     public Team? DefensiveTeam { get; set; }
-    public ICollection<Play> Plays { get; set; } = [];
+    public ICollection<DriveEvent> Plays { get; set; } = [];
 }
