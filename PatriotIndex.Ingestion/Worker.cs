@@ -1,10 +1,12 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.EntityFrameworkCore;
+using PatriotIndex.Domain;
+using PatriotIndex.Domain.Entities;
 
 namespace PatriotIndex.Ingestion;
 
-public class Worker(ILogger<Worker> logger, IHttpClientFactory httpFactory) : BackgroundService
+public class Worker(ILogger<Worker> logger, IHttpClientFactory httpFactory, IDbContextFactory<PatriotIndexDbContext> dbContextFactory) : BackgroundService
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
@@ -26,9 +28,51 @@ public class Worker(ILogger<Worker> logger, IHttpClientFactory httpFactory) : Ba
         
         string content = await message.Content.ReadAsStringAsync(stoppingToken);
         
+        
+        
+        logger.LogInformation("Worker stopped at: {time}", DateTimeOffset.Now);
+        
+        // while (!stoppingToken.IsCancellationRequested)
+        // {
+        //     if (logger.IsEnabled(LogLevel.Information))
+        //     {
+        //         logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);
+        //     }
+        //
+        //     await Task.Delay(1000, stoppingToken);
+        // }
+    }
+
+
+    private void ConvertData(string content)
+    {
+        
+        using var ctx = dbContextFactory.CreateDbContext();
+        
         using var doc = JsonDocument.Parse(content);
         JsonElement root = doc.RootElement;
 
+        var game = new Game
+        {
+            Id = root.GetProperty("id").GetGuid(),
+            Status = root.GetProperty("status").GetString() ?? string.Empty,
+            Scheduled = root.GetProperty("scheduled").GetDateTime(),
+            Attendance = root.GetProperty("attendance").GetInt32(),
+            SrId = root.GetProperty("sr_id").GetString() ?? string.Empty,
+            GameType = root.GetProperty("game_type").GetString() ?? string.Empty,
+            ConferenceGame = root.GetProperty("conference_game").GetBoolean(),
+            Title = root.GetProperty("title").GetString() ?? string.Empty,
+            Duration = root.GetProperty("duration").GetString() ?? string.Empty,
+            SeasonYear = root.GetProperty("summary").GetProperty("season").GetProperty("season_year").GetInt32(),
+            SeasonType = root.GetProperty("summary").GetProperty("season").GetProperty("season_type").GetString() ?? string.Empty,
+            WeekSequence = root.GetProperty("summary").GetProperty("week").GetProperty("sequence").GetInt32(),// should probably add the weekId too
+            VenueId = root.GetProperty("summary").GetProperty("venue").GetProperty("id").GetGuid(),
+            HomeTeamId = root.GetProperty("summary").GetProperty("home").GetProperty("id").GetGuid(),
+            AwayTeamId = root.GetProperty("summary").GetProperty("away").GetProperty("id").GetGuid(),
+            //NeutralSite = root.GetProperty("neutral_site").GetBoolean()
+        };
+        
+        
         // Navigate by property name
         JsonElement periods = root.GetProperty("periods");
 
@@ -47,16 +91,8 @@ public class Worker(ILogger<Worker> logger, IHttpClientFactory httpFactory) : Ba
             // }
         }
         
-        logger.LogInformation("Worker stopped at: {time}", DateTimeOffset.Now);
         
-        // while (!stoppingToken.IsCancellationRequested)
-        // {
-        //     if (logger.IsEnabled(LogLevel.Information))
-        //     {
-        //         logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);
-        //     }
-        //
-        //     await Task.Delay(1000, stoppingToken);
-        // }
     }
+    
+    
 }
