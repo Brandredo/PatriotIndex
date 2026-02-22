@@ -149,12 +149,7 @@ public class PatriotIndexDbContext : DbContext
         // ── CoinToss ──────────────────────────────────────────────────
         modelBuilder.Entity<CoinToss>(e =>
         {
-            e.HasIndex(x => x.GameId);
-
-            e.HasOne<Game>()
-             .WithMany()
-             .HasForeignKey(x => x.GameId)
-             .OnDelete(DeleteBehavior.Cascade);
+            e.HasIndex(x => x.PeriodId);
 
             // Restrict to avoid multiple cascade paths: Game → CoinToss and Game → Period → CoinToss
             e.HasOne<Period>()

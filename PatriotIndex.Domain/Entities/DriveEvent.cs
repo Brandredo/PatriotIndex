@@ -7,7 +7,7 @@ public class DriveEvent
     public Guid DriveId { get; set; }
     
     // Enums
-    public EventType EventType { get; set;} // play, timeout, etc
+    public string EventType { get; set;} // play, timeout, etc
     public PlayType DriveType { get; set;}
 
     // Core Event
@@ -20,7 +20,7 @@ public class DriveEvent
     public int AwayScore { get; set; }
 
     // Play Identification
-    public PlayType? PlayType { get; set; } // kickoff, punt, etc
+    public string? PlayType { get; set; } // kickoff, punt, etc
     public string PassRoute { get; set; }
 
     // Pre-Snap / Formation
