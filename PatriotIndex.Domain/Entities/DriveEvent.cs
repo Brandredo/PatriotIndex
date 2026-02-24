@@ -5,14 +5,14 @@ namespace PatriotIndex.Domain.Entities;
 public class DriveEvent
 {
     public Guid DriveId { get; set; }
-    
+    public Guid PeriodId { get; set; }
     // Enums
     public string EventType { get; set;} // play, timeout, etc
     public PlayType DriveType { get; set;}
 
     // Core Event
     public Guid Id { get; set; }
-    public long Sequence { get; set; }
+    public decimal Sequence { get; set; }
     public string Clock { get; set; }
     public string WallClock { get; set; }
     public string Description { get; set; }
@@ -58,7 +58,7 @@ public class DriveEvent
     
     public Drive? Drive { get; set; }
     public ICollection<PbpEventStatistics> EventStats { get; set; } = [];
-    
+    public Period? Period { get; set; }
     public Team? StartTeam { get; set; }
     public Team? EndTeam { get; set; }
     

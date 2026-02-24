@@ -3,9 +3,9 @@ namespace PatriotIndex.Domain.Entities;
 public class Drive
 {
     public Guid Id { get; set; }
-    public Guid PeriodId { get; set; }
+    //public Guid PeriodId { get; set; }
     public int? Sequence { get; set; }
-    public Guid GameId { get; set; }
+    //public Guid GameId { get; set; }
     public int? PeriodNumber { get; set; }
     public int? TeamSequence { get; set; }
     public string? StartReason { get; set; }
@@ -29,8 +29,9 @@ public class Drive
     public int? OffensiveStartPoints { get; set; }
     public int? DefensiveStartPoints { get; set; }
 
-    public Game? Game { get; set; }
+    // public Game? Game { get; set; }
     public Team? OffensiveTeam { get; set; }
     public Team? DefensiveTeam { get; set; }
+    //public Period? Period { get; set; }
     public ICollection<DriveEvent> Plays { get; set; } = [];
 }

@@ -6,7 +6,6 @@ public class Division
     public string Name { get; set; } = "";
     public string Alias { get; set; } = "";
     public Guid ConferenceId { get; set; }
-
     public Conference? Conference { get; set; }
     public ICollection<Team> Teams { get; set; } = [];
 }

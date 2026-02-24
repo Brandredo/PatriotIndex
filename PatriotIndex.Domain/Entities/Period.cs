@@ -13,5 +13,6 @@ public class Period
     public int AwayScore { get; set; }
     
     // Navigation properties
+    public Game? Game { get; set; }
     public ICollection<Drive> Drives { get; set; } = [];
 }

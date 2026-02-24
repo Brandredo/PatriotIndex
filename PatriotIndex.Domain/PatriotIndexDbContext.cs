@@ -76,8 +76,12 @@ public class PatriotIndexDbContext : DbContext
             // TeamColors has no PK — configured as an owned entity stored in a separate table.
             e.OwnsOne(x => x.Colors, colors =>
             {
-                colors.ToTable("TeamColors");
+                colors.ToTable("team_colors");
                 colors.WithOwner().HasForeignKey("TeamId");
+                
+                colors.Property(x => x.Primary).HasColumnName("primary_color");
+                colors.Property(x => x.Secondary).HasColumnName("secondary_color");
+                
             });
         });
 
@@ -167,19 +171,21 @@ public class PatriotIndexDbContext : DbContext
         // ── Drive ─────────────────────────────────────────────────────
         modelBuilder.Entity<Drive>(e =>
         {
-            e.HasIndex(x => x.GameId);
-            e.HasIndex(x => new { x.GameId, x.Sequence });
+            //e.HasIndex(x => x.GameId);
+            //e.HasIndex(x => x.Sequence);
+            //e.HasIndex(x => new { x.GameId, x.Sequence });
+            e.HasKey(x => x.Id);
 
-            e.HasOne(x => x.Game)
-             .WithMany(x => x.Drives)
-             .HasForeignKey(x => x.GameId)
-             .OnDelete(DeleteBehavior.Cascade);
+            // e.HasOne(x => x.Game)
+            //  .WithMany(x => x.Drives)
+            //  .HasForeignKey(x => x.GameId)
+            //  .OnDelete(DeleteBehavior.Cascade);
 
             // No nav property on Drive for Period
-            e.HasOne<Period>()
-             .WithMany()
-             .HasForeignKey(x => x.PeriodId)
-             .OnDelete(DeleteBehavior.Restrict);
+            // e.HasOne<Period>()
+            //  .WithMany()
+            //  .HasForeignKey(x => x.PeriodId)
+            //  .OnDelete(DeleteBehavior.Restrict);
 
             e.HasOne(x => x.OffensiveTeam)
              .WithMany()

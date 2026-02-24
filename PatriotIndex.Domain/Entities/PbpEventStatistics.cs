@@ -4,7 +4,7 @@ namespace PatriotIndex.Domain.Entities;
 
 public class PbpEventStatistics
 {
-    public Guid Id { get; set; }
+    public long Id { get; set; }
     public Guid EventId { get; set; }
     
     // ------------

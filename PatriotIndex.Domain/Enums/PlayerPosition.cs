@@ -17,6 +17,8 @@ public enum PlayerPosition
     NT,
     OG,
     OT,
+    OL,
+    OLB,
     P,
     QB,
     RB,
@@ -24,5 +26,6 @@ public enum PlayerPosition
     SS,
     T,
     TE,
-    WR
+    WR,
+    K
 }

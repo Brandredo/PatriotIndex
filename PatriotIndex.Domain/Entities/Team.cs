@@ -21,6 +21,7 @@ public class Team
     public int? PlayoffAppearances { get; set; }
     public string? ChampionshipSeasons { get; set; }
 
+    // Navigation Properties
     public TeamColors? Colors { get; set; }
     public Division? Division { get; set; }
     public Venue? Venue { get; set; }
