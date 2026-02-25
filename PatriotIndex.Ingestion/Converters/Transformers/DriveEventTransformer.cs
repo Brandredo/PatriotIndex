@@ -2,13 +2,14 @@ using PatriotIndex.Domain.Entities;
 
 namespace PatriotIndex.Ingestion.Converters.Transformers;
 
-public class DriveEventTransformer : IJsonTransformer<DriveEvent>
+public class DriveEventTransformer
 {
-    public DriveEvent Transform(JsonNavigator nav)
+    public DriveEvent Transform(JsonNavigator nav, Guid periodId)
     {
         return new DriveEvent
         {
             Id = nav["id"].GetGuid(),
+            PeriodId = periodId,
             Sequence = nav["sequence"].GetDecimal(),
             EventType = nav["type"].GetString(),
             PlayType = nav["play_type"].GetString(),

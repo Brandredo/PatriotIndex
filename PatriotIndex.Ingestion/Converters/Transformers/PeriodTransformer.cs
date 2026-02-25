@@ -14,8 +14,8 @@ public class PeriodTransformer(ILogger<PeriodTransformer> logger) : IPeriodTrans
             Number = nav["number"].GetInt32(),
             HomeScore = nav["scoring"]["home"]["points"].GetInt32(),
             AwayScore = nav["scoring"]["away"]["points"].GetInt32(),
-            StartTime = DateTime.MinValue,
-            EndTime = DateTime.MinValue,
+            StartTime = DateTime.SpecifyKind(DateTime.MinValue, DateTimeKind.Utc),
+            EndTime = DateTime.SpecifyKind(DateTime.MinValue, DateTimeKind.Utc),
         };
 
         foreach (var item in nav["pbp"].EnumerateArray())
@@ -26,11 +26,15 @@ public class PeriodTransformer(ILogger<PeriodTransformer> logger) : IPeriodTrans
                 continue;
             }
 
-            var drive = driveAggregator.Process(item);
+            var drive = driveAggregator.Process(item, period.Id);
             if (drive is not null)
+            {
                 period.Drives.Add(drive);
+            }
             else
+            {
                 logger.LogInformation("Drive {DriveId} already seen — plays merged into existing drive", item["id"].GetString());
+            }
         }
 
         return period;

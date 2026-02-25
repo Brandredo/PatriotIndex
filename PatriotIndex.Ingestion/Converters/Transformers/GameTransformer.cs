@@ -23,6 +23,13 @@ public class GameTransformer(IPeriodTransformer periodTransformer, DriveAggregat
             VenueId = nav["summary"]["venue"]["id"].GetGuid(),
             HomeTeamId = nav["summary"]["home"]["id"].GetGuid(),
             AwayTeamId = nav["summary"]["away"]["id"].GetGuid(),
+            HomePoints = nav["summary"]["home"]["points"].GetInt32(),
+            AwayPoints = nav["summary"]["away"]["points"].GetInt32(),
+            WeatherCondition = nav["weather"]["condition"].GetString(),
+            WeatherTemp = nav["weather"]["temp"].GetInt32(),
+            WeatherHumidity = nav["weather"]["humidity"].GetInt32(),
+            WeatherWindSpeed = nav["weather"]["wind"]["speed"].GetInt32(),
+            WeatherWindDirection = nav["weather"]["wind"]["direction"].GetString(),
         };
 
         // Fresh aggregator per game — lifetime is naturally scoped here

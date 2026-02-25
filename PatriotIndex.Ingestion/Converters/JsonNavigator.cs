@@ -181,7 +181,7 @@ public readonly struct JsonNavigator
     {
         try
         {
-            return _element.GetDateTime();
+            return _element.GetDateTime().ToUniversalTime();
         }
         catch (Exception ex) when (ex is FormatException or InvalidOperationException)
         {

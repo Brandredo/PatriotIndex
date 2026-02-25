@@ -2,10 +2,10 @@ using PatriotIndex.Domain.Entities;
 
 namespace PatriotIndex.Ingestion.Converters.Transformers;
 
-public class DriveTransformer(DriveEventTransformer driveEventTransformer) : IJsonTransformer<Drive>
+public class DriveTransformer(DriveEventTransformer driveEventTransformer)
 {
     
-    public Drive Transform(JsonNavigator nav)
+    public Drive Transform(JsonNavigator nav, Guid periodId)
     {
         
         var drive = new Drive
@@ -39,7 +39,7 @@ public class DriveTransformer(DriveEventTransformer driveEventTransformer) : IJs
                 continue;
             }
             
-            var evt = driveEventTransformer.Transform(eventNav);
+            var evt = driveEventTransformer.Transform(eventNav, periodId);
             evt.DriveId = drive.Id;
             drive.Plays.Add(evt);
         }

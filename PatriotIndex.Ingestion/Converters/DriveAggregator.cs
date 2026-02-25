@@ -7,23 +7,23 @@ public class DriveAggregator(DriveTransformer driveTransformer, DriveEventTransf
 {
     private readonly Dictionary<Guid, Drive> _drives = new();
 
-    public Drive? Process(JsonNavigator nav)
+    public Drive? Process(JsonNavigator nav, Guid periodId)
     {
         var driveId = nav["id"].GetGuid();
 
         if (_drives.TryGetValue(driveId, out var existingDrive))
         {
-            MergePlays(nav, existingDrive);
+            MergePlays(nav, existingDrive, periodId);
             return null;
         }
 
-        var drive = driveTransformer.Transform(nav);
+        var drive = driveTransformer.Transform(nav, periodId);
         //drive.PeriodId = periodId;
         _drives[drive.Id] = drive;
         return drive;
     }
 
-    private void MergePlays(JsonNavigator nav, Drive existingDrive)
+    private void MergePlays(JsonNavigator nav, Drive existingDrive, Guid periodId)
     {
         var existingPlayIds = existingDrive.Plays
             .Select(p => p.Id)
@@ -34,7 +34,7 @@ public class DriveAggregator(DriveTransformer driveTransformer, DriveEventTransf
             if (eventNav["type"].GetString() != "play")
                 continue;
 
-            var play = driveEventTransformer.Transform(eventNav);
+            var play = driveEventTransformer.Transform(eventNav, periodId);
 
             if (existingPlayIds.Contains(play.Id))
                 continue;

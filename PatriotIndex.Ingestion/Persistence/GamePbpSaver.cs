@@ -18,4 +18,6 @@ public class GamePbpSaver(ILogger<GamePbpSaver> logger)
         ctx.Games.Add(game);
         await ctx.SaveChangesAsync(ct);
     }
+    
+    // method to clear a game
 }
