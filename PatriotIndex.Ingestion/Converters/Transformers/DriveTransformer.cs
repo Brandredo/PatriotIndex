@@ -29,6 +29,9 @@ public class DriveTransformer(DriveEventTransformer driveEventTransformer)
             PatPointsAttempted = nav["pat_points_attempted"].GetInt32(),
             OffensiveTeamId = nav["offensive_team"]["id"].GetGuid(),
             DefensiveTeamId = nav["defensive_team"]["id"].GetGuid(),
+            OffensivePoints = nav["offensive_team"]["points"].GetInt32(),
+            DefensivePoints = nav["defensive_team"]["points"].GetInt32(),
+            
         };
 
         foreach (var eventNav in nav["events"].EnumerateArray())

@@ -8,7 +8,7 @@ public class DriveEvent
     public Guid PeriodId { get; set; }
     // Enums
     public string EventType { get; set;} // play, timeout, etc
-    public PlayType DriveType { get; set;}
+    //public PlayType DriveType { get; set;}
 
     // Core Event
     public Guid Id { get; set; }

@@ -5,5 +5,5 @@ namespace PatriotIndex.Ingestion;
 
 public interface IPeriodTransformer
 {
-    Period Transform(JsonNavigator nav, DriveAggregator driveAggregator);
+    Period Transform(Game game, JsonNavigator nav, DriveAggregator driveAggregator);
 }

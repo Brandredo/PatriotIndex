@@ -141,13 +141,13 @@ public class PatriotIndexDbContext : DbContext
         // ── Period ────────────────────────────────────────────────────
         modelBuilder.Entity<Period>(e =>
         {
-            e.HasIndex(x => x.GameId);
-            e.HasIndex(x => new { x.GameId, x.Number }).IsUnique();
+            // e.HasIndex(x => x.GameId);
+            // e.HasIndex(x => new { x.GameId, x.Number }).IsUnique();
 
-            e.HasOne<Game>()
-             .WithMany()
-             .HasForeignKey(x => x.GameId)
-             .OnDelete(DeleteBehavior.Cascade);
+            // e.HasOne<Game>()
+            //  .WithMany()
+            //  .HasForeignKey(x => x.GameId)
+            //  .OnDelete(DeleteBehavior.Cascade);
         });
 
         // ── CoinToss ──────────────────────────────────────────────────
@@ -171,21 +171,26 @@ public class PatriotIndexDbContext : DbContext
         // ── Drive ─────────────────────────────────────────────────────
         modelBuilder.Entity<Drive>(e =>
         {
-            //e.HasIndex(x => x.GameId);
+            e.HasIndex(x => x.GameId);
             //e.HasIndex(x => x.Sequence);
             //e.HasIndex(x => new { x.GameId, x.Sequence });
             e.HasKey(x => x.Id);
 
-            // e.HasOne(x => x.Game)
-            //  .WithMany(x => x.Drives)
-            //  .HasForeignKey(x => x.GameId)
-            //  .OnDelete(DeleteBehavior.Cascade);
+            e.HasOne(x => x.Game)
+             .WithMany(x => x.Drives)
+             .HasForeignKey(x => x.GameId)
+             .OnDelete(DeleteBehavior.Cascade);
 
             // No nav property on Drive for Period
             // e.HasOne<Period>()
             //  .WithMany()
             //  .HasForeignKey(x => x.PeriodId)
             //  .OnDelete(DeleteBehavior.Restrict);
+            
+            e.HasMany(x => x.Plays)
+                .WithOne(x => x.Drive)
+                .HasForeignKey(x => x.DriveId)
+                .OnDelete(DeleteBehavior.Cascade);
 
             e.HasOne(x => x.OffensiveTeam)
              .WithMany()
@@ -259,15 +264,21 @@ public class PatriotIndexDbContext : DbContext
         {
             e.HasIndex(x => x.Sequence);
 
-            e.HasOne<Team>()
+            e.HasOne(x => x.StartTeam)
              .WithMany()
              .HasForeignKey(x => x.StartPossessionTeamId)
              .OnDelete(DeleteBehavior.Restrict);
 
-            e.HasOne<Team>()
+            e.HasOne(x => x.EndTeam)
              .WithMany()
              .HasForeignKey(x => x.EndPossessionTeamId)
              .OnDelete(DeleteBehavior.Restrict);
+            
+            e.HasMany(x => x.EventStats)
+                .WithOne(x => x.DriveEvent)
+                .HasForeignKey(x => x.EventId)
+                .OnDelete(DeleteBehavior.Cascade);
+                
         });
 
         // ── PbpEventStatistics ────────────────────────────────────────

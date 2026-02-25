@@ -4,7 +4,7 @@ namespace PatriotIndex.Ingestion.Converters.Transformers;
 
 public class PeriodTransformer(ILogger<PeriodTransformer> logger) : IPeriodTransformer
 {
-    public Period Transform(JsonNavigator nav, DriveAggregator driveAggregator)
+    public Period Transform(Game game, JsonNavigator nav, DriveAggregator driveAggregator)
     {
         var period = new Period
         {
@@ -14,8 +14,6 @@ public class PeriodTransformer(ILogger<PeriodTransformer> logger) : IPeriodTrans
             Number = nav["number"].GetInt32(),
             HomeScore = nav["scoring"]["home"]["points"].GetInt32(),
             AwayScore = nav["scoring"]["away"]["points"].GetInt32(),
-            StartTime = DateTime.SpecifyKind(DateTime.MinValue, DateTimeKind.Utc),
-            EndTime = DateTime.SpecifyKind(DateTime.MinValue, DateTimeKind.Utc),
         };
 
         foreach (var item in nav["pbp"].EnumerateArray())
@@ -29,6 +27,7 @@ public class PeriodTransformer(ILogger<PeriodTransformer> logger) : IPeriodTrans
             var drive = driveAggregator.Process(item, period.Id);
             if (drive is not null)
             {
+                drive.GameId = game.Id;
                 period.Drives.Add(drive);
             }
             else

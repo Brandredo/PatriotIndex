@@ -5,8 +5,7 @@ public class Drive
     public Guid Id { get; set; }
     //public Guid PeriodId { get; set; }
     public int? Sequence { get; set; }
-    //public Guid GameId { get; set; }
-    public int? PeriodNumber { get; set; }
+    public Guid GameId { get; set; }
     public int? TeamSequence { get; set; }
     public string? StartReason { get; set; }
     public string? EndReason { get; set; }
@@ -26,10 +25,7 @@ public class Drive
     public int? LastDriveYardLine { get; set; }
     public int? FarthestDriveYardLine { get; set; }
     public int? PatPointsAttempted { get; set; }
-    public int? OffensiveStartPoints { get; set; }
-    public int? DefensiveStartPoints { get; set; }
-
-    // public Game? Game { get; set; }
+    public Game? Game { get; set; }
     public Team? OffensiveTeam { get; set; }
     public Team? DefensiveTeam { get; set; }
     //public Period? Period { get; set; }

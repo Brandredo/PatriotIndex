@@ -3,6 +3,7 @@ using System;
 using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using PatriotIndex.Domain;
@@ -12,9 +13,11 @@ using PatriotIndex.Domain;
 namespace PatriotIndex.Domain.Migrations
 {
     [DbContext(typeof(PatriotIndexDbContext))]
-    partial class PatriotIndexDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260225003704_DbUpdates")]
+    partial class DbUpdates
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -172,6 +175,10 @@ namespace PatriotIndex.Domain.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("defensive_points");
 
+                    b.Property<int?>("DefensiveStartPoints")
+                        .HasColumnType("integer")
+                        .HasColumnName("defensive_start_points");
+
                     b.Property<Guid>("DefensiveTeamId")
                         .HasColumnType("uuid")
                         .HasColumnName("defensive_team_id");
@@ -220,6 +227,10 @@ namespace PatriotIndex.Domain.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("offensive_points");
 
+                    b.Property<int?>("OffensiveStartPoints")
+                        .HasColumnType("integer")
+                        .HasColumnName("offensive_start_points");
+
                     b.Property<Guid>("OffensiveTeamId")
                         .HasColumnType("uuid")
                         .HasColumnName("offensive_team_id");
@@ -235,6 +246,10 @@ namespace PatriotIndex.Domain.Migrations
                     b.Property<Guid?>("PeriodId")
                         .HasColumnType("uuid")
                         .HasColumnName("period_id");
+
+                    b.Property<int?>("PeriodNumber")
+                        .HasColumnType("integer")
+                        .HasColumnName("period_number");
 
                     b.Property<int?>("PlayCount")
                         .HasColumnType("integer")
@@ -303,6 +318,10 @@ namespace PatriotIndex.Domain.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("drive_id");
 
+                    b.Property<int>("DriveType")
+                        .HasColumnType("integer")
+                        .HasColumnName("drive_type");
+
                     b.Property<string>("EndClock")
                         .HasColumnType("text")
                         .HasColumnName("end_clock");
@@ -318,6 +337,10 @@ namespace PatriotIndex.Domain.Migrations
                     b.Property<Guid>("EndPossessionTeamId")
                         .HasColumnType("uuid")
                         .HasColumnName("end_possession_team_id");
+
+                    b.Property<Guid?>("EndTeamId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("end_team_id");
 
                     b.Property<int>("EndYardsToGain")
                         .HasColumnType("integer")
@@ -421,6 +444,10 @@ namespace PatriotIndex.Domain.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("start_possession_team_id");
 
+                    b.Property<Guid?>("StartTeamId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("start_team_id");
+
                     b.Property<int>("StartYardsToGain")
                         .HasColumnType("integer")
                         .HasColumnName("start_yards_to_gain");
@@ -439,6 +466,9 @@ namespace PatriotIndex.Domain.Migrations
                     b.HasIndex("EndPossessionTeamId")
                         .HasDatabaseName("ix_pbp_drive_events_end_possession_team_id");
 
+                    b.HasIndex("EndTeamId")
+                        .HasDatabaseName("ix_pbp_drive_events_end_team_id");
+
                     b.HasIndex("PeriodId")
                         .HasDatabaseName("ix_pbp_drive_events_period_id");
 
@@ -447,6 +477,9 @@ namespace PatriotIndex.Domain.Migrations
 
                     b.HasIndex("StartPossessionTeamId")
                         .HasDatabaseName("ix_pbp_drive_events_start_possession_team_id");
+
+                    b.HasIndex("StartTeamId")
+                        .HasDatabaseName("ix_pbp_drive_events_start_team_id");
 
                     b.ToTable("pbp_drive_events", (string)null);
                 });
@@ -1656,7 +1689,7 @@ namespace PatriotIndex.Domain.Migrations
                         .IsRequired()
                         .HasConstraintName("fk_drives_teams_defensive_team_id");
 
-                    b.HasOne("PatriotIndex.Domain.Entities.Game", "Game")
+                    b.HasOne("PatriotIndex.Domain.Entities.Game", null)
                         .WithMany("Drives")
                         .HasForeignKey("GameId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1677,8 +1710,6 @@ namespace PatriotIndex.Domain.Migrations
 
                     b.Navigation("DefensiveTeam");
 
-                    b.Navigation("Game");
-
                     b.Navigation("OffensiveTeam");
                 });
 
@@ -1691,12 +1722,17 @@ namespace PatriotIndex.Domain.Migrations
                         .IsRequired()
                         .HasConstraintName("fk_pbp_drive_events_drives_drive_id");
 
-                    b.HasOne("PatriotIndex.Domain.Entities.Team", "EndTeam")
+                    b.HasOne("PatriotIndex.Domain.Entities.Team", null)
                         .WithMany()
                         .HasForeignKey("EndPossessionTeamId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
                         .HasConstraintName("fk_pbp_drive_events_teams_end_possession_team_id");
+
+                    b.HasOne("PatriotIndex.Domain.Entities.Team", "EndTeam")
+                        .WithMany()
+                        .HasForeignKey("EndTeamId")
+                        .HasConstraintName("fk_pbp_drive_events_teams_end_team_id");
 
                     b.HasOne("PatriotIndex.Domain.Entities.Period", "Period")
                         .WithMany()
@@ -1705,12 +1741,17 @@ namespace PatriotIndex.Domain.Migrations
                         .IsRequired()
                         .HasConstraintName("fk_pbp_drive_events_periods_period_id");
 
-                    b.HasOne("PatriotIndex.Domain.Entities.Team", "StartTeam")
+                    b.HasOne("PatriotIndex.Domain.Entities.Team", null)
                         .WithMany()
                         .HasForeignKey("StartPossessionTeamId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
                         .HasConstraintName("fk_pbp_drive_events_teams_start_possession_team_id");
+
+                    b.HasOne("PatriotIndex.Domain.Entities.Team", "StartTeam")
+                        .WithMany()
+                        .HasForeignKey("StartTeamId")
+                        .HasConstraintName("fk_pbp_drive_events_teams_start_team_id");
 
                     b.Navigation("Drive");
 

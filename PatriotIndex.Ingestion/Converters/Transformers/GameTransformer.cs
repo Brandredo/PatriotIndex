@@ -37,7 +37,7 @@ public class GameTransformer(IPeriodTransformer periodTransformer, DriveAggregat
 
         foreach (var periodNav in nav["periods"].EnumerateArray())
         {
-            var period = periodTransformer.Transform(periodNav, driveAggregator);
+            var period = periodTransformer.Transform(game, periodNav, driveAggregator);
             period.GameId = game.Id;
             game.Periods.Add(period);
         }
