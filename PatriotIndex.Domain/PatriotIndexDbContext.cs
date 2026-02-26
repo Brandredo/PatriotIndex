@@ -8,6 +8,7 @@ public class PatriotIndexDbContext : DbContext
     
     public PatriotIndexDbContext(DbContextOptions<PatriotIndexDbContext> options) : base(options)
     {
+        
     }
     
     public DbSet<Coach> Coaches { get; set; }
