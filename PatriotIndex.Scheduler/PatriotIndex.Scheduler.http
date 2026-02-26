@@ -1,0 +1,6 @@
+@PatriotIndex.Scheduler_HostAddress = http://localhost:5014
+
+GET {{PatriotIndex.Scheduler_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
