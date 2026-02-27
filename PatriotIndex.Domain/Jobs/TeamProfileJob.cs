@@ -3,12 +3,12 @@ using Microsoft.Extensions.Logging;
 using PatriotIndex.Domain.Entities;
 using PatriotIndex.Domain.Repository;
 using PatriotIndex.Domain.Services;
+using PatriotIndex.Domain.Transformers;
 
 namespace PatriotIndex.Domain.Jobs;
 
 public class TeamProfileJob(SportsApiClient apiClient, SyncLogRepository syncLogRepository, ILogger<TeamProfileJob> logger)
 {
-
     
     public async Task RunAsync(Guid teamId, CancellationToken cancellationToken)
     {
@@ -37,8 +37,11 @@ public class TeamProfileJob(SportsApiClient apiClient, SyncLogRepository syncLog
         await syncLogRepository.InsertEntry(log, cancellationToken);
 
         // 3. transform the data into a model
+        var tpt = new TeamProfileTransformer(data);
+        var team = tpt.Transform();
 
         // 4. persist the model in the database
+        
 
     }
     

@@ -43,12 +43,16 @@ public sealed class JsonTraverser : IDisposable
     public byte[]?  GetBytes  (string path) => JsonTraverserCore.GetBytes  (_root, path);
 
     // --- Nullable primitives ---
+    public string?  GetStringN (string path, bool treatEmptyAsNull = true, bool coerceNonStringPrimitives = true)
+        => JsonTraverserCore.GetStringN(_root, path, treatEmptyAsNull, coerceNonStringPrimitives);
+
     public bool?    GetBoolN   (string path) => JsonTraverserCore.GetNullable(_root, path, e => e.ValueKind == JsonValueKind.True ? true : e.ValueKind == JsonValueKind.False ? false : (bool?)null);
     public int?     GetIntN    (string path) => JsonTraverserCore.GetNullable(_root, path, e => e.TryGetInt32(out  int i)     ? i : (int?)null);
     public long?    GetLongN   (string path) => JsonTraverserCore.GetNullable(_root, path, e => e.TryGetInt64(out  long l)    ? l : (long?)null);
     public double?  GetDoubleN (string path) => JsonTraverserCore.GetNullable(_root, path, e => e.TryGetDouble(out double d)  ? d : (double?)null);
     public decimal? GetDecimalN(string path) => JsonTraverserCore.GetNullable(_root, path, e => e.TryGetDecimal(out decimal m) ? m : (decimal?)null);
     public float?   GetFloatN  (string path) => JsonTraverserCore.GetNullable(_root, path, e => e.TryGetSingle(out float f)   ? f : (float?)null);
+    public short?   GetShortN  (string path) => JsonTraverserCore.GetNullable(_root, path, e => e.TryGetInt16(out short s)    ? s : (short?)null);
 
     // --- Enum ---
     public T GetEnum<T>(string path, T fallback = default) where T : struct, Enum => JsonTraverserCore.GetEnum<T>(_root, path, fallback);
@@ -62,7 +66,6 @@ public sealed class JsonTraverser : IDisposable
 
     public void Dispose() => _doc.Dispose();
 }
-
 
 // -------------------------------------------------------------------------
 // Shared traversal logic — used by both JsonTraverser and JsonTraverserItem
@@ -203,6 +206,25 @@ internal static class JsonTraverserCore
         return extractor(e.Value);
     }
 
+    internal static string? GetStringN(JsonElement root, string path, bool treatEmptyAsNull, bool coerceNonStringPrimitives)
+    {
+        var e = Navigate(root, path);
+        if (e is null || e.Value.ValueKind == JsonValueKind.Null) return null;
+
+        string? s = e.Value.ValueKind switch
+        {
+            JsonValueKind.String => e.Value.GetString(),
+            JsonValueKind.Number or JsonValueKind.True or JsonValueKind.False
+                when coerceNonStringPrimitives => e.Value.ToString(),
+            _ => null
+        };
+
+        if (s is null) return null;
+        if (treatEmptyAsNull && string.IsNullOrWhiteSpace(s)) return null;
+
+        return s;
+    }
+
     // --- Enum ---
 
     internal static T GetEnum<T>(JsonElement root, string path, T fallback) where T : struct, Enum
@@ -293,12 +315,16 @@ public sealed class JsonTraverserItem
     public byte[]? GetBytes(string path) => JsonTraverserCore.GetBytes(_element, path);
 
     // --- Nullable primitives ---
+    public string?  GetStringN (string path, bool treatEmptyAsNull = true, bool coerceNonStringPrimitives = true)
+        => JsonTraverserCore.GetStringN(_element, path, treatEmptyAsNull, coerceNonStringPrimitives);
+
     public bool?    GetBoolN   (string path) => JsonTraverserCore.GetNullable(_element, path, e => e.ValueKind == JsonValueKind.True ? true : e.ValueKind == JsonValueKind.False ? false : (bool?)null);
     public int?     GetIntN    (string path) => JsonTraverserCore.GetNullable(_element, path, e => e.TryGetInt32  (out int     i) ? i : (int?)null);
     public long?    GetLongN   (string path) => JsonTraverserCore.GetNullable(_element, path, e => e.TryGetInt64  (out long    l) ? l : (long?)null);
     public double?  GetDoubleN (string path) => JsonTraverserCore.GetNullable(_element, path, e => e.TryGetDouble (out double  d) ? d : (double?)null);
     public decimal? GetDecimalN(string path) => JsonTraverserCore.GetNullable(_element, path, e => e.TryGetDecimal(out decimal m) ? m : (decimal?)null);
     public float?   GetFloatN  (string path) => JsonTraverserCore.GetNullable(_element, path, e => e.TryGetSingle (out float   f) ? f : (float?)null);
+    public short?   GetShortN  (string path) => JsonTraverserCore.GetNullable(_element, path, e => e.TryGetInt16 (out short   f) ? f : (short?)null);
 
     // --- Enum ---
     public T GetEnum<T>(string path, T fallback = default) where T : struct, Enum => JsonTraverserCore.GetEnum<T>(_element, path, fallback);
