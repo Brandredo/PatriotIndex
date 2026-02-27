@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using PatriotIndex.Domain;
 using PatriotIndex.Domain.Jobs;
 using PatriotIndex.Domain.Repository;
+using PatriotIndex.Domain.Services;
 
 namespace PatriotIndex.Scheduler;
 
@@ -48,6 +49,8 @@ public class Program
         // Register repository classes
         builder.Services.AddScoped<TeamsRepository>();
         
+        // Register services
+        builder.Services.AddHttpClient<SportsApiClient>();
         
         // Add services to the container.
         builder.Services.AddAuthorization();

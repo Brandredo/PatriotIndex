@@ -11,11 +11,11 @@ public class TeamProfileJobOrchestrator(TeamsRepository teamRepository, IBackgro
     {
         logger.LogInformation("Starting Team Profile Job Orchestrator");
         
-        var teams = await teamRepository.GetTeamIdsAsync(); // returns all 32 team ids
+        var teamsIds = await teamRepository.GetTeamIdsAsync(); // returns all 32 team ids
         
-        foreach (var team in teams)
+        foreach (var id in teamsIds)
         {
-            backgroundJobClient.Enqueue<TeamProfileJob>(job => job.RunAsync(team.Id, CancellationToken.None));
+            backgroundJobClient.Enqueue<TeamProfileJob>(job => job.RunAsync(id, CancellationToken.None));
         }
         logger.LogInformation("Team Profile Job Orchestrator completed");
     }
