@@ -48,6 +48,7 @@ public class Program
         
         // Register repository classes
         builder.Services.AddScoped<TeamsRepository>();
+        builder.Services.AddScoped<SyncLogRepository>();
         
         // Register services
         builder.Services.AddHttpClient<SportsApiClient>();

@@ -22,6 +22,20 @@ public readonly struct JsonNavigator
             return new JsonNavigator(child, $"{Path}.{prop}");
         }
     }
+    
+    // Helper to safely navigate a dot-separated path and return a nullable JsonElement
+    public JsonElement? Navigate(JsonElement element, string path)
+    {
+        JsonElement current = element;
+        foreach (var key in path.Split('.'))
+        {
+            if (!current.TryGetProperty(key, out current))
+                return null; // path doesn't exist — handle gracefully
+        }
+        return current;
+    }
+    
+    
 
     public JsonNavigator this[int index]
     {
