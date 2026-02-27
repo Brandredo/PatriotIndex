@@ -3,6 +3,7 @@ using Hangfire.PostgreSql;
 using Microsoft.EntityFrameworkCore;
 using PatriotIndex.Domain;
 using PatriotIndex.Domain.Jobs;
+using PatriotIndex.Domain.Repository;
 
 namespace PatriotIndex.Scheduler;
 
@@ -43,6 +44,10 @@ public class Program
         
         // Register job classes
         builder.Services.AddScoped<TeamProfileJobOrchestrator>();
+        
+        // Register repository classes
+        builder.Services.AddScoped<TeamsRepository>();
+        
         
         // Add services to the container.
         builder.Services.AddAuthorization();
