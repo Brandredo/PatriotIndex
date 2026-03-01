@@ -2,6 +2,7 @@ using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using PatriotIndex.Domain;
 using PatriotIndex.Domain.Entities;
+using PatriotIndex.Domain.Repository;
 using PatriotIndex.Ingestion.Converters.Transformers;
 using PatriotIndex.Ingestion.Persistence;
 
@@ -15,7 +16,7 @@ public class TeamProfileDataConverter(IServiceProvider sp, TeamTransformer teamT
     {
         
         var scope = sp.CreateScope();
-        var saver = scope.ServiceProvider.GetRequiredService<TeamSaver>();
+        var saver = scope.ServiceProvider.GetRequiredService<TeamsRepository>();
         
         using var doc = JsonDocument.Parse(jsonContent);
         var nav = new JsonNavigator(doc.RootElement);
@@ -31,6 +32,6 @@ public class TeamProfileDataConverter(IServiceProvider sp, TeamTransformer teamT
             throw;
         }
 
-        await saver.SaveAsync(team, ct);
+        await saver.SaveOrUpdateAsync(team, ct);
     }
 }

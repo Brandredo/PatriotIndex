@@ -44,7 +44,7 @@ public class DriveTransformer(DriveEventTransformer driveEventTransformer)
             
             var evt = driveEventTransformer.Transform(eventNav, periodId);
             evt.DriveId = drive.Id;
-            drive.Plays.Add(evt);
+            //drive.Plays.Add(evt);
         }
 
         return drive;

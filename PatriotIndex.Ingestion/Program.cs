@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using PatriotIndex.Domain;
+using PatriotIndex.Domain.Repository;
 using PatriotIndex.Ingestion.Converters;
 using PatriotIndex.Ingestion.Converters.Endpoints;
 using PatriotIndex.Ingestion.Converters.Transformers;
@@ -43,7 +44,7 @@ public class Program
         
         // Persistence
         builder.Services.AddScoped<GamePbpSaver>();
-        builder.Services.AddScoped<TeamSaver>();
+        builder.Services.AddScoped<TeamsRepository>();
 
         // Endpoint converters
         builder.Services.AddSingleton<IEndpointDataConverter, PbpDataConverter>();

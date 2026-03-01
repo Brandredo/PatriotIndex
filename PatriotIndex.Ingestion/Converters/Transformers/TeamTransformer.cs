@@ -37,7 +37,7 @@ public class TeamTransformer(PlayerTransformer playerTransformer, CoachTransform
         {
             var p = playerTransformer.Transform(playerNav);
             p.TeamId = team.Id;
-            team.Players.Add(p);
+            //team.Players.Add(p);
         }
         
         // transform the coaches of the team
@@ -45,7 +45,7 @@ public class TeamTransformer(PlayerTransformer playerTransformer, CoachTransform
         {
             var c = coachTransformer.Transform(coachNav);
             c.TeamId = team.Id;
-            team.Coaches.Add(c);
+            //team.Coaches.Add(c);
         }
 
 

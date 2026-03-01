@@ -28,7 +28,7 @@ public class PeriodTransformer(ILogger<PeriodTransformer> logger) : IPeriodTrans
             if (drive is not null)
             {
                 drive.GameId = game.Id;
-                period.Drives.Add(drive);
+                //period.Drives.Add(drive);
             }
             else
             {

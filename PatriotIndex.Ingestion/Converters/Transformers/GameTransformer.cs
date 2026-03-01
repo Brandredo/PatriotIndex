@@ -39,7 +39,7 @@ public class GameTransformer(IPeriodTransformer periodTransformer, DriveAggregat
         {
             var period = periodTransformer.Transform(game, periodNav, driveAggregator);
             period.GameId = game.Id;
-            game.Periods.Add(period);
+            //game.Periods.Add(period);
         }
 
         return game;

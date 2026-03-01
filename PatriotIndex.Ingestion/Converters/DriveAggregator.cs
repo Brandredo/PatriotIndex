@@ -40,7 +40,7 @@ public class DriveAggregator(DriveTransformer driveTransformer, DriveEventTransf
                 continue;
 
             play.DriveId = existingDrive.Id;
-            existingDrive.Plays.Add(play);
+            //existingDrive.Plays.Add(play);
         }
     }
 }
