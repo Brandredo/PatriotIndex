@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿namespace PatriotIndex.Domain.Migrations;
 
-namespace PatriotIndex.Domain.Migrations;
-
-public partial class Period
+public class Period
 {
     public Guid Id { get; set; }
 
@@ -25,15 +22,15 @@ public partial class Period
 
     public Guid? GameId1 { get; set; }
 
-    public virtual ICollection<CoinToss> CoinTossPeriodId1Navigations { get; set; } = new List<CoinToss>();
+    public virtual IEnumerable<CoinToss> CoinTossPeriodId1Navigations { get; set; } = new List<CoinToss>();
 
-    public virtual ICollection<CoinToss> CoinTossPeriods { get; set; } = new List<CoinToss>();
+    public virtual IEnumerable<CoinToss> CoinTossPeriods { get; set; } = new List<CoinToss>();
 
-    public virtual ICollection<Drife> Drives { get; set; } = new List<Drife>();
+    public virtual IEnumerable<Drife> Drives { get; set; } = new List<Drife>();
 
     public virtual Game Game { get; set; } = null!;
 
     public virtual Game? GameId1Navigation { get; set; }
 
-    public virtual ICollection<PbpDriveEvent> PbpDriveEvents { get; set; } = new List<PbpDriveEvent>();
+    public virtual IEnumerable<PbpDriveEvent> PbpDriveEvents { get; set; } = new List<PbpDriveEvent>();
 }

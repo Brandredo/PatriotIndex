@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿namespace PatriotIndex.Domain.Migrations;
 
-namespace PatriotIndex.Domain.Migrations;
-
-public partial class Drife
+public class Drife
 {
     public Guid Id { get; set; }
 
@@ -63,7 +60,7 @@ public partial class Drife
 
     public virtual Team OffensiveTeam { get; set; } = null!;
 
-    public virtual ICollection<PbpDriveEvent> PbpDriveEvents { get; set; } = new List<PbpDriveEvent>();
+    public virtual IEnumerable<PbpDriveEvent> PbpDriveEvents { get; set; } = new List<PbpDriveEvent>();
 
     public virtual Period? Period { get; set; }
 }

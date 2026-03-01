@@ -71,5 +71,5 @@ public enum PlayResult
     Touchback,
 
     [EnumMember(Value = "touchdown")]
-    Touchdown,
+    Touchdown
 }

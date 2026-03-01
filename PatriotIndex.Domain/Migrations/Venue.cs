@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿namespace PatriotIndex.Domain.Migrations;
 
-namespace PatriotIndex.Domain.Migrations;
-
-public partial class Venue
+public class Venue
 {
     public Guid Id { get; set; }
 
@@ -31,7 +28,7 @@ public partial class Venue
 
     public string? Lng { get; set; }
 
-    public virtual ICollection<Game> Games { get; set; } = new List<Game>();
+    public virtual IEnumerable<Game> Games { get; set; } = new List<Game>();
 
-    public virtual ICollection<Team> Teams { get; set; } = new List<Team>();
+    public virtual IEnumerable<Team> Teams { get; set; } = new List<Team>();
 }

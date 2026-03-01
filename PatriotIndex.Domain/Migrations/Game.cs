@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿namespace PatriotIndex.Domain.Migrations;
 
-namespace PatriotIndex.Domain.Migrations;
-
-public partial class Game
+public class Game
 {
     public Guid Id { get; set; }
 
@@ -57,15 +54,15 @@ public partial class Game
 
     public virtual Team? AwayTeam { get; set; }
 
-    public virtual ICollection<Drife> Drives { get; set; } = new List<Drife>();
+    public virtual IEnumerable<Drife> Drives { get; set; } = new List<Drife>();
 
     public virtual Team? HomeTeam { get; set; }
 
-    public virtual ICollection<Period> PeriodGameId1Navigations { get; set; } = new List<Period>();
+    public virtual IEnumerable<Period> PeriodGameId1Navigations { get; set; } = new List<Period>();
 
-    public virtual ICollection<Period> PeriodGames { get; set; } = new List<Period>();
+    public virtual IEnumerable<Period> PeriodGames { get; set; } = new List<Period>();
 
-    public virtual ICollection<PlayerGameStat> PlayerGameStats { get; set; } = new List<PlayerGameStat>();
+    public virtual IEnumerable<PlayerGameStat> PlayerGameStats { get; set; } = new List<PlayerGameStat>();
 
     public virtual Venue? Venue { get; set; }
 }

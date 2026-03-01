@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿namespace PatriotIndex.Domain.Migrations;
 
-namespace PatriotIndex.Domain.Migrations;
-
-public partial class Player
+public class Player
 {
     public Guid Id { get; set; }
 
@@ -47,11 +44,11 @@ public partial class Player
 
     public virtual Team? DraftTeam { get; set; }
 
-    public virtual ICollection<PbpEventStatistic> PbpEventStatistics { get; set; } = new List<PbpEventStatistic>();
+    public virtual IEnumerable<PbpEventStatistic> PbpEventStatistics { get; set; } = new List<PbpEventStatistic>();
 
-    public virtual ICollection<PlayerGameStat> PlayerGameStats { get; set; } = new List<PlayerGameStat>();
+    public virtual IEnumerable<PlayerGameStat> PlayerGameStats { get; set; } = new List<PlayerGameStat>();
 
-    public virtual ICollection<PlayerSeasonStat> PlayerSeasonStats { get; set; } = new List<PlayerSeasonStat>();
+    public virtual IEnumerable<PlayerSeasonStat> PlayerSeasonStats { get; set; } = new List<PlayerSeasonStat>();
 
     public virtual Team? Team { get; set; }
 }

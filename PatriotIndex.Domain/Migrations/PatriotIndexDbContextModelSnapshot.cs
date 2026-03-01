@@ -1281,6 +1281,10 @@ namespace PatriotIndex.Domain.Migrations
                         .HasColumnType("text")
                         .HasColumnName("general_manager");
 
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_active");
+
                     b.Property<string>("Market")
                         .IsRequired()
                         .HasColumnType("text")
@@ -1306,10 +1310,6 @@ namespace PatriotIndex.Domain.Migrations
                     b.Property<string>("President")
                         .HasColumnType("text")
                         .HasColumnName("president");
-
-                    b.Property<string>("SecondaryColor")
-                        .HasColumnType("text")
-                        .HasColumnName("secondary_color");
 
                     b.Property<string>("SrId")
                         .HasColumnType("text")
@@ -1869,7 +1869,6 @@ namespace PatriotIndex.Domain.Migrations
                                 .HasColumnName("id");
 
                             b1.Property<string>("Primary")
-                                .IsRequired()
                                 .HasColumnType("text")
                                 .HasColumnName("primary_color");
 

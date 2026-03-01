@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿namespace PatriotIndex.Domain.Migrations;
 
-namespace PatriotIndex.Domain.Migrations;
-
-public partial class TeamSeasonStat
+public class TeamSeasonStat
 {
     public Guid Id { get; set; }
 

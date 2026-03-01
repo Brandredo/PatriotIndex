@@ -27,6 +27,6 @@ public class Player
 
     public Team? Team { get; set; }
     public Team? DraftTeam { get; set; }
-    public ICollection<PlayerSeasonStats>? SeasonStats { get; set; } = [];
-    public ICollection<PlayerGameStats>? GameStats { get; set; } = [];
+    public IEnumerable<PlayerSeasonStats>? SeasonStats { get; set; } = [];
+    public IEnumerable<PlayerGameStats>? GameStats { get; set; } = [];
 }

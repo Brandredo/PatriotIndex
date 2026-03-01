@@ -6,7 +6,7 @@ public class PbpEventStatistics
 {
     public long Id { get; set; }
     public Guid EventId { get; set; }
-    
+
     // ------------
     public string StatType { get; set; } = "";
     public Guid? PlayerId { get; set; }

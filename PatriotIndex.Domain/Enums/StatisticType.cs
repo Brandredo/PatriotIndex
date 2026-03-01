@@ -44,5 +44,5 @@ public enum StatisticType
     DefenseConversion,
 
     [EnumMember(Value = "blocked")]
-    Blocked,
+    Blocked
 }

@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using PatriotIndex.Domain.Migrations;
 
 namespace PatriotIndex.Domain.Context;
@@ -51,8 +49,9 @@ public partial class MyDbContext : DbContext
     public virtual DbSet<Venue> Venues { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseNpgsql("Host=localhost;Port=5432;Database=patriotindex_dev;Username=brandredo;Password=yAvQuTH9WTxZjq.yHX@RjP78.Hgb;Timeout=30;Command Timeout=30;");
+#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https: //go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
+        => optionsBuilder.UseNpgsql(
+            "Host=localhost;Port=5432;Database=patriotindex_dev;Username=brandredo;Password=yAvQuTH9WTxZjq.yHX@RjP78.Hgb;Timeout=30;Command Timeout=30;");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -224,7 +223,8 @@ public partial class MyDbContext : DbContext
 
             entity.HasIndex(e => e.Scheduled, "ix_games_scheduled");
 
-            entity.HasIndex(e => new { e.SeasonYear, e.SeasonType, e.WeekSequence }, "ix_games_season_year_season_type_week_sequence");
+            entity.HasIndex(e => new { e.SeasonYear, e.SeasonType, e.WeekSequence },
+                "ix_games_season_year_season_type_week_sequence");
 
             entity.HasIndex(e => e.SrId, "ix_games_sr_id").IsUnique();
 
@@ -573,7 +573,8 @@ public partial class MyDbContext : DbContext
 
             entity.HasIndex(e => e.PlayerId, "ix_player_season_stats_player_id");
 
-            entity.HasIndex(e => new { e.PlayerId, e.SeasonYear, e.SeasonType }, "ix_player_season_stats_player_id_season_year_season_type").IsUnique();
+            entity.HasIndex(e => new { e.PlayerId, e.SeasonYear, e.SeasonType },
+                "ix_player_season_stats_player_id_season_year_season_type").IsUnique();
 
             entity.HasIndex(e => e.TeamId, "ix_player_season_stats_team_id");
 
@@ -728,7 +729,8 @@ public partial class MyDbContext : DbContext
 
             entity.HasIndex(e => e.TeamId, "ix_team_season_stats_team_id");
 
-            entity.HasIndex(e => new { e.TeamId, e.SeasonYear, e.SeasonType }, "ix_team_season_stats_team_id_season_year_season_type").IsUnique();
+            entity.HasIndex(e => new { e.TeamId, e.SeasonYear, e.SeasonType },
+                "ix_team_season_stats_team_id_season_year_season_type").IsUnique();
 
             entity.Property(e => e.Id)
                 .ValueGeneratedNever()

@@ -1,13 +1,13 @@
-using PatriotIndex.Domain.Enums;
-
 namespace PatriotIndex.Domain.Entities;
 
 public class DriveEvent
 {
     public Guid DriveId { get; set; }
+
     public Guid PeriodId { get; set; }
+
     // Enums
-    public string EventType { get; set;} // play, timeout, etc
+    public string EventType { get; set; } // play, timeout, etc
     //public PlayType DriveType { get; set;}
 
     // Core Event
@@ -55,11 +55,10 @@ public class DriveEvent
     public int EndYardsToGain { get; set; }
     public int EndLocationYardLine { get; set; }
     public Guid EndPossessionTeamId { get; set; }
-    
+
     public Drive? Drive { get; set; }
-    public ICollection<PbpEventStatistics> EventStats { get; set; } = [];
+    public IEnumerable<PbpEventStatistics> EventStats { get; set; } = [];
     public Period? Period { get; set; }
     public Team? StartTeam { get; set; }
     public Team? EndTeam { get; set; }
-    
 }

@@ -1,3 +1,4 @@
+using System.Threading.RateLimiting;
 using Hangfire;
 using Hangfire.PostgreSql;
 using Microsoft.EntityFrameworkCore;
@@ -5,24 +6,39 @@ using PatriotIndex.Domain;
 using PatriotIndex.Domain.Jobs;
 using PatriotIndex.Domain.Repository;
 using PatriotIndex.Domain.Services;
+using Polly;
 
 namespace PatriotIndex.Scheduler;
 
 public class Program
 {
-    public static void Main(string[] args)
+    public static async Task Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
-        
-        // Add a database
-        builder.Services.AddDbContextFactory<PatriotIndexDbContext>(options =>
+
+        builder.AddServiceDefaults();
+        builder.AddNpgsqlDbContext<PatriotIndexDbContext>("PostgresDb", configureDbContextOptions: options =>
         {
-            options.UseNpgsql(builder.Configuration.GetConnectionString("PatriotIndexDb"));
             options.UseSnakeCaseNamingConvention();
             options.EnableDetailedErrors();
-            options.EnableSensitiveDataLogging();
         });
-        
+
+        // builder.EnrichNpgsqlDbContext<PatriotIndexDbContext>(settings =>
+        // {
+        //     settings.Ena
+        //     settings.DisableRetry = true;
+        //     settings.CommandTimeout = 30;
+        // });
+
+        // Add a database
+        // builder.Services.AddDbContextFactory<PatriotIndexDbContext>(options =>
+        // {
+        //     options.UseNpgsql(builder.Configuration.GetConnectionString("PatriotIndexDb"));
+        //     options.UseSnakeCaseNamingConvention();
+        //     options.EnableDetailedErrors();
+        //     options.EnableSensitiveDataLogging();
+        // });
+
         // Hangfire
         builder.Services.AddHangfire(config => config
             .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
@@ -30,11 +46,12 @@ public class Program
             .UseRecommendedSerializerSettings()
             .UsePostgreSqlStorage(options =>
             {
-                var connectionString = builder.Configuration.GetConnectionString("PatriotIndexDb") ?? throw new ArgumentNullException("Hangfire connection string is missing");
+                var connectionString = builder.Configuration.GetConnectionString("PostgresDb") ??
+                                       throw new ArgumentNullException("Hangfire connection string is missing");
                 options.UseNpgsqlConnection(connectionString);
             }, new PostgreSqlStorageOptions
             {
-                SchemaName = "hangfire",
+                SchemaName = "hangfire"
                 //UseNativeDatabaseTransactions = true,
             }));
 
@@ -42,49 +59,67 @@ public class Program
         {
             options.WorkerCount = 1; // Set the number of workers to 1 to ensure sequential execution
         });
-        
+
         // Register job classes
         builder.Services.AddScoped<TeamProfileJobOrchestrator>();
-        
+
         // Register repository classes
         builder.Services.AddScoped<TeamsRepository>();
         builder.Services.AddScoped<SyncLogRepository>();
-        
+
         // Register services
-        builder.Services.AddHttpClient<SportsApiClient>();
-        
+        builder.Services.AddHttpClient<SportsApiClient>()
+            .AddResilienceHandler("token-limiter", builder =>
+            {
+                builder.AddRateLimiter(new TokenBucketRateLimiter(
+                    new TokenBucketRateLimiterOptions
+                    {
+                        TokenLimit = 1,
+                        ReplenishmentPeriod = TimeSpan.FromSeconds(2),
+                        TokensPerPeriod = 1,
+                        QueueLimit = 50
+                    }));
+            });
+
         // Add services to the container.
         builder.Services.AddAuthorization();
-    
+
         // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
         builder.Services.AddOpenApi();
 
         var app = builder.Build();
 
+        app.MapDefaultEndpoints();
+
         // Configure the HTTP request pipeline.
-        if (app.Environment.IsDevelopment())
-        {
-            app.MapOpenApi();
-        }
+        if (app.Environment.IsDevelopment()) app.MapOpenApi();
 
         app.UseHttpsRedirection();
 
         app.UseAuthorization();
+
+        app.UseHangfireDashboard("/hangfire", new DashboardOptions
+        {
+            Authorization = []
+        });
+
+        // app.MapGet("/temp", (HttpContext httpContext) => "")
+        //     .WithName("TempEndpoint");
         
-        app.UseHangfireDashboard("/hangfire");
-        
-        app.MapGet("/temp", (HttpContext httpContext) => "")
-            .WithName("TempEndpoint");
-        
+        using (var scope = app.Services.CreateScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<PatriotIndexDbContext>();
+            await db.Database.MigrateAsync();
+        }
+
         // Hangfire recurring jobs
         RecurringJob.AddOrUpdate<TeamProfileJobOrchestrator>(
-            recurringJobId: "tp-orchestrator",
-            methodCall: job => job.RunAsync(),
-            cronExpression: "*/5 * * * *");
-        
+            "team_profile-orchestrator",
+            job => job.RunAsync(),
+            "0 6 * * *");
+
         // -----------------------
-        
-        
-        app.Run();
+
+        await app.RunAsync();
     }
 }

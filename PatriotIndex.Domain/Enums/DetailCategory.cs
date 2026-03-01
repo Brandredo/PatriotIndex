@@ -188,5 +188,5 @@ public enum DetailCategory
     TwoPointResult,
 
     [EnumMember(Value = "two_point_rush")]
-    TwoPointRush,
+    TwoPointRush
 }

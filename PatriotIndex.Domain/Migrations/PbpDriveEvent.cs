@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿namespace PatriotIndex.Domain.Migrations;
 
-namespace PatriotIndex.Domain.Migrations;
-
-public partial class PbpDriveEvent
+public class PbpDriveEvent
 {
     public Guid Id { get; set; }
 
@@ -85,9 +82,10 @@ public partial class PbpDriveEvent
 
     public virtual Team EndPossessionTeam { get; set; } = null!;
 
-    public virtual ICollection<PbpEventStatistic> PbpEventStatisticDriveEvents { get; set; } = new List<PbpEventStatistic>();
+    public virtual IEnumerable<PbpEventStatistic> PbpEventStatisticDriveEvents { get; set; } =
+        new List<PbpEventStatistic>();
 
-    public virtual ICollection<PbpEventStatistic> PbpEventStatisticEvents { get; set; } = new List<PbpEventStatistic>();
+    public virtual IEnumerable<PbpEventStatistic> PbpEventStatisticEvents { get; set; } = new List<PbpEventStatistic>();
 
     public virtual Period Period { get; set; } = null!;
 

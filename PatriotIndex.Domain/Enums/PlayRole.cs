@@ -107,5 +107,5 @@ public enum PlayRole
     Timeout,
 
     [EnumMember(Value = "touchback")]
-    Touchback,
+    Touchback
 }

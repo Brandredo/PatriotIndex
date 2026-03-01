@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿namespace PatriotIndex.Domain.Migrations;
 
-namespace PatriotIndex.Domain.Migrations;
-
-public partial class Team
+public class Team
 {
     public Guid Id { get; set; }
 
@@ -41,37 +38,38 @@ public partial class Team
 
     public string? ChampionshipSeasons { get; set; }
 
-    public virtual ICollection<Coach> Coaches { get; set; } = new List<Coach>();
+    public virtual IEnumerable<Coach> Coaches { get; set; } = new List<Coach>();
 
-    public virtual ICollection<CoinToss> CoinTosses { get; set; } = new List<CoinToss>();
+    public virtual IEnumerable<CoinToss> CoinTosses { get; set; } = new List<CoinToss>();
 
     public virtual Division? Division { get; set; }
 
-    public virtual ICollection<Drife> DrifeDefensiveTeams { get; set; } = new List<Drife>();
+    public virtual IEnumerable<Drife> DrifeDefensiveTeams { get; set; } = new List<Drife>();
 
-    public virtual ICollection<Drife> DrifeOffensiveTeams { get; set; } = new List<Drife>();
+    public virtual IEnumerable<Drife> DrifeOffensiveTeams { get; set; } = new List<Drife>();
 
-    public virtual ICollection<Game> GameAwayTeams { get; set; } = new List<Game>();
+    public virtual IEnumerable<Game> GameAwayTeams { get; set; } = new List<Game>();
 
-    public virtual ICollection<Game> GameHomeTeams { get; set; } = new List<Game>();
+    public virtual IEnumerable<Game> GameHomeTeams { get; set; } = new List<Game>();
 
-    public virtual ICollection<PbpDriveEvent> PbpDriveEventEndPossessionTeams { get; set; } = new List<PbpDriveEvent>();
+    public virtual IEnumerable<PbpDriveEvent> PbpDriveEventEndPossessionTeams { get; set; } = new List<PbpDriveEvent>();
 
-    public virtual ICollection<PbpDriveEvent> PbpDriveEventStartPossessionTeams { get; set; } = new List<PbpDriveEvent>();
+    public virtual IEnumerable<PbpDriveEvent> PbpDriveEventStartPossessionTeams { get; set; } =
+        new List<PbpDriveEvent>();
 
-    public virtual ICollection<PbpEventStatistic> PbpEventStatistics { get; set; } = new List<PbpEventStatistic>();
+    public virtual IEnumerable<PbpEventStatistic> PbpEventStatistics { get; set; } = new List<PbpEventStatistic>();
 
-    public virtual ICollection<Player> PlayerDraftTeams { get; set; } = new List<Player>();
+    public virtual IEnumerable<Player> PlayerDraftTeams { get; set; } = new List<Player>();
 
-    public virtual ICollection<PlayerGameStat> PlayerGameStats { get; set; } = new List<PlayerGameStat>();
+    public virtual IEnumerable<PlayerGameStat> PlayerGameStats { get; set; } = new List<PlayerGameStat>();
 
-    public virtual ICollection<PlayerSeasonStat> PlayerSeasonStats { get; set; } = new List<PlayerSeasonStat>();
+    public virtual IEnumerable<PlayerSeasonStat> PlayerSeasonStats { get; set; } = new List<PlayerSeasonStat>();
 
-    public virtual ICollection<Player> PlayerTeams { get; set; } = new List<Player>();
+    public virtual IEnumerable<Player> PlayerTeams { get; set; } = new List<Player>();
 
     public virtual TeamColor? TeamColor { get; set; }
 
-    public virtual ICollection<TeamSeasonStat> TeamSeasonStats { get; set; } = new List<TeamSeasonStat>();
+    public virtual IEnumerable<TeamSeasonStat> TeamSeasonStats { get; set; } = new List<TeamSeasonStat>();
 
     public virtual Venue? Venue { get; set; }
 }

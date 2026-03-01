@@ -14,17 +14,17 @@ public class Team
     public string? Mascot { get; set; }
     public Guid? VenueId { get; set; }
     public Guid? DivisionId { get; set; }
-    public string? SecondaryColor { get; set; }
     public int? ChampionshipsWon { get; set; }
     public int? ConferenceTitles { get; set; }
     public int? DivisionTitles { get; set; }
     public int? PlayoffAppearances { get; set; }
     public string? ChampionshipSeasons { get; set; }
+    public bool IsActive { get; set; }
 
     // Navigation Properties
     public TeamColors? Colors { get; set; }
     public Division? Division { get; set; }
     public Venue? Venue { get; set; }
-    public ICollection<Coach> Coaches { get; set; } = [];
-    public ICollection<Player> Players { get; set; } = [];
+    public IEnumerable<Coach> Coaches { get; set; } = [];
+    public IEnumerable<Player> Players { get; set; } = [];
 }

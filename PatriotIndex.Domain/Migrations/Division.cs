@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿namespace PatriotIndex.Domain.Migrations;
 
-namespace PatriotIndex.Domain.Migrations;
-
-public partial class Division
+public class Division
 {
     public Guid Id { get; set; }
 
@@ -15,5 +12,5 @@ public partial class Division
 
     public virtual Conference Conference { get; set; } = null!;
 
-    public virtual ICollection<Team> Teams { get; set; } = new List<Team>();
+    public virtual IEnumerable<Team> Teams { get; set; } = new List<Team>();
 }

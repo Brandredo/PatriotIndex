@@ -7,5 +7,5 @@ public class Division
     public string Alias { get; set; } = "";
     public Guid ConferenceId { get; set; }
     public Conference? Conference { get; set; }
-    public ICollection<Team> Teams { get; set; } = [];
+    public IEnumerable<Team> Teams { get; set; } = [];
 }
