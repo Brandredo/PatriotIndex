@@ -3,9 +3,11 @@ using Hangfire;
 using Hangfire.PostgreSql;
 using Microsoft.EntityFrameworkCore;
 using PatriotIndex.Domain;
+using PatriotIndex.Domain.Context;
 using PatriotIndex.Domain.Jobs;
 using PatriotIndex.Domain.Repository;
 using PatriotIndex.Domain.Services;
+using PatriotIndex.ServiceDefaults;
 using Polly;
 
 namespace PatriotIndex.Scheduler;

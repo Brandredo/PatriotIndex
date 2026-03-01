@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using PatriotIndex.Domain.Context;
 using PatriotIndex.Domain.Entities;
 
 namespace PatriotIndex.Domain.Repository;
@@ -9,7 +10,7 @@ public class TeamsRepository(PatriotIndexDbContext ctx, ILogger<TeamsRepository>
     public async Task<IEnumerable<Team>> GetTeamsAsync(CancellationToken cancellationToken = default)
     {
         logger.LogInformation("Getting all teams");
-        return await ctx.Teams.ToListAsync(cancellationToken);
+        return await ctx.Teams.AsNoTracking().Where(t => t.IsActive).ToListAsync(cancellationToken);
     }
 
     public async Task<Team?> GetTeamByIdAsync(Guid id, CancellationToken cancellationToken = default)
@@ -21,7 +22,7 @@ public class TeamsRepository(PatriotIndexDbContext ctx, ILogger<TeamsRepository>
     public async Task<IEnumerable<Guid>> GetTeamIdsAsync(CancellationToken cancellationToken = default)
     {
         logger.LogInformation("Getting all team ids");
-        return await ctx.Teams.Select(t => t.Id).ToListAsync(cancellationToken);
+        return await ctx.Teams.AsNoTracking().Where(t => t.IsActive).Select(t => t.Id).ToListAsync(cancellationToken);
     }
 
     // delete a team based on the team's id

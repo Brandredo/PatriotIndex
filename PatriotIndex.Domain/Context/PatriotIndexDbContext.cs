@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using PatriotIndex.Domain.Entities;
 
-namespace PatriotIndex.Domain;
+namespace PatriotIndex.Domain.Context;
 
 public class PatriotIndexDbContext : DbContext
 {

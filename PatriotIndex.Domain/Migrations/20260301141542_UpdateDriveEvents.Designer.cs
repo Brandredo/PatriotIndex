@@ -6,7 +6,6 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
-using PatriotIndex.Domain;
 using PatriotIndex.Domain.Context;
 
 #nullable disable
@@ -14,8 +13,8 @@ using PatriotIndex.Domain.Context;
 namespace PatriotIndex.Domain.Migrations
 {
     [DbContext(typeof(PatriotIndexDbContext))]
-    [Migration("20260227203913_RemoveSecColorFromTeam")]
-    partial class RemoveSecColorFromTeam
+    [Migration("20260301141542_UpdateDriveEvents")]
+    partial class UpdateDriveEvents
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -289,7 +288,7 @@ namespace PatriotIndex.Domain.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("away_score");
 
-                    b.Property<bool>("Blitz")
+                    b.Property<bool?>("Blitz")
                         .HasColumnType("boolean")
                         .HasColumnName("blitz");
 
@@ -299,7 +298,6 @@ namespace PatriotIndex.Domain.Migrations
                         .HasColumnName("clock");
 
                     b.Property<string>("Description")
-                        .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("description");
 
@@ -311,19 +309,19 @@ namespace PatriotIndex.Domain.Migrations
                         .HasColumnType("text")
                         .HasColumnName("end_clock");
 
-                    b.Property<int>("EndDown")
+                    b.Property<int?>("EndDown")
                         .HasColumnType("integer")
                         .HasColumnName("end_down");
 
-                    b.Property<int>("EndLocationYardLine")
+                    b.Property<int?>("EndLocationYardLine")
                         .HasColumnType("integer")
                         .HasColumnName("end_location_yard_line");
 
-                    b.Property<Guid>("EndPossessionTeamId")
+                    b.Property<Guid?>("EndPossessionTeamId")
                         .HasColumnType("uuid")
                         .HasColumnName("end_possession_team_id");
 
-                    b.Property<int>("EndYardsToGain")
+                    b.Property<int?>("EndYardsToGain")
                         .HasColumnType("integer")
                         .HasColumnName("end_yards_to_gain");
 
@@ -332,11 +330,11 @@ namespace PatriotIndex.Domain.Migrations
                         .HasColumnType("text")
                         .HasColumnName("event_type");
 
-                    b.Property<bool>("FakeFieldGoal")
+                    b.Property<bool?>("FakeFieldGoal")
                         .HasColumnType("boolean")
                         .HasColumnName("fake_field_goal");
 
-                    b.Property<bool>("FakePunt")
+                    b.Property<bool?>("FakePunt")
                         .HasColumnType("boolean")
                         .HasColumnName("fake_punt");
 
@@ -361,7 +359,6 @@ namespace PatriotIndex.Domain.Migrations
                         .HasColumnName("men_in_box");
 
                     b.Property<string>("PassRoute")
-                        .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("pass_route");
 
@@ -369,7 +366,7 @@ namespace PatriotIndex.Domain.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("period_id");
 
-                    b.Property<bool>("PlayAction")
+                    b.Property<bool?>("PlayAction")
                         .HasColumnType("boolean")
                         .HasColumnName("play_action");
 
@@ -397,11 +394,11 @@ namespace PatriotIndex.Domain.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("right_tight_ends");
 
-                    b.Property<bool>("RunPassOption")
+                    b.Property<bool?>("RunPassOption")
                         .HasColumnType("boolean")
                         .HasColumnName("run_pass_option");
 
-                    b.Property<bool>("ScreenPass")
+                    b.Property<bool?>("ScreenPass")
                         .HasColumnType("boolean")
                         .HasColumnName("screen_pass");
 
@@ -413,19 +410,19 @@ namespace PatriotIndex.Domain.Migrations
                         .HasColumnType("text")
                         .HasColumnName("start_clock");
 
-                    b.Property<int>("StartDown")
+                    b.Property<int?>("StartDown")
                         .HasColumnType("integer")
                         .HasColumnName("start_down");
 
-                    b.Property<int>("StartLocationYardLine")
+                    b.Property<int?>("StartLocationYardLine")
                         .HasColumnType("integer")
                         .HasColumnName("start_location_yard_line");
 
-                    b.Property<Guid>("StartPossessionTeamId")
+                    b.Property<Guid?>("StartPossessionTeamId")
                         .HasColumnType("uuid")
                         .HasColumnName("start_possession_team_id");
 
-                    b.Property<int>("StartYardsToGain")
+                    b.Property<int?>("StartYardsToGain")
                         .HasColumnType("integer")
                         .HasColumnName("start_yards_to_gain");
 
@@ -1285,6 +1282,10 @@ namespace PatriotIndex.Domain.Migrations
                         .HasColumnType("text")
                         .HasColumnName("general_manager");
 
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_active");
+
                     b.Property<string>("Market")
                         .IsRequired()
                         .HasColumnType("text")
@@ -1684,7 +1685,6 @@ namespace PatriotIndex.Domain.Migrations
                         .WithMany()
                         .HasForeignKey("EndPossessionTeamId")
                         .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired()
                         .HasConstraintName("fk_pbp_drive_events_teams_end_possession_team_id");
 
                     b.HasOne("PatriotIndex.Domain.Entities.Period", "Period")
@@ -1698,7 +1698,6 @@ namespace PatriotIndex.Domain.Migrations
                         .WithMany()
                         .HasForeignKey("StartPossessionTeamId")
                         .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired()
                         .HasConstraintName("fk_pbp_drive_events_teams_start_possession_team_id");
 
                     b.Navigation("Drive");

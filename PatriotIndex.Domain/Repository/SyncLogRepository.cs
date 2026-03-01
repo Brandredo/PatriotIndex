@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using PatriotIndex.Domain.Context;
 using PatriotIndex.Domain.Entities;
 
 namespace PatriotIndex.Domain.Repository;

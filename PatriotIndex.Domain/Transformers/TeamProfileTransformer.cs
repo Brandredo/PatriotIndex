@@ -30,13 +30,12 @@ public class TeamProfileTransformer(string json)
             ConferenceTitles = trf.GetIntN("conference_titles"),
             DivisionTitles = trf.GetIntN("division_titles"),
             PlayoffAppearances = trf.GetIntN("playoff_appearances"),
-            ChampionshipSeasons = trf.GetStringN("championship_seasons")
+            ChampionshipSeasons = trf.GetStringN("championship_seasons"),
+            Players = TransformPlayers(trf),
+            Coaches = TransformCoaches(trf),
+            Venue = TransformVenue(trf),
+            Colors = TransformColor(trf)
         };
-
-        _team.Players = TransformPlayers(trf);
-        _team.Coaches = TransformCoaches(trf);
-        _team.Venue = TransformVenue(trf);
-        _team.Colors = TransformColor(trf);
 
         return _team;
     }
@@ -113,7 +112,7 @@ public class TeamProfileTransformer(string json)
         };
     }
 
-    private TeamColors TransformColor(JsonTraverser trf)
+    private TeamColors? TransformColor(JsonTraverser trf)
     {
         var tc = trf.GetArrayList("team_colors", c => new
         {
@@ -121,15 +120,14 @@ public class TeamProfileTransformer(string json)
             HexColor = c.GetStringN("hex_color")
         });
 
-        var enumerable = tc.ToList();
-        if (tc is null || !enumerable.Any()) throw new Exception("team colors is null");
+        if(tc is null || tc.Count == 0) return null;
 
         var colors = new TeamColors();
 
-        if (enumerable.Any(t => t.Type == "primary"))
-            colors.Primary = enumerable.First(t => t.Type == "primary").HexColor;
-        if (enumerable.Any(t => t.Type == "secondary"))
-            colors.Secondary = enumerable.First(t => t.Type == "secondary").HexColor;
+        if (tc.Any(t => t.Type == "primary"))
+            colors.Primary = tc.First(t => t.Type == "primary").HexColor;
+        if (tc.Any(t => t.Type == "secondary"))
+            colors.Secondary = tc.First(t => t.Type == "secondary").HexColor;
 
         return colors;
     }

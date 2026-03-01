@@ -12,6 +12,7 @@ public class Game
     public string? Duration { get; set; }
     public int? SeasonYear { get; set; }
     public string? SeasonType { get; set; }
+    public Guid? SeasonId { get; set; }
     public int? WeekSequence { get; set; }
     public string? WeekTitle { get; set; }
     public Guid? HomeTeamId { get; set; }
@@ -33,4 +34,5 @@ public class Game
     public Venue? Venue { get; set; }
     public IEnumerable<Drive> Drives { get; set; } = [];
     public IEnumerable<Period> Periods { get; set; } = [];
+    public Guid? WeekId { get; set; }
 }
