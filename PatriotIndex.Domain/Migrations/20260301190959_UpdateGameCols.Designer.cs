@@ -3,6 +3,7 @@ using System;
 using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using PatriotIndex.Domain.Context;
@@ -12,9 +13,11 @@ using PatriotIndex.Domain.Context;
 namespace PatriotIndex.Domain.Migrations
 {
     [DbContext(typeof(PatriotIndexDbContext))]
-    partial class PatriotIndexDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260301190959_UpdateGameCols")]
+    partial class UpdateGameCols
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -172,7 +175,7 @@ namespace PatriotIndex.Domain.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("defensive_points");
 
-                    b.Property<Guid?>("DefensiveTeamId")
+                    b.Property<Guid>("DefensiveTeamId")
                         .HasColumnType("uuid")
                         .HasColumnName("defensive_team_id");
 
@@ -220,7 +223,7 @@ namespace PatriotIndex.Domain.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("offensive_points");
 
-                    b.Property<Guid?>("OffensiveTeamId")
+                    b.Property<Guid>("OffensiveTeamId")
                         .HasColumnType("uuid")
                         .HasColumnName("offensive_team_id");
 
@@ -231,6 +234,10 @@ namespace PatriotIndex.Domain.Migrations
                     b.Property<int?>("PenaltyYards")
                         .HasColumnType("integer")
                         .HasColumnName("penalty_yards");
+
+                    b.Property<Guid?>("PeriodId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("period_id");
 
                     b.Property<int?>("PlayCount")
                         .HasColumnType("integer")
@@ -252,10 +259,6 @@ namespace PatriotIndex.Domain.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("team_sequence");
 
-                    b.Property<string>("Type")
-                        .HasColumnType("text")
-                        .HasColumnName("type");
-
                     b.HasKey("Id")
                         .HasName("pk_drives");
 
@@ -267,6 +270,9 @@ namespace PatriotIndex.Domain.Migrations
 
                     b.HasIndex("OffensiveTeamId")
                         .HasDatabaseName("ix_drives_offensive_team_id");
+
+                    b.HasIndex("PeriodId")
+                        .HasDatabaseName("ix_drives_period_id");
 
                     b.ToTable("drives", (string)null);
                 });
@@ -1645,6 +1651,7 @@ namespace PatriotIndex.Domain.Migrations
                         .WithMany()
                         .HasForeignKey("DefensiveTeamId")
                         .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
                         .HasConstraintName("fk_drives_teams_defensive_team_id");
 
                     b.HasOne("PatriotIndex.Domain.Entities.Game", "Game")
@@ -1658,7 +1665,13 @@ namespace PatriotIndex.Domain.Migrations
                         .WithMany()
                         .HasForeignKey("OffensiveTeamId")
                         .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
                         .HasConstraintName("fk_drives_teams_offensive_team_id");
+
+                    b.HasOne("PatriotIndex.Domain.Entities.Period", null)
+                        .WithMany("Drives")
+                        .HasForeignKey("PeriodId")
+                        .HasConstraintName("fk_drives_periods_period_id");
 
                     b.Navigation("DefensiveTeam");
 
@@ -1924,6 +1937,11 @@ namespace PatriotIndex.Domain.Migrations
                     b.Navigation("Drives");
 
                     b.Navigation("Periods");
+                });
+
+            modelBuilder.Entity("PatriotIndex.Domain.Entities.Period", b =>
+                {
+                    b.Navigation("Drives");
                 });
 
             modelBuilder.Entity("PatriotIndex.Domain.Entities.Player", b =>

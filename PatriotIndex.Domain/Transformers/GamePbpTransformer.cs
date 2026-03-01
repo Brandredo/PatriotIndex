@@ -6,7 +6,8 @@ namespace PatriotIndex.Domain.Transformers;
 public class GamePbpTransformer(string json)
 {
     private Game? _game;
-    
+    private readonly Dictionary<Guid, Drive> _drives = new();
+
     public Game? Transform()
     {
         using var trf = new JsonTraverser(json);
@@ -38,13 +39,14 @@ public class GamePbpTransformer(string json)
             BroadcastNetwork = trf.GetStringN("broadcast.network"),
             NeutralSite = trf.GetBool( "neutral_site"),
             ConferenceGame = trf.GetBool( "conference_game"),
-            Periods = TransformPeriods(trf)
             // HomeTeam = null,
             // AwayTeam = null,
             // Venue = null,
             // Drives = null,
             // Periods = null
         };
+        _game.Periods = TransformPeriods(trf);
+        _game.Drives = _drives.Values;
 
         return _game;
     }
@@ -58,7 +60,7 @@ public class GamePbpTransformer(string json)
             {
                 Id = period.GetGuid("id") ?? throw new Exception("period id is null"),
                 Number = period.GetShort("number"),
-                //GameId = period.GetGuid("game.id") ?? throw new Exception("game id is null"),
+                GameId = _game.Id,
                 Type = period.GetString("period_type"),
                 Sequence = period.GetShort("sequence"),
                 HomeScore = period.GetShort("scoring.home.points"),
@@ -67,14 +69,16 @@ public class GamePbpTransformer(string json)
                 // Drives = null
             };
 
-            var drives = period.GetArrayList("drives", drive =>
+            var drives = period.GetArrayList("pbp", drive =>
             {
-
+                
+                //if(drive.GetString("type") != "drive") return null;
                 var d = new Drive
                 {
                     Id = drive.GetGuid("id") ?? throw new Exception("drive id is null"),
                     Sequence = drive.GetShort("sequence"),
-                    GameId = trf.GetGuid("game.id") ?? throw new Exception("game id is null"),
+                    Type = drive.GetStringN("type"),
+                    GameId = _game.Id,
                     TeamSequence = drive.GetShortN("team_sequence"),
                     StartReason = drive.GetStringN("start_reason"),
                     EndReason = drive.GetStringN("end_reason"),
@@ -86,8 +90,8 @@ public class GamePbpTransformer(string json)
                     NetYards = drive.GetShortN("net_yards"),
                     StartClock = drive.GetStringN("start_clock"),
                     EndClock = drive.GetStringN("end_clock"),
-                    OffensiveTeamId = drive.GetGuid("offensive_team.id") ?? throw new Exception("offensive team id is null"),
-                    DefensiveTeamId = drive.GetGuid("defensive_team.id") ?? throw new Exception("defensive team id is null"),
+                    OffensiveTeamId = drive.GetGuid("offensive_team.id"),
+                    DefensiveTeamId = drive.GetGuid("defensive_team.id"),
                     OffensivePoints = drive.GetShortN("offensive_team.points"),
                     DefensivePoints = drive.GetShortN("defensive_team.points"),
                     FirstDriveYardLine = drive.GetShortN("first_drive_yardline"),
@@ -154,12 +158,19 @@ public class GamePbpTransformer(string json)
                 });
                 
                 d.Plays = driveEvents;
-                
+
+                if (!_drives.TryGetValue(d.Id, out var existing))
+                {
+                    _drives[d.Id] = d;
+                }
+                else
+                {
+                    existing.Plays = existing.Plays.Concat(driveEvents);
+                }
+
                 return d;
             });
-            
-            p.Drives = drives;
-            
+
             return p;
         });
             

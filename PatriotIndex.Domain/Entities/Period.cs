@@ -16,5 +16,5 @@ public class Period
 
     // Navigation properties
     public Game? Game { get; set; }
-    public IEnumerable<Drive> Drives { get; set; } = [];
+    //public IEnumerable<Drive> Drives { get; set; } = [];
 }

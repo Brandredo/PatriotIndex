@@ -8,10 +8,10 @@ using PatriotIndex.Domain.Transformers;
 
 namespace PatriotIndex.Domain.Jobs;
 
-public class CurrentWeekScheduleJob(IBackgroundJobClient backgroundJobClient, SportsApiClient apiClient, ILogger<CurrentWeekScheduleJob> logger, SyncLogRepository syncLogRepository, GamesRepository gamesRepository )
+public class CurrentWeekScheduleJob(IBackgroundJobClient backgroundJobClient, SportsApiClient apiClient, ILogger<CurrentWeekScheduleJob> logger, SyncLogRepository syncLogRepository, GamesRepository gamesRepository)
 {
     [AutomaticRetry(Attempts = 0)]
-    public async Task RunAsync(CancellationToken cancellationToken)
+    public async Task RunAsync()
     {
         
         logger.LogInformation("Starting Current Week Schedule Job");
@@ -23,29 +23,31 @@ public class CurrentWeekScheduleJob(IBackgroundJobClient backgroundJobClient, Sp
             var log = new SyncLog();
             log.StartedAt = DateTime.UtcNow;
             
-            var data = await apiClient.GetAsync($"/games/current_week/schedule.json", cancellationToken);
+            var data = await apiClient.GetAsync($"games/current_week/schedule.json", CancellationToken.None);
             log.CompletedAt = DateTime.UtcNow;
             log.Status = "Completed";
             log.RecordCount = 1;
             log.RawResponse = JsonDocument.Parse(data);
             
             // 2. persist the api response in the database
-            await syncLogRepository.InsertEntry(log, cancellationToken);
+            await syncLogRepository.InsertEntry(log, CancellationToken.None);
 
             var week = new CurrentWeekTransformer(data);
             var games = week.Transform();
             if(games == null) throw new Exception("List of games is null");
             var list = games.ToList();
 
-            await gamesRepository.SaveAsync(list, cancellationToken);
+            await gamesRepository.SaveAsync(list, CancellationToken.None);
             
             foreach (var game in list)
                 backgroundJobClient.Enqueue<GamePbpJob>(job => job.RunAsync(game.Id, CancellationToken.None));
+            
+            logger.LogInformation("Current Week Schedule Job completed");
 
         }
         catch (Exception e)
         {
-            Console.WriteLine(e);
+            logger.LogError(e, "Current Week Schedule Job failed");
             throw;
         }
         

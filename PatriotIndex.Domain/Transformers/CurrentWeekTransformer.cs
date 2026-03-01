@@ -17,18 +17,23 @@ public class CurrentWeekTransformer(string json)
         var weekTitle = trf.GetStringN("week.title");
         var weekId = trf.GetGuid("week.id");
         
-        _games = trf.GetArrayList("games", g => new Game
+        _games = trf.GetArrayList("week.games", g =>
         {
-            Id = g.GetGuid("id") ?? throw new NullReferenceException("game id is null"),
-            Status = g.GetStringN("status"),
-            Scheduled = g.GetDateTime("scheduled"),
-            Title = g.GetStringN("title"),
-            SeasonId = seasonId,
-            SeasonYear = seasonYear,
-            SeasonType = seasonType,
-            WeekSequence = weekSequence,
-            WeekTitle = weekTitle,
-            WeekId = weekId,
+
+            var game = new Game
+            {
+                Id = g.GetGuid("id") ?? throw new NullReferenceException("game id is null"),
+                Status = g.GetStringN("status"),
+                Scheduled = g.GetDateTime("scheduled"),
+                Title = g.GetStringN("title"),
+                SeasonId = seasonId,
+                SeasonYear = seasonYear,
+                SeasonType = seasonType,
+                WeekSequence = weekSequence,
+                WeekTitle = weekTitle,
+                WeekId = weekId,
+            };
+            return game;
         });
         
         return _games;

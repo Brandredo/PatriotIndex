@@ -3,6 +3,7 @@ using System;
 using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using PatriotIndex.Domain.Context;
@@ -12,9 +13,11 @@ using PatriotIndex.Domain.Context;
 namespace PatriotIndex.Domain.Migrations
 {
     [DbContext(typeof(PatriotIndexDbContext))]
-    partial class PatriotIndexDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260301193336_DriveType")]
+    partial class DriveType
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -232,6 +235,10 @@ namespace PatriotIndex.Domain.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("penalty_yards");
 
+                    b.Property<Guid?>("PeriodId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("period_id");
+
                     b.Property<int?>("PlayCount")
                         .HasColumnType("integer")
                         .HasColumnName("play_count");
@@ -267,6 +274,9 @@ namespace PatriotIndex.Domain.Migrations
 
                     b.HasIndex("OffensiveTeamId")
                         .HasDatabaseName("ix_drives_offensive_team_id");
+
+                    b.HasIndex("PeriodId")
+                        .HasDatabaseName("ix_drives_period_id");
 
                     b.ToTable("drives", (string)null);
                 });
@@ -1660,6 +1670,11 @@ namespace PatriotIndex.Domain.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .HasConstraintName("fk_drives_teams_offensive_team_id");
 
+                    b.HasOne("PatriotIndex.Domain.Entities.Period", null)
+                        .WithMany("Drives")
+                        .HasForeignKey("PeriodId")
+                        .HasConstraintName("fk_drives_periods_period_id");
+
                     b.Navigation("DefensiveTeam");
 
                     b.Navigation("Game");
@@ -1924,6 +1939,11 @@ namespace PatriotIndex.Domain.Migrations
                     b.Navigation("Drives");
 
                     b.Navigation("Periods");
+                });
+
+            modelBuilder.Entity("PatriotIndex.Domain.Entities.Period", b =>
+                {
+                    b.Navigation("Drives");
                 });
 
             modelBuilder.Entity("PatriotIndex.Domain.Entities.Player", b =>

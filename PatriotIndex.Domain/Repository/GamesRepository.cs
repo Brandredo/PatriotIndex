@@ -48,8 +48,9 @@ public class GamesRepository(ILogger<GamesRepository> logger, PatriotIndexDbCont
     {
         await UpsertGameAsync(game);
         await UpsertPeriod(game.Periods);
-        await UpsertDrives(game.Drives);
-        await UpsertDriveEvents(game.Drives.SelectMany(d => d.Plays));
+        var allDrives = game.Drives.ToList();
+        await UpsertDrives(allDrives);
+        await UpsertDriveEvents(allDrives.SelectMany(d => d.Plays));
     }
 
     private async Task UpsertGameAsync(Game game)
@@ -139,10 +140,10 @@ public class GamesRepository(ILogger<GamesRepository> logger, PatriotIndexDbCont
         var list = drives.ToList();
         if (list.Count == 0) return;
 
-        const int cols = 22;
+        const int cols = 23;
         var sb = new StringBuilder(
             "INSERT INTO drives (" +
-            "id, sequence, game_id, team_sequence, start_reason, end_reason, play_count, duration, " +
+            "id, type, sequence, game_id, team_sequence, start_reason, end_reason, play_count, duration, " +
             "first_downs, gained_yards, penalty_yards, net_yards, start_clock, end_clock, " +
             "offensive_team_id, defensive_team_id, offensive_points, defensive_points, " +
             "first_drive_yard_line, last_drive_yard_line, farthest_drive_yard_line, pat_points_attempted) VALUES ");
@@ -154,6 +155,7 @@ public class GamesRepository(ILogger<GamesRepository> logger, PatriotIndexDbCont
             if (i > 0) sb.Append(", ");
             sb.Append($"({string.Join(", ", Enumerable.Range(i * cols, cols).Select(n => $"{{{n}}}"))})");
             parameters.Add(drive.Id);
+            parameters.Add(drive.Type ?? (object)DBNull.Value);
             parameters.Add(drive.Sequence);
             parameters.Add(drive.GameId);
             parameters.Add(drive.TeamSequence);
@@ -180,7 +182,7 @@ public class GamesRepository(ILogger<GamesRepository> logger, PatriotIndexDbCont
 
         sb.Append(
             " ON CONFLICT (id) DO UPDATE SET" +
-            " sequence = EXCLUDED.sequence, game_id = EXCLUDED.game_id, team_sequence = EXCLUDED.team_sequence," +
+            " type = EXCLUDED.type, sequence = EXCLUDED.sequence, game_id = EXCLUDED.game_id, team_sequence = EXCLUDED.team_sequence," +
             " start_reason = EXCLUDED.start_reason, end_reason = EXCLUDED.end_reason, play_count = EXCLUDED.play_count," +
             " duration = EXCLUDED.duration, first_downs = EXCLUDED.first_downs, gained_yards = EXCLUDED.gained_yards," +
             " penalty_yards = EXCLUDED.penalty_yards, net_yards = EXCLUDED.net_yards, start_clock = EXCLUDED.start_clock," +

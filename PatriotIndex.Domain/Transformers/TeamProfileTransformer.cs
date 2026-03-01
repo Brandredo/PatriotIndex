@@ -31,11 +31,11 @@ public class TeamProfileTransformer(string json)
             DivisionTitles = trf.GetIntN("division_titles"),
             PlayoffAppearances = trf.GetIntN("playoff_appearances"),
             ChampionshipSeasons = trf.GetStringN("championship_seasons"),
-            Players = TransformPlayers(trf),
-            Coaches = TransformCoaches(trf),
-            Venue = TransformVenue(trf),
-            Colors = TransformColor(trf)
         };
+        _team.Players = TransformPlayers(trf);
+        _team.Coaches = TransformCoaches(trf);
+        _team.Venue = TransformVenue(trf);
+        _team.Colors = TransformColor(trf);
 
         return _team;
     }

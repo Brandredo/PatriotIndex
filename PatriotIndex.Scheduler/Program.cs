@@ -67,6 +67,7 @@ public class Program
 
         // Register repository classes
         builder.Services.AddScoped<TeamsRepository>();
+        builder.Services.AddScoped<GamesRepository>();
         builder.Services.AddScoped<SyncLogRepository>();
 
         // Register services
@@ -114,11 +115,30 @@ public class Program
             await db.Database.MigrateAsync();
         }
 
+        // Misfire modes
+        // Relaxed: (Default) If a job was missed, fire it once immediately on startup
+        // Ignorable: If a job was missed, skip it and wait for the next scheduled time
+        // Strict: Fire the job for every missed occurrence (use with caution)
+        
+        
         // Hangfire recurring jobs
         RecurringJob.AddOrUpdate<TeamProfileJobOrchestrator>(
             "team_profile-orchestrator",
             job => job.RunAsync(),
-            "0 6 * * *");
+            "0 6 * * *",
+            new RecurringJobOptions
+            {
+                MisfireHandling = MisfireHandlingMode.Ignorable // Key setting
+            });
+        
+        RecurringJob.AddOrUpdate<CurrentWeekScheduleJob>(
+            "week-schedule-orchestrator",
+            job => job.RunAsync(),
+            "0 0 * * *",
+            new RecurringJobOptions
+            {
+                MisfireHandling = MisfireHandlingMode.Ignorable // Key setting
+            });
 
         // -----------------------
 

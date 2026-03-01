@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Text.Json;
+using Hangfire;
 using Microsoft.Extensions.Logging;
 using PatriotIndex.Domain.Entities;
 using PatriotIndex.Domain.Repository;
@@ -14,7 +15,7 @@ public class GamePbpJob(SportsApiClient apiClient,
     
     private static readonly ActivitySource _tracer = new("GamePbpJob");
 
-
+    [AutomaticRetry(Attempts = 0)]
     public async Task RunAsync(Guid gameId, CancellationToken cancellationToken)
     {
         logger.LogInformation("Starting Game Pbp Job");

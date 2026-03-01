@@ -26,8 +26,8 @@ public class Game
     public int? WeatherWindSpeed { get; set; }
     public string? WeatherWindDirection { get; set; }
     public string? BroadcastNetwork { get; set; }
-    public bool NeutralSite { get; set; }
-    public bool ConferenceGame { get; set; }
+    public bool? NeutralSite { get; set; }
+    public bool? ConferenceGame { get; set; }
 
     public Team? HomeTeam { get; set; }
     public Team? AwayTeam { get; set; }

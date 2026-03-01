@@ -6,11 +6,13 @@ public sealed class JsonTraverser : IDisposable
 {
     private readonly JsonDocument _doc;
     private readonly JsonElement _root;
+    private readonly Action<string>? _log;
 
-    public JsonTraverser(string json)
+    public JsonTraverser(string json, Action<string>? log = null)
     {
         _doc = JsonDocument.Parse(json);
         _root = _doc.RootElement;
+        _log = log;
     }
 
     public void Dispose()
@@ -20,193 +22,230 @@ public sealed class JsonTraverser : IDisposable
 
     public JsonElement? Navigate(string path)
     {
+        _log?.Invoke(path);
         return JsonTraverserCore.Navigate(_root, path);
     }
 
     public JsonTraverserItem? Scope(string path)
     {
-        return JsonTraverserCore.Scope(_root, path);
+        _log?.Invoke(path);
+        return JsonTraverserCore.Scope(_root, path, _log);
     }
 
     // --- Primitives ---
     public string GetString(string path, string fallback = "")
     {
+        _log?.Invoke(path);
         return JsonTraverserCore.GetString(_root, path, fallback);
     }
 
     public bool GetBool(string path, bool fallback = false)
     {
+        _log?.Invoke(path);
         return JsonTraverserCore.GetBool(_root, path, fallback);
     }
 
     public byte GetByte(string path, byte fallback = 0)
     {
+        _log?.Invoke(path);
         return JsonTraverserCore.GetByte(_root, path, fallback);
     }
 
     public short GetShort(string path, short fallback = 0)
     {
+        _log?.Invoke(path);
         return JsonTraverserCore.GetShort(_root, path, fallback);
     }
 
     public int GetInt(string path, int fallback = 0)
     {
+        _log?.Invoke(path);
         return JsonTraverserCore.GetInt(_root, path, fallback);
     }
 
     public long GetLong(string path, long fallback = 0)
     {
+        _log?.Invoke(path);
         return JsonTraverserCore.GetLong(_root, path, fallback);
     }
 
     public float GetFloat(string path, float fallback = 0)
     {
+        _log?.Invoke(path);
         return JsonTraverserCore.GetFloat(_root, path, fallback);
     }
 
     public double GetDouble(string path, double fallback = 0)
     {
+        _log?.Invoke(path);
         return JsonTraverserCore.GetDouble(_root, path, fallback);
     }
 
     public decimal GetDecimal(string path, decimal fallback = 0)
     {
+        _log?.Invoke(path);
         return JsonTraverserCore.GetDecimal(_root, path, fallback);
     }
 
     public uint GetUInt(string path, uint fallback = 0)
     {
+        _log?.Invoke(path);
         return JsonTraverserCore.GetUInt(_root, path, fallback);
     }
 
     public ulong GetULong(string path, ulong fallback = 0)
     {
+        _log?.Invoke(path);
         return JsonTraverserCore.GetULong(_root, path, fallback);
     }
 
     public char GetChar(string path, char fallback = '\0')
     {
+        _log?.Invoke(path);
         return JsonTraverserCore.GetChar(_root, path, fallback);
     }
 
     // --- Dates and times ---
     public DateTime? GetDateTime(string path)
     {
+        _log?.Invoke(path);
         return JsonTraverserCore.GetDateTime(_root, path);
     }
 
     public DateTimeOffset? GetDateTimeOffset(string path)
     {
+        _log?.Invoke(path);
         return JsonTraverserCore.GetDateTimeOffset(_root, path);
     }
 
     public TimeSpan? GetTimeSpan(string path)
     {
+        _log?.Invoke(path);
         return JsonTraverserCore.GetTimeSpan(_root, path);
     }
 
     public DateOnly? GetDateOnly(string path)
     {
+        _log?.Invoke(path);
         return JsonTraverserCore.GetDateOnly(_root, path);
     }
 
     public TimeOnly? GetTimeOnly(string path)
     {
+        _log?.Invoke(path);
         return JsonTraverserCore.GetTimeOnly(_root, path);
     }
 
     // --- Other common types ---
     public Guid? GetGuid(string path)
     {
+        _log?.Invoke(path);
         return JsonTraverserCore.GetGuid(_root, path);
     }
 
     public Uri? GetUri(string path)
     {
+        _log?.Invoke(path);
         return JsonTraverserCore.GetUri(_root, path);
     }
 
     public byte[]? GetBytes(string path)
     {
+        _log?.Invoke(path);
         return JsonTraverserCore.GetBytes(_root, path);
     }
 
     // --- Nullable primitives ---
     public string? GetStringN(string path, bool treatEmptyAsNull = true, bool coerceNonStringPrimitives = true)
     {
+        _log?.Invoke(path);
         return JsonTraverserCore.GetStringN(_root, path, treatEmptyAsNull, coerceNonStringPrimitives);
     }
 
     public bool? GetBoolN(string path)
     {
+        _log?.Invoke(path);
         return JsonTraverserCore.GetNullable(_root, path,
             e => e.ValueKind == JsonValueKind.True ? true : e.ValueKind == JsonValueKind.False ? false : (bool?)null);
     }
 
     public int? GetIntN(string path)
     {
+        _log?.Invoke(path);
         return JsonTraverserCore.GetNullable(_root, path, e => e.TryGetInt32(out var i) ? i : (int?)null);
     }
 
     public long? GetLongN(string path)
     {
+        _log?.Invoke(path);
         return JsonTraverserCore.GetNullable(_root, path, e => e.TryGetInt64(out var l) ? l : (long?)null);
     }
 
     public double? GetDoubleN(string path)
     {
+        _log?.Invoke(path);
         return JsonTraverserCore.GetNullable(_root, path, e => e.TryGetDouble(out var d) ? d : (double?)null);
     }
 
     public decimal? GetDecimalN(string path)
     {
+        _log?.Invoke(path);
         return JsonTraverserCore.GetNullable(_root, path, e => e.TryGetDecimal(out var m) ? m : (decimal?)null);
     }
 
     public float? GetFloatN(string path)
     {
+        _log?.Invoke(path);
         return JsonTraverserCore.GetNullable(_root, path, e => e.TryGetSingle(out var f) ? f : (float?)null);
     }
 
     public short? GetShortN(string path)
     {
+        _log?.Invoke(path);
         return JsonTraverserCore.GetNullable(_root, path, e => e.TryGetInt16(out var s) ? s : (short?)null);
     }
 
     // --- Enum ---
     public T GetEnum<T>(string path, T fallback = default) where T : struct, Enum
     {
+        _log?.Invoke(path);
         return JsonTraverserCore.GetEnum(_root, path, fallback);
     }
 
     // --- Collections ---
     public IEnumerable<T> GetArray<T>(string path, Func<JsonTraverserItem, T> map)
     {
-        return JsonTraverserCore.GetArray(_root, path, map);
+        _log?.Invoke(path);
+        return JsonTraverserCore.GetArray(_root, path, map, _log);
     }
 
     public List<T> GetArrayList<T>(string path, Func<JsonTraverserItem, T> map)
     {
-        return JsonTraverserCore.GetArrayList(_root, path, map);
+        _log?.Invoke(path);
+        return JsonTraverserCore.GetArrayList(_root, path, map, _log);
     }
 
     public IEnumerable<(string Key, JsonTraverserItem Value)> GetProperties(string path)
     {
-        return JsonTraverserCore.GetProperties(_root, path);
+        _log?.Invoke(path);
+        return JsonTraverserCore.GetProperties(_root, path, _log);
     }
 
     public List<string> GetStringList(string path)
     {
+        _log?.Invoke(path);
         return JsonTraverserCore.GetPrimitiveList(_root, path, e => e.GetString() ?? "");
     }
 
     public List<int> GetIntList(string path)
     {
+        _log?.Invoke(path);
         return JsonTraverserCore.GetPrimitiveList(_root, path, e => e.TryGetInt32(out var i) ? i : 0);
     }
 
     public List<double> GetDoubleList(string path)
     {
+        _log?.Invoke(path);
         return JsonTraverserCore.GetPrimitiveList(_root, path, e => e.TryGetDouble(out var d) ? d : 0);
     }
 }
@@ -234,10 +273,10 @@ internal static class JsonTraverserCore
         return current;
     }
 
-    internal static JsonTraverserItem? Scope(JsonElement root, string path)
+    internal static JsonTraverserItem? Scope(JsonElement root, string path, Action<string>? log = null)
     {
         var e = Navigate(root, path);
-        return e.HasValue ? new JsonTraverserItem(e.Value) : null;
+        return e.HasValue ? new JsonTraverserItem(e.Value, log) : null;
     }
 
     // --- Primitives ---
@@ -318,10 +357,10 @@ internal static class JsonTraverserCore
     {
         var e = Navigate(root, path);
         if (e is null) return null;
-        if (e.Value.TryGetDateTime(out var dt)) return dt;
+        if (e.Value.TryGetDateTime(out var dt)) return dt.ToUniversalTime();
         // Fall back to parsing a string manually
         if (e.Value.ValueKind == JsonValueKind.String &&
-            DateTime.TryParse(e.Value.GetString(), out var parsed)) return parsed;
+            DateTime.TryParse(e.Value.GetString(), out var parsed)) return parsed.ToUniversalTime();
         return null;
     }
 
@@ -429,17 +468,19 @@ internal static class JsonTraverserCore
 
     // --- Collections ---
 
-    internal static IEnumerable<T> GetArray<T>(JsonElement root, string path, Func<JsonTraverserItem, T> map)
+    internal static IEnumerable<T> GetArray<T>(JsonElement root, string path, Func<JsonTraverserItem, T> map,
+        Action<string>? log = null)
     {
         var element = Navigate(root, path);
         if (element is null || element.Value.ValueKind != JsonValueKind.Array)
             yield break;
 
         foreach (var item in element.Value.EnumerateArray())
-            yield return map(new JsonTraverserItem(item));
+            yield return map(new JsonTraverserItem(item, log));
     }
 
-    internal static List<T> GetArrayList<T>(JsonElement root, string path, Func<JsonTraverserItem, T> map)
+    internal static List<T> GetArrayList<T>(JsonElement root, string path, Func<JsonTraverserItem, T> map,
+        Action<string>? log = null)
     {
         var element = Navigate(root, path);
         if (element is null || element.Value.ValueKind != JsonValueKind.Array)
@@ -447,19 +488,20 @@ internal static class JsonTraverserCore
 
         var list = new List<T>();
         foreach (var item in element.Value.EnumerateArray())
-            list.Add(map(new JsonTraverserItem(item)));
+            list.Add(map(new JsonTraverserItem(item, log)));
 
         return list;
     }
 
-    internal static IEnumerable<(string Key, JsonTraverserItem Value)> GetProperties(JsonElement root, string path)
+    internal static IEnumerable<(string Key, JsonTraverserItem Value)> GetProperties(JsonElement root, string path,
+        Action<string>? log = null)
     {
         var element = Navigate(root, path);
         if (element is null || element.Value.ValueKind != JsonValueKind.Object)
             yield break;
 
         foreach (var prop in element.Value.EnumerateObject())
-            yield return (prop.Name, new JsonTraverserItem(prop.Value));
+            yield return (prop.Name, new JsonTraverserItem(prop.Value, log));
     }
 
     internal static List<T> GetPrimitiveList<T>(JsonElement root, string path, Func<JsonElement, T> extractor)
@@ -479,201 +521,240 @@ internal static class JsonTraverserCore
 public sealed class JsonTraverserItem
 {
     private readonly JsonElement _element;
+    private readonly Action<string>? _log;
 
-    internal JsonTraverserItem(JsonElement element)
+    internal JsonTraverserItem(JsonElement element, Action<string>? log = null)
     {
         _element = element;
+        _log = log;
     }
 
     public JsonElement? Navigate(string path)
     {
+        _log?.Invoke(path);
         return JsonTraverserCore.Navigate(_element, path);
     }
 
     public JsonTraverserItem? Scope(string path)
     {
-        return JsonTraverserCore.Scope(_element, path);
+        _log?.Invoke(path);
+        return JsonTraverserCore.Scope(_element, path, _log);
     }
 
     // --- Primitives ---
     public string GetString(string path, string fallback = "")
     {
+        _log?.Invoke(path);
         return JsonTraverserCore.GetString(_element, path, fallback);
     }
 
     public bool GetBool(string path, bool fallback = false)
     {
+        _log?.Invoke(path);
         return JsonTraverserCore.GetBool(_element, path, fallback);
     }
 
     public byte GetByte(string path, byte fallback = 0)
     {
+        _log?.Invoke(path);
         return JsonTraverserCore.GetByte(_element, path, fallback);
     }
 
     public short GetShort(string path, short fallback = 0)
     {
+        _log?.Invoke(path);
         return JsonTraverserCore.GetShort(_element, path, fallback);
     }
 
     public int GetInt(string path, int fallback = 0)
     {
+        _log?.Invoke(path);
         return JsonTraverserCore.GetInt(_element, path, fallback);
     }
 
     public long GetLong(string path, long fallback = 0)
     {
+        _log?.Invoke(path);
         return JsonTraverserCore.GetLong(_element, path, fallback);
     }
 
     public float GetFloat(string path, float fallback = 0)
     {
+        _log?.Invoke(path);
         return JsonTraverserCore.GetFloat(_element, path, fallback);
     }
 
     public double GetDouble(string path, double fallback = 0)
     {
+        _log?.Invoke(path);
         return JsonTraverserCore.GetDouble(_element, path, fallback);
     }
 
     public decimal GetDecimal(string path, decimal fallback = 0)
     {
+        _log?.Invoke(path);
         return JsonTraverserCore.GetDecimal(_element, path, fallback);
     }
 
     public uint GetUInt(string path, uint fallback = 0)
     {
+        _log?.Invoke(path);
         return JsonTraverserCore.GetUInt(_element, path, fallback);
     }
 
     public ulong GetULong(string path, ulong fallback = 0)
     {
+        _log?.Invoke(path);
         return JsonTraverserCore.GetULong(_element, path, fallback);
     }
 
     public char GetChar(string path, char fallback = '\0')
     {
+        _log?.Invoke(path);
         return JsonTraverserCore.GetChar(_element, path, fallback);
     }
 
     // --- Dates and times ---
     public DateTime? GetDateTime(string path)
     {
+        _log?.Invoke(path);
         return JsonTraverserCore.GetDateTime(_element, path);
     }
 
     public DateTimeOffset? GetDateTimeOffset(string path)
     {
+        _log?.Invoke(path);
         return JsonTraverserCore.GetDateTimeOffset(_element, path);
     }
 
     public TimeSpan? GetTimeSpan(string path)
     {
+        _log?.Invoke(path);
         return JsonTraverserCore.GetTimeSpan(_element, path);
     }
 
     public DateOnly? GetDateOnly(string path)
     {
+        _log?.Invoke(path);
         return JsonTraverserCore.GetDateOnly(_element, path);
     }
 
     public TimeOnly? GetTimeOnly(string path)
     {
+        _log?.Invoke(path);
         return JsonTraverserCore.GetTimeOnly(_element, path);
     }
 
     // --- Other common types ---
     public Guid? GetGuid(string path)
     {
+        _log?.Invoke(path);
         return JsonTraverserCore.GetGuid(_element, path);
     }
 
     public Uri? GetUri(string path)
     {
+        _log?.Invoke(path);
         return JsonTraverserCore.GetUri(_element, path);
     }
 
     public byte[]? GetBytes(string path)
     {
+        _log?.Invoke(path);
         return JsonTraverserCore.GetBytes(_element, path);
     }
 
     // --- Nullable primitives ---
     public string? GetStringN(string path, bool treatEmptyAsNull = true, bool coerceNonStringPrimitives = true)
     {
+        _log?.Invoke(path);
         return JsonTraverserCore.GetStringN(_element, path, treatEmptyAsNull, coerceNonStringPrimitives);
     }
 
     public bool? GetBoolN(string path)
     {
+        _log?.Invoke(path);
         return JsonTraverserCore.GetNullable(_element, path,
             e => e.ValueKind == JsonValueKind.True ? true : e.ValueKind == JsonValueKind.False ? false : (bool?)null);
     }
 
     public int? GetIntN(string path)
     {
+        _log?.Invoke(path);
         return JsonTraverserCore.GetNullable(_element, path, e => e.TryGetInt32(out var i) ? i : (int?)null);
     }
 
     public long? GetLongN(string path)
     {
+        _log?.Invoke(path);
         return JsonTraverserCore.GetNullable(_element, path, e => e.TryGetInt64(out var l) ? l : (long?)null);
     }
 
     public double? GetDoubleN(string path)
     {
+        _log?.Invoke(path);
         return JsonTraverserCore.GetNullable(_element, path, e => e.TryGetDouble(out var d) ? d : (double?)null);
     }
 
     public decimal? GetDecimalN(string path)
     {
+        _log?.Invoke(path);
         return JsonTraverserCore.GetNullable(_element, path, e => e.TryGetDecimal(out var m) ? m : (decimal?)null);
     }
 
     public float? GetFloatN(string path)
     {
+        _log?.Invoke(path);
         return JsonTraverserCore.GetNullable(_element, path, e => e.TryGetSingle(out var f) ? f : (float?)null);
     }
 
     public short? GetShortN(string path)
     {
+        _log?.Invoke(path);
         return JsonTraverserCore.GetNullable(_element, path, e => e.TryGetInt16(out var f) ? f : (short?)null);
     }
 
     // --- Enum ---
     public T GetEnum<T>(string path, T fallback = default) where T : struct, Enum
     {
+        _log?.Invoke(path);
         return JsonTraverserCore.GetEnum(_element, path, fallback);
     }
 
     // --- Collections ---
     public IEnumerable<T> GetArray<T>(string path, Func<JsonTraverserItem, T> map)
     {
-        return JsonTraverserCore.GetArray(_element, path, map);
+        _log?.Invoke(path);
+        return JsonTraverserCore.GetArray(_element, path, map, _log);
     }
 
     public List<T> GetArrayList<T>(string path, Func<JsonTraverserItem, T> map)
     {
-        return JsonTraverserCore.GetArrayList(_element, path, map);
+        _log?.Invoke(path);
+        return JsonTraverserCore.GetArrayList(_element, path, map, _log);
     }
 
     public IEnumerable<(string Key, JsonTraverserItem Value)> GetProperties(string path)
     {
-        return JsonTraverserCore.GetProperties(_element, path);
+        _log?.Invoke(path);
+        return JsonTraverserCore.GetProperties(_element, path, _log);
     }
 
     public List<string> GetStringList(string path)
     {
+        _log?.Invoke(path);
         return JsonTraverserCore.GetPrimitiveList(_element, path, e => e.GetString() ?? "");
     }
 
     public List<int> GetIntList(string path)
     {
+        _log?.Invoke(path);
         return JsonTraverserCore.GetPrimitiveList(_element, path, e => e.TryGetInt32(out var i) ? i : 0);
     }
 
     public List<double> GetDoubleList(string path)
     {
+        _log?.Invoke(path);
         return JsonTraverserCore.GetPrimitiveList(_element, path, e => e.TryGetDouble(out var d) ? d : 0);
     }
 }

@@ -3,8 +3,7 @@ namespace PatriotIndex.Domain.Entities;
 public class Drive
 {
     public Guid Id { get; set; }
-
-    //public Guid PeriodId { get; set; }
+    public string? Type { get; set; }
     public int? Sequence { get; set; }
     public Guid GameId { get; set; }
     public int? TeamSequence { get; set; }
@@ -18,8 +17,8 @@ public class Drive
     public int? NetYards { get; set; }
     public string? StartClock { get; set; }
     public string? EndClock { get; set; }
-    public Guid OffensiveTeamId { get; set; }
-    public Guid DefensiveTeamId { get; set; }
+    public Guid? OffensiveTeamId { get; set; }
+    public Guid? DefensiveTeamId { get; set; }
     public int? OffensivePoints { get; set; }
     public int? DefensivePoints { get; set; }
     public int? FirstDriveYardLine { get; set; }
