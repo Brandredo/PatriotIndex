@@ -25,6 +25,8 @@ public class PatriotIndexDbContext : DbContext
     public DbSet<Team> Teams { get; set; }
     public DbSet<TeamSeasonStats> TeamSeasonStats { get; set; }
     public DbSet<Venue> Venues { get; set; }
+    
+    public DbSet<PlayStatistic> PlayStatistics { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -273,6 +275,12 @@ public class PatriotIndexDbContext : DbContext
                 .WithOne(x => x.DriveEvent)
                 .HasForeignKey(x => x.EventId)
                 .OnDelete(DeleteBehavior.Cascade);
+            
+            // this is the used relationship
+            e.HasMany(x => x.PlayStats)
+                .WithOne(x => x.PlayEvent)
+                .HasForeignKey(x => x.PlayId)
+                .OnDelete(DeleteBehavior.Cascade);
         });
 
         // ── PbpEventStatistics ────────────────────────────────────────
@@ -293,6 +301,61 @@ public class PatriotIndexDbContext : DbContext
         {
             e.HasIndex(x => x.EntityType);
             e.HasIndex(x => x.StartedAt);
+        });
+        
+        
+        modelBuilder.Entity<PlayStatistic>(entity =>
+        {
+            entity.ToTable("play_statistics");
+            entity.HasKey(e => e.Id);
+
+            entity.Property(e => e.Id).ValueGeneratedOnAdd();
+            
+            // Not to map StatType as a regular column
+            //entity.Ignore(e => e.StatType);
+            
+            // Map the stat_type string directly as the EF discriminator
+            entity.HasDiscriminator<string>("stat_type")
+                .HasValue<RushPlayStat>              ("rush")
+                .HasValue<PassPlayStat>              ("pass")
+                .HasValue<ReceivePlayStat>           ("receive")
+                .HasValue<DefensePlayStat>           ("defense")
+                .HasValue<FumblePlayStat>            ("fumble")
+                .HasValue<PenaltyPlayStat>           ("penalty")
+                .HasValue<KickPlayStat>              ("kick")
+                .HasValue<PuntPlayStat>              ("punt")
+                .HasValue<ReturnPlayStat>            ("return")
+                .HasValue<IntReturnPlayStat>         ("int_return")
+                .HasValue<MiscReturnPlayStat>        ("misc_return")
+                .HasValue<FieldGoalPlayStat>         ("field_goal")
+                .HasValue<ExtraPointPlayStat>        ("extra_point")
+                .HasValue<ConversionPlayStat>        ("conversion")
+                .HasValue<DefenseConversionPlayStat> ("defense_conversion")
+                .HasValue<DownConversionPlayStat>    ("down_conversion")
+                .HasValue<BlockPlayStat>             ("block")
+                .HasValue<FirstDownPlayStat>         ("first_down");
+            
+            // Owned entities for the embedded Player/Team references
+            entity.OwnsOne(e => e.Player, player =>
+            {
+                player.Property(p => p.Id)      .HasColumnName("player_id");
+                player.Property(p => p.Name)    .HasColumnName("player_name");
+                player.Property(p => p.Jersey)  .HasColumnName("player_jersey");
+                player.Property(p => p.Position).HasColumnName("player_position");
+                player.Property(p => p.SrId)    .HasColumnName("player_sr_id");
+            });
+
+            entity.OwnsOne(e => e.Team, team =>
+            {
+                team.Property(t => t.Id)    .HasColumnName("team_id");
+                team.Property(t => t.Name)  .HasColumnName("team_name");
+                team.Property(t => t.Market).HasColumnName("team_market");
+                team.Property(t => t.Alias) .HasColumnName("team_alias");
+                team.Property(t => t.SrId)  .HasColumnName("team_sr_id");
+            });
+
+            // Index the discriminator — nearly every query will filter by it
+            entity.HasIndex(e => new { e.PlayId, e.StatType });
         });
     }
 }

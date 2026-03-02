@@ -61,4 +61,7 @@ public class DriveEvent
     public Period? Period { get; set; }
     public Team? StartTeam { get; set; }
     public Team? EndTeam { get; set; }
+    
+    public IEnumerable<PlayStatistic> PlayStats { get; set; } = [];
+    
 }
