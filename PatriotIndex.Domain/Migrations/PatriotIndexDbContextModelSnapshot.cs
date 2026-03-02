@@ -720,6 +720,38 @@ namespace PatriotIndex.Domain.Migrations
                     b.ToTable("periods", (string)null);
                 });
 
+            modelBuilder.Entity("PatriotIndex.Domain.Entities.PlayStatistic", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<Guid>("PlayId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("play_id");
+
+                    b.Property<string>("stat_type")
+                        .IsRequired()
+                        .HasMaxLength(21)
+                        .HasColumnType("character varying(21)")
+                        .HasColumnName("stat_type");
+
+                    b.HasKey("Id")
+                        .HasName("pk_play_statistics");
+
+                    b.HasIndex("PlayId", "stat_type")
+                        .HasDatabaseName("ix_play_statistics_play_id_stat_type");
+
+                    b.ToTable("play_statistics", (string)null);
+
+                    b.HasDiscriminator<string>("stat_type").HasValue("PlayStatistic");
+
+                    b.UseTphMappingStrategy();
+                });
+
             modelBuilder.Entity("PatriotIndex.Domain.Entities.Player", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1589,6 +1621,1431 @@ namespace PatriotIndex.Domain.Migrations
                     b.ToTable("venues", (string)null);
                 });
 
+            modelBuilder.Entity("PatriotIndex.Domain.Entities.BlockPlayStat", b =>
+                {
+                    b.HasBaseType("PatriotIndex.Domain.Entities.PlayStatistic");
+
+                    b.Property<int>("Blocks")
+                        .HasColumnType("integer")
+                        .HasColumnName("blocks")
+                        .HasJsonPropertyName("blocks");
+
+                    b.Property<string>("Category")
+                        .HasColumnType("text")
+                        .HasColumnName("category")
+                        .HasJsonPropertyName("category");
+
+                    b.ToTable("play_statistics", null, t =>
+                        {
+                            t.Property("Category")
+                                .HasColumnName("block_play_stat_category");
+                        });
+
+                    b.HasDiscriminator().HasValue("block");
+                });
+
+            modelBuilder.Entity("PatriotIndex.Domain.Entities.ConversionPlayStat", b =>
+                {
+                    b.HasBaseType("PatriotIndex.Domain.Entities.PlayStatistic");
+
+                    b.Property<int>("Attempt")
+                        .HasColumnType("integer")
+                        .HasColumnName("attempt")
+                        .HasJsonPropertyName("attempt");
+
+                    b.Property<string>("Category")
+                        .HasColumnType("text")
+                        .HasColumnName("category")
+                        .HasJsonPropertyName("category");
+
+                    b.Property<int>("Complete")
+                        .HasColumnType("integer")
+                        .HasColumnName("complete")
+                        .HasJsonPropertyName("complete");
+
+                    b.Property<int?>("Safety")
+                        .HasColumnType("integer")
+                        .HasColumnName("safety")
+                        .HasJsonPropertyName("safety");
+
+                    b.ToTable("play_statistics", null, t =>
+                        {
+                            t.Property("Attempt")
+                                .HasColumnName("conversion_play_stat_attempt");
+
+                            t.Property("Category")
+                                .HasColumnName("conversion_play_stat_category");
+
+                            t.Property("Complete")
+                                .HasColumnName("conversion_play_stat_complete");
+
+                            t.Property("Safety")
+                                .HasColumnName("conversion_play_stat_safety");
+                        });
+
+                    b.HasDiscriminator().HasValue("conversion");
+                });
+
+            modelBuilder.Entity("PatriotIndex.Domain.Entities.DefenseConversionPlayStat", b =>
+                {
+                    b.HasBaseType("PatriotIndex.Domain.Entities.PlayStatistic");
+
+                    b.Property<int>("Attempt")
+                        .HasColumnType("integer")
+                        .HasColumnName("attempt")
+                        .HasJsonPropertyName("attempt");
+
+                    b.Property<string>("Category")
+                        .HasColumnType("text")
+                        .HasColumnName("category")
+                        .HasJsonPropertyName("category");
+
+                    b.Property<int>("Complete")
+                        .HasColumnType("integer")
+                        .HasColumnName("complete")
+                        .HasJsonPropertyName("complete");
+
+                    b.ToTable("play_statistics", null, t =>
+                        {
+                            t.Property("Attempt")
+                                .HasColumnName("defense_conversion_play_stat_attempt");
+
+                            t.Property("Category")
+                                .HasColumnName("defense_conversion_play_stat_category");
+
+                            t.Property("Complete")
+                                .HasColumnName("defense_conversion_play_stat_complete");
+                        });
+
+                    b.HasDiscriminator().HasValue("defense_conversion");
+                });
+
+            modelBuilder.Entity("PatriotIndex.Domain.Entities.DefensePlayStat", b =>
+                {
+                    b.HasBaseType("PatriotIndex.Domain.Entities.PlayStatistic");
+
+                    b.Property<int>("Assist")
+                        .HasColumnType("integer")
+                        .HasColumnName("assist")
+                        .HasJsonPropertyName("assist");
+
+                    b.Property<double?>("AssistedSack")
+                        .HasColumnType("double precision")
+                        .HasColumnName("assisted_sack")
+                        .HasJsonPropertyName("assisted_sack");
+
+                    b.Property<int?>("AssistedTackle")
+                        .HasColumnType("integer")
+                        .HasColumnName("assisted_tackle")
+                        .HasJsonPropertyName("assisted_tackle");
+
+                    b.Property<double?>("AssistedTackleForLoss")
+                        .HasColumnType("double precision")
+                        .HasColumnName("assisted_tackle_for_loss")
+                        .HasJsonPropertyName("assisted_tloss");
+
+                    b.Property<int>("BattedPass")
+                        .HasColumnType("integer")
+                        .HasColumnName("batted_pass")
+                        .HasJsonPropertyName("batted_pass");
+
+                    b.Property<int>("Blitz")
+                        .HasColumnType("integer")
+                        .HasColumnName("blitz")
+                        .HasJsonPropertyName("blitz");
+
+                    b.Property<string>("Category")
+                        .HasColumnType("text")
+                        .HasColumnName("category")
+                        .HasJsonPropertyName("category");
+
+                    b.Property<int?>("DefComp")
+                        .HasColumnType("integer")
+                        .HasColumnName("def_comp")
+                        .HasJsonPropertyName("def_comp");
+
+                    b.Property<int?>("DefTarget")
+                        .HasColumnType("integer")
+                        .HasColumnName("def_target")
+                        .HasJsonPropertyName("def_target");
+
+                    b.Property<int>("ForcedFumble")
+                        .HasColumnType("integer")
+                        .HasColumnName("forced_fumble")
+                        .HasJsonPropertyName("forced_fumble");
+
+                    b.Property<int>("FumbleRecovery")
+                        .HasColumnType("integer")
+                        .HasColumnName("fumble_recovery")
+                        .HasJsonPropertyName("fumble_recovery");
+
+                    b.Property<int>("Hurry")
+                        .HasColumnType("integer")
+                        .HasColumnName("hurry")
+                        .HasJsonPropertyName("hurry");
+
+                    b.Property<int>("Interception")
+                        .HasColumnType("integer")
+                        .HasColumnName("interception")
+                        .HasJsonPropertyName("interception");
+
+                    b.Property<int?>("InterceptionTouchdowns")
+                        .HasColumnType("integer")
+                        .HasColumnName("interception_touchdowns")
+                        .HasJsonPropertyName("int_touchdowns");
+
+                    b.Property<int?>("InterceptionYards")
+                        .HasColumnType("integer")
+                        .HasColumnName("interception_yards")
+                        .HasJsonPropertyName("int_yards");
+
+                    b.Property<int>("Knockdown")
+                        .HasColumnType("integer")
+                        .HasColumnName("knockdown")
+                        .HasJsonPropertyName("knockdown");
+
+                    b.Property<int?>("MiscAssist")
+                        .HasColumnType("integer")
+                        .HasColumnName("misc_assist")
+                        .HasJsonPropertyName("misc_assist");
+
+                    b.Property<int?>("MiscForcedFumble")
+                        .HasColumnType("integer")
+                        .HasColumnName("misc_forced_fumble")
+                        .HasJsonPropertyName("misc_forced_fumble");
+
+                    b.Property<int?>("MiscFumbleRecovery")
+                        .HasColumnType("integer")
+                        .HasColumnName("misc_fumble_recovery")
+                        .HasJsonPropertyName("misc_fumble_recovery");
+
+                    b.Property<int?>("MiscTackle")
+                        .HasColumnType("integer")
+                        .HasColumnName("misc_tackle")
+                        .HasJsonPropertyName("misc_tackle");
+
+                    b.Property<int>("MissedTackle")
+                        .HasColumnType("integer")
+                        .HasColumnName("missed_tackle")
+                        .HasJsonPropertyName("missed_tackle");
+
+                    b.Property<int?>("Nullified")
+                        .HasColumnType("integer")
+                        .HasColumnName("nullified")
+                        .HasJsonPropertyName("nullified");
+
+                    b.Property<int>("PassDefended")
+                        .HasColumnType("integer")
+                        .HasColumnName("pass_defended")
+                        .HasJsonPropertyName("pass_defended");
+
+                    b.Property<int?>("Primary")
+                        .HasColumnType("integer")
+                        .HasColumnName("primary")
+                        .HasJsonPropertyName("primary");
+
+                    b.Property<int>("QbHit")
+                        .HasColumnType("integer")
+                        .HasColumnName("qb_hit")
+                        .HasJsonPropertyName("qb_hit");
+
+                    b.Property<double>("Sack")
+                        .HasColumnType("double precision")
+                        .HasColumnName("sack")
+                        .HasJsonPropertyName("sack");
+
+                    b.Property<double>("SackYards")
+                        .HasColumnType("double precision")
+                        .HasColumnName("sack_yards")
+                        .HasJsonPropertyName("sack_yards");
+
+                    b.Property<int>("Safety")
+                        .HasColumnType("integer")
+                        .HasColumnName("safety")
+                        .HasJsonPropertyName("safety");
+
+                    b.Property<int?>("SpAssist")
+                        .HasColumnType("integer")
+                        .HasColumnName("sp_assist")
+                        .HasJsonPropertyName("sp_assist");
+
+                    b.Property<int?>("SpBlock")
+                        .HasColumnType("integer")
+                        .HasColumnName("sp_block")
+                        .HasJsonPropertyName("sp_block");
+
+                    b.Property<int?>("SpForcedFumble")
+                        .HasColumnType("integer")
+                        .HasColumnName("sp_forced_fumble")
+                        .HasJsonPropertyName("sp_forced_fumble");
+
+                    b.Property<int?>("SpFumbleRecovery")
+                        .HasColumnType("integer")
+                        .HasColumnName("sp_fumble_recovery")
+                        .HasJsonPropertyName("sp_fumble_recovery");
+
+                    b.Property<int?>("SpTackle")
+                        .HasColumnType("integer")
+                        .HasColumnName("sp_tackle")
+                        .HasJsonPropertyName("sp_tackle");
+
+                    b.Property<int>("Tackle")
+                        .HasColumnType("integer")
+                        .HasColumnName("tackle")
+                        .HasJsonPropertyName("tackle");
+
+                    b.Property<double>("TackleForLoss")
+                        .HasColumnType("double precision")
+                        .HasColumnName("tackle_for_loss")
+                        .HasJsonPropertyName("tloss");
+
+                    b.Property<double>("TackleForLossYards")
+                        .HasColumnType("double precision")
+                        .HasColumnName("tackle_for_loss_yards")
+                        .HasJsonPropertyName("tloss_yards");
+
+                    b.ToTable("play_statistics", null, t =>
+                        {
+                            t.Property("Blitz")
+                                .HasColumnName("defense_play_stat_blitz");
+
+                            t.Property("Category")
+                                .HasColumnName("defense_play_stat_category");
+
+                            t.Property("Hurry")
+                                .HasColumnName("defense_play_stat_hurry");
+
+                            t.Property("Knockdown")
+                                .HasColumnName("defense_play_stat_knockdown");
+
+                            t.Property("Nullified")
+                                .HasColumnName("defense_play_stat_nullified");
+
+                            t.Property("Sack")
+                                .HasColumnName("defense_play_stat_sack");
+
+                            t.Property("SackYards")
+                                .HasColumnName("defense_play_stat_sack_yards");
+
+                            t.Property("Safety")
+                                .HasColumnName("defense_play_stat_safety");
+                        });
+
+                    b.HasDiscriminator().HasValue("defense");
+                });
+
+            modelBuilder.Entity("PatriotIndex.Domain.Entities.DownConversionPlayStat", b =>
+                {
+                    b.HasBaseType("PatriotIndex.Domain.Entities.PlayStatistic");
+
+                    b.Property<int>("Attempt")
+                        .HasColumnType("integer")
+                        .HasColumnName("attempt")
+                        .HasJsonPropertyName("attempt");
+
+                    b.Property<int>("Complete")
+                        .HasColumnType("integer")
+                        .HasColumnName("complete")
+                        .HasJsonPropertyName("complete");
+
+                    b.Property<int>("Down")
+                        .HasColumnType("integer")
+                        .HasColumnName("down")
+                        .HasJsonPropertyName("down");
+
+                    b.ToTable("play_statistics", null, t =>
+                        {
+                            t.Property("Attempt")
+                                .HasColumnName("down_conversion_play_stat_attempt");
+
+                            t.Property("Complete")
+                                .HasColumnName("down_conversion_play_stat_complete");
+                        });
+
+                    b.HasDiscriminator().HasValue("down_conversion");
+                });
+
+            modelBuilder.Entity("PatriotIndex.Domain.Entities.ExtraPointPlayStat", b =>
+                {
+                    b.HasBaseType("PatriotIndex.Domain.Entities.PlayStatistic");
+
+                    b.Property<int?>("Aborted")
+                        .HasColumnType("integer")
+                        .HasColumnName("aborted")
+                        .HasJsonPropertyName("aborted");
+
+                    b.Property<int>("Attempt")
+                        .HasColumnType("integer")
+                        .HasColumnName("attempt")
+                        .HasJsonPropertyName("attempt");
+
+                    b.Property<int?>("Blocked")
+                        .HasColumnType("integer")
+                        .HasColumnName("blocked")
+                        .HasJsonPropertyName("blocked");
+
+                    b.Property<int>("Made")
+                        .HasColumnType("integer")
+                        .HasColumnName("made")
+                        .HasJsonPropertyName("made");
+
+                    b.Property<int?>("Missed")
+                        .HasColumnType("integer")
+                        .HasColumnName("missed")
+                        .HasJsonPropertyName("missed");
+
+                    b.Property<int?>("Returned")
+                        .HasColumnType("integer")
+                        .HasColumnName("returned")
+                        .HasJsonPropertyName("returned");
+
+                    b.Property<int?>("Safety")
+                        .HasColumnType("integer")
+                        .HasColumnName("safety")
+                        .HasJsonPropertyName("safety");
+
+                    b.ToTable("play_statistics", null, t =>
+                        {
+                            t.Property("Attempt")
+                                .HasColumnName("extra_point_play_stat_attempt");
+
+                            t.Property("Blocked")
+                                .HasColumnName("extra_point_play_stat_blocked");
+
+                            t.Property("Made")
+                                .HasColumnName("extra_point_play_stat_made");
+
+                            t.Property("Missed")
+                                .HasColumnName("extra_point_play_stat_missed");
+
+                            t.Property("Returned")
+                                .HasColumnName("extra_point_play_stat_returned");
+
+                            t.Property("Safety")
+                                .HasColumnName("extra_point_play_stat_safety");
+                        });
+
+                    b.HasDiscriminator().HasValue("extra_point");
+                });
+
+            modelBuilder.Entity("PatriotIndex.Domain.Entities.FieldGoalPlayStat", b =>
+                {
+                    b.HasBaseType("PatriotIndex.Domain.Entities.PlayStatistic");
+
+                    b.Property<int>("Attempt")
+                        .HasColumnType("integer")
+                        .HasColumnName("attempt")
+                        .HasJsonPropertyName("attempt");
+
+                    b.Property<int?>("AttemptYards")
+                        .HasColumnType("integer")
+                        .HasColumnName("attempt_yards")
+                        .HasJsonPropertyName("attempt_yards");
+
+                    b.Property<int>("Blocked")
+                        .HasColumnType("integer")
+                        .HasColumnName("blocked")
+                        .HasJsonPropertyName("blocked");
+
+                    b.Property<int?>("Inside20")
+                        .HasColumnType("integer")
+                        .HasColumnName("inside20")
+                        .HasJsonPropertyName("inside_20");
+
+                    b.Property<int>("Made")
+                        .HasColumnType("integer")
+                        .HasColumnName("made")
+                        .HasJsonPropertyName("made");
+
+                    b.Property<int?>("Missed")
+                        .HasColumnType("integer")
+                        .HasColumnName("missed")
+                        .HasJsonPropertyName("missed");
+
+                    b.Property<int?>("Nullified")
+                        .HasColumnType("integer")
+                        .HasColumnName("nullified")
+                        .HasJsonPropertyName("nullified");
+
+                    b.Property<int?>("Returned")
+                        .HasColumnType("integer")
+                        .HasColumnName("returned")
+                        .HasJsonPropertyName("returned");
+
+                    b.Property<int>("Yards")
+                        .HasColumnType("integer")
+                        .HasColumnName("yards")
+                        .HasJsonPropertyName("yards");
+
+                    b.ToTable("play_statistics", null, t =>
+                        {
+                            t.Property("Attempt")
+                                .HasColumnName("field_goal_play_stat_attempt");
+
+                            t.Property("AttemptYards")
+                                .HasColumnName("field_goal_play_stat_attempt_yards");
+
+                            t.Property("Inside20")
+                                .HasColumnName("field_goal_play_stat_inside20");
+
+                            t.Property("Nullified")
+                                .HasColumnName("field_goal_play_stat_nullified");
+
+                            t.Property("Returned")
+                                .HasColumnName("field_goal_play_stat_returned");
+
+                            t.Property("Yards")
+                                .HasColumnName("field_goal_play_stat_yards");
+                        });
+
+                    b.HasDiscriminator().HasValue("field_goal");
+                });
+
+            modelBuilder.Entity("PatriotIndex.Domain.Entities.FirstDownPlayStat", b =>
+                {
+                    b.HasBaseType("PatriotIndex.Domain.Entities.PlayStatistic");
+
+                    b.Property<string>("Category")
+                        .HasColumnType("text")
+                        .HasColumnName("category")
+                        .HasJsonPropertyName("category");
+
+                    b.Property<int>("Pass")
+                        .HasColumnType("integer")
+                        .HasColumnName("pass")
+                        .HasJsonPropertyName("pass");
+
+                    b.Property<int>("Penalty")
+                        .HasColumnType("integer")
+                        .HasColumnName("penalty")
+                        .HasJsonPropertyName("penalty");
+
+                    b.Property<int>("Rush")
+                        .HasColumnType("integer")
+                        .HasColumnName("rush")
+                        .HasJsonPropertyName("rush");
+
+                    b.Property<int?>("Total")
+                        .HasColumnType("integer")
+                        .HasColumnName("total")
+                        .HasJsonPropertyName("total");
+
+                    b.ToTable("play_statistics", (string)null);
+
+                    b.HasDiscriminator().HasValue("first_down");
+                });
+
+            modelBuilder.Entity("PatriotIndex.Domain.Entities.FumblePlayStat", b =>
+                {
+                    b.HasBaseType("PatriotIndex.Domain.Entities.PlayStatistic");
+
+                    b.Property<int>("EndZoneRecoveryTds")
+                        .HasColumnType("integer")
+                        .HasColumnName("end_zone_recovery_tds")
+                        .HasJsonPropertyName("ez_rec_tds");
+
+                    b.Property<int>("ForcedFumbles")
+                        .HasColumnType("integer")
+                        .HasColumnName("forced_fumbles")
+                        .HasJsonPropertyName("forced_fumble");
+
+                    b.Property<int>("Fumbles")
+                        .HasColumnType("integer")
+                        .HasColumnName("fumbles")
+                        .HasJsonPropertyName("fumble");
+
+                    b.Property<int>("LostFumbles")
+                        .HasColumnType("integer")
+                        .HasColumnName("lost_fumbles")
+                        .HasJsonPropertyName("lost_fumble");
+
+                    b.Property<int?>("Nullified")
+                        .HasColumnType("integer")
+                        .HasColumnName("nullified")
+                        .HasJsonPropertyName("nullified");
+
+                    b.Property<int>("OppRecoveries")
+                        .HasColumnType("integer")
+                        .HasColumnName("opp_recoveries")
+                        .HasJsonPropertyName("opp_rec");
+
+                    b.Property<int>("OppRecoveryTds")
+                        .HasColumnType("integer")
+                        .HasColumnName("opp_recovery_tds")
+                        .HasJsonPropertyName("opp_rec_tds");
+
+                    b.Property<int>("OppRecoveryYards")
+                        .HasColumnType("integer")
+                        .HasColumnName("opp_recovery_yards")
+                        .HasJsonPropertyName("opp_rec_yards");
+
+                    b.Property<int>("OutOfBounds")
+                        .HasColumnType("integer")
+                        .HasColumnName("out_of_bounds")
+                        .HasJsonPropertyName("out_of_bounds");
+
+                    b.Property<int>("OwnRecoveries")
+                        .HasColumnType("integer")
+                        .HasColumnName("own_recoveries")
+                        .HasJsonPropertyName("own_rec");
+
+                    b.Property<int>("OwnRecoveryTds")
+                        .HasColumnType("integer")
+                        .HasColumnName("own_recovery_tds")
+                        .HasJsonPropertyName("own_rec_tds");
+
+                    b.Property<int>("OwnRecoveryYards")
+                        .HasColumnType("integer")
+                        .HasColumnName("own_recovery_yards")
+                        .HasJsonPropertyName("own_rec_yards");
+
+                    b.Property<string>("PlayCategory")
+                        .HasColumnType("text")
+                        .HasColumnName("play_category")
+                        .HasJsonPropertyName("play_category");
+
+                    b.ToTable("play_statistics", null, t =>
+                        {
+                            t.Property("Nullified")
+                                .HasColumnName("fumble_play_stat_nullified");
+
+                            t.Property("OutOfBounds")
+                                .HasColumnName("fumble_play_stat_out_of_bounds");
+                        });
+
+                    b.HasDiscriminator().HasValue("fumble");
+                });
+
+            modelBuilder.Entity("PatriotIndex.Domain.Entities.IntReturnPlayStat", b =>
+                {
+                    b.HasBaseType("PatriotIndex.Domain.Entities.PlayStatistic");
+
+                    b.Property<int?>("Longest")
+                        .HasColumnType("integer")
+                        .HasColumnName("longest")
+                        .HasJsonPropertyName("longest");
+
+                    b.Property<int?>("Returns")
+                        .HasColumnType("integer")
+                        .HasColumnName("returns")
+                        .HasJsonPropertyName("returns");
+
+                    b.Property<int>("Touchdowns")
+                        .HasColumnType("integer")
+                        .HasColumnName("touchdowns")
+                        .HasJsonPropertyName("touchdowns");
+
+                    b.Property<int>("Yards")
+                        .HasColumnType("integer")
+                        .HasColumnName("yards")
+                        .HasJsonPropertyName("yards");
+
+                    b.ToTable("play_statistics", null, t =>
+                        {
+                            t.Property("Returns")
+                                .HasColumnName("int_return_play_stat_returns");
+
+                            t.Property("Touchdowns")
+                                .HasColumnName("int_return_play_stat_touchdowns");
+
+                            t.Property("Yards")
+                                .HasColumnName("int_return_play_stat_yards");
+                        });
+
+                    b.HasDiscriminator().HasValue("int_return");
+                });
+
+            modelBuilder.Entity("PatriotIndex.Domain.Entities.KickPlayStat", b =>
+                {
+                    b.HasBaseType("PatriotIndex.Domain.Entities.PlayStatistic");
+
+                    b.Property<int>("Attempt")
+                        .HasColumnType("integer")
+                        .HasColumnName("attempt")
+                        .HasJsonPropertyName("attempt");
+
+                    b.Property<int?>("Endzone")
+                        .HasColumnType("integer")
+                        .HasColumnName("endzone")
+                        .HasJsonPropertyName("endzone");
+
+                    b.Property<int?>("Inside20")
+                        .HasColumnType("integer")
+                        .HasColumnName("inside20")
+                        .HasJsonPropertyName("inside_20");
+
+                    b.Property<int>("NetYards")
+                        .HasColumnType("integer")
+                        .HasColumnName("net_yards")
+                        .HasJsonPropertyName("net_yards");
+
+                    b.Property<int?>("Nullified")
+                        .HasColumnType("integer")
+                        .HasColumnName("nullified")
+                        .HasJsonPropertyName("nullified");
+
+                    b.Property<int>("OnsideAttempt")
+                        .HasColumnType("integer")
+                        .HasColumnName("onside_attempt")
+                        .HasJsonPropertyName("onside_attempt");
+
+                    b.Property<int>("OnsideSuccess")
+                        .HasColumnType("integer")
+                        .HasColumnName("onside_success")
+                        .HasJsonPropertyName("onside_success");
+
+                    b.Property<int?>("OutOfBounds")
+                        .HasColumnType("integer")
+                        .HasColumnName("out_of_bounds")
+                        .HasJsonPropertyName("out_of_bounds");
+
+                    b.Property<int?>("OwnRecovery")
+                        .HasColumnType("integer")
+                        .HasColumnName("own_recovery")
+                        .HasJsonPropertyName("own_recovery");
+
+                    b.Property<int?>("OwnRecoveryTouchdown")
+                        .HasColumnType("integer")
+                        .HasColumnName("own_recovery_touchdown")
+                        .HasJsonPropertyName("own_recovery_td");
+
+                    b.Property<int?>("Returned")
+                        .HasColumnType("integer")
+                        .HasColumnName("returned")
+                        .HasJsonPropertyName("returned");
+
+                    b.Property<int>("SquibKick")
+                        .HasColumnType("integer")
+                        .HasColumnName("squib_kick")
+                        .HasJsonPropertyName("squib_kick");
+
+                    b.Property<int>("Touchback")
+                        .HasColumnType("integer")
+                        .HasColumnName("touchback")
+                        .HasJsonPropertyName("touchback");
+
+                    b.Property<int>("Yards")
+                        .HasColumnType("integer")
+                        .HasColumnName("yards")
+                        .HasJsonPropertyName("yards");
+
+                    b.ToTable("play_statistics", null, t =>
+                        {
+                            t.Property("Attempt")
+                                .HasColumnName("kick_play_stat_attempt");
+
+                            t.Property("Inside20")
+                                .HasColumnName("kick_play_stat_inside20");
+
+                            t.Property("NetYards")
+                                .HasColumnName("kick_play_stat_net_yards");
+
+                            t.Property("Nullified")
+                                .HasColumnName("kick_play_stat_nullified");
+
+                            t.Property("Yards")
+                                .HasColumnName("kick_play_stat_yards");
+                        });
+
+                    b.HasDiscriminator().HasValue("kick");
+                });
+
+            modelBuilder.Entity("PatriotIndex.Domain.Entities.MiscReturnPlayStat", b =>
+                {
+                    b.HasBaseType("PatriotIndex.Domain.Entities.PlayStatistic");
+
+                    b.Property<int?>("BlkFgTouchdowns")
+                        .HasColumnType("integer")
+                        .HasColumnName("blk_fg_touchdowns")
+                        .HasJsonPropertyName("blk_fg_touchdowns");
+
+                    b.Property<int?>("BlkPuntTouchdowns")
+                        .HasColumnType("integer")
+                        .HasColumnName("blk_punt_touchdowns")
+                        .HasJsonPropertyName("blk_punt_touchdowns");
+
+                    b.Property<int?>("EzRecTouchdowns")
+                        .HasColumnType("integer")
+                        .HasColumnName("ez_rec_touchdowns")
+                        .HasJsonPropertyName("ez_rec_touchdowns");
+
+                    b.Property<int?>("FgReturnTouchdowns")
+                        .HasColumnType("integer")
+                        .HasColumnName("fg_return_touchdowns")
+                        .HasJsonPropertyName("fg_return_touchdowns");
+
+                    b.Property<int?>("LongestTouchdown")
+                        .HasColumnType("integer")
+                        .HasColumnName("longest_touchdown")
+                        .HasJsonPropertyName("longest_touchdown");
+
+                    b.Property<int?>("Returns")
+                        .HasColumnType("integer")
+                        .HasColumnName("returns")
+                        .HasJsonPropertyName("returns");
+
+                    b.Property<int>("Touchdowns")
+                        .HasColumnType("integer")
+                        .HasColumnName("touchdowns")
+                        .HasJsonPropertyName("touchdowns");
+
+                    b.Property<int>("Yards")
+                        .HasColumnType("integer")
+                        .HasColumnName("yards")
+                        .HasJsonPropertyName("yards");
+
+                    b.ToTable("play_statistics", null, t =>
+                        {
+                            t.Property("Touchdowns")
+                                .HasColumnName("misc_return_play_stat_touchdowns");
+
+                            t.Property("Yards")
+                                .HasColumnName("misc_return_play_stat_yards");
+                        });
+
+                    b.HasDiscriminator().HasValue("misc_return");
+                });
+
+            modelBuilder.Entity("PatriotIndex.Domain.Entities.PassPlayStat", b =>
+                {
+                    b.HasBaseType("PatriotIndex.Domain.Entities.PlayStatistic");
+
+                    b.Property<int>("AirYards")
+                        .HasColumnType("integer")
+                        .HasColumnName("air_yards")
+                        .HasJsonPropertyName("air_yards");
+
+                    b.Property<int>("Attempt")
+                        .HasColumnType("integer")
+                        .HasColumnName("attempt")
+                        .HasJsonPropertyName("attempt");
+
+                    b.Property<int?>("AttemptYards")
+                        .HasColumnType("integer")
+                        .HasColumnName("attempt_yards")
+                        .HasJsonPropertyName("attempt_yards");
+
+                    b.Property<int>("Batted")
+                        .HasColumnType("integer")
+                        .HasColumnName("batted")
+                        .HasJsonPropertyName("batted");
+
+                    b.Property<int>("Blitz")
+                        .HasColumnType("integer")
+                        .HasColumnName("blitz")
+                        .HasJsonPropertyName("blitz");
+
+                    b.Property<int>("Complete")
+                        .HasColumnType("integer")
+                        .HasColumnName("complete")
+                        .HasJsonPropertyName("complete");
+
+                    b.Property<int>("Defended")
+                        .HasColumnType("integer")
+                        .HasColumnName("defended")
+                        .HasJsonPropertyName("defended");
+
+                    b.Property<int>("Dropped")
+                        .HasColumnType("integer")
+                        .HasColumnName("dropped")
+                        .HasJsonPropertyName("dropped");
+
+                    b.Property<int>("FirstDown")
+                        .HasColumnType("integer")
+                        .HasColumnName("first_down")
+                        .HasJsonPropertyName("first_down");
+
+                    b.Property<int?>("GoalToGo")
+                        .HasColumnType("integer")
+                        .HasColumnName("goal_to_go")
+                        .HasJsonPropertyName("goal_to_go");
+
+                    b.Property<int?>("GrossYards")
+                        .HasColumnType("integer")
+                        .HasColumnName("gross_yards")
+                        .HasJsonPropertyName("gross_yards");
+
+                    b.Property<int>("Hurry")
+                        .HasColumnType("integer")
+                        .HasColumnName("hurry")
+                        .HasJsonPropertyName("hurry");
+
+                    b.Property<string>("IncompletionType")
+                        .HasColumnType("text")
+                        .HasColumnName("incompletion_type")
+                        .HasJsonPropertyName("incompletion_type");
+
+                    b.Property<int?>("Inside20")
+                        .HasColumnType("integer")
+                        .HasColumnName("inside20")
+                        .HasJsonPropertyName("inside_20");
+
+                    b.Property<int?>("IntTouchdowns")
+                        .HasColumnType("integer")
+                        .HasColumnName("int_touchdowns")
+                        .HasJsonPropertyName("int_touchdowns");
+
+                    b.Property<int>("Interceptions")
+                        .HasColumnType("integer")
+                        .HasColumnName("interceptions")
+                        .HasJsonPropertyName("interceptions");
+
+                    b.Property<int>("Knockdown")
+                        .HasColumnType("integer")
+                        .HasColumnName("knockdown")
+                        .HasJsonPropertyName("knockdown");
+
+                    b.Property<int?>("NetYards")
+                        .HasColumnType("integer")
+                        .HasColumnName("net_yards")
+                        .HasJsonPropertyName("net_yards");
+
+                    b.Property<int?>("Nullified")
+                        .HasColumnType("integer")
+                        .HasColumnName("nullified")
+                        .HasJsonPropertyName("nullified");
+
+                    b.Property<int?>("OnTarget")
+                        .HasColumnType("integer")
+                        .HasColumnName("on_target")
+                        .HasJsonPropertyName("on_target");
+
+                    b.Property<double?>("PocketTime")
+                        .HasColumnType("double precision")
+                        .HasColumnName("pocket_time")
+                        .HasJsonPropertyName("pocket_time");
+
+                    b.Property<int>("PoorThrow")
+                        .HasColumnType("integer")
+                        .HasColumnName("poor_throw")
+                        .HasJsonPropertyName("poor_throw");
+
+                    b.Property<int>("Sack")
+                        .HasColumnType("integer")
+                        .HasColumnName("sack")
+                        .HasJsonPropertyName("sack");
+
+                    b.Property<int>("SackYards")
+                        .HasColumnType("integer")
+                        .HasColumnName("sack_yards")
+                        .HasJsonPropertyName("sack_yards");
+
+                    b.Property<int?>("Safety")
+                        .HasColumnType("integer")
+                        .HasColumnName("safety")
+                        .HasJsonPropertyName("safety");
+
+                    b.Property<int>("Spike")
+                        .HasColumnType("integer")
+                        .HasColumnName("spike")
+                        .HasJsonPropertyName("spike");
+
+                    b.Property<int>("ThrowAway")
+                        .HasColumnType("integer")
+                        .HasColumnName("throw_away")
+                        .HasJsonPropertyName("throw_away");
+
+                    b.Property<int>("Touchdowns")
+                        .HasColumnType("integer")
+                        .HasColumnName("touchdowns")
+                        .HasJsonPropertyName("touchdowns");
+
+                    b.Property<int>("Yards")
+                        .HasColumnType("integer")
+                        .HasColumnName("yards")
+                        .HasJsonPropertyName("yards");
+
+                    b.ToTable("play_statistics", null, t =>
+                        {
+                            t.Property("FirstDown")
+                                .HasColumnName("pass_play_stat_first_down");
+
+                            t.Property("Yards")
+                                .HasColumnName("pass_play_stat_yards");
+                        });
+
+                    b.HasDiscriminator().HasValue("pass");
+                });
+
+            modelBuilder.Entity("PatriotIndex.Domain.Entities.PenaltyPlayStat", b =>
+                {
+                    b.HasBaseType("PatriotIndex.Domain.Entities.PlayStatistic");
+
+                    b.Property<int?>("Declined")
+                        .HasColumnType("integer")
+                        .HasColumnName("declined")
+                        .HasJsonPropertyName("declined");
+
+                    b.Property<int>("FirstDown")
+                        .HasColumnType("integer")
+                        .HasColumnName("first_down")
+                        .HasJsonPropertyName("first_down");
+
+                    b.Property<int?>("NoPlay")
+                        .HasColumnType("integer")
+                        .HasColumnName("no_play")
+                        .HasJsonPropertyName("no_play");
+
+                    b.Property<int?>("Offsetting")
+                        .HasColumnType("integer")
+                        .HasColumnName("offsetting")
+                        .HasJsonPropertyName("offsetting");
+
+                    b.Property<int>("Penalties")
+                        .HasColumnType("integer")
+                        .HasColumnName("penalties")
+                        .HasJsonPropertyName("penalties");
+
+                    b.Property<string>("PenaltyType")
+                        .HasColumnType("text")
+                        .HasColumnName("penalty_type")
+                        .HasJsonPropertyName("penalty_type");
+
+                    b.Property<int>("Yards")
+                        .HasColumnType("integer")
+                        .HasColumnName("yards")
+                        .HasJsonPropertyName("yards");
+
+                    b.ToTable("play_statistics", (string)null);
+
+                    b.HasDiscriminator().HasValue("penalty");
+                });
+
+            modelBuilder.Entity("PatriotIndex.Domain.Entities.PuntPlayStat", b =>
+                {
+                    b.HasBaseType("PatriotIndex.Domain.Entities.PlayStatistic");
+
+                    b.Property<int>("Attempt")
+                        .HasColumnType("integer")
+                        .HasColumnName("attempt")
+                        .HasJsonPropertyName("attempt");
+
+                    b.Property<int>("Blocked")
+                        .HasColumnType("integer")
+                        .HasColumnName("blocked")
+                        .HasJsonPropertyName("blocked");
+
+                    b.Property<int?>("Downed")
+                        .HasColumnType("integer")
+                        .HasColumnName("downed")
+                        .HasJsonPropertyName("downed");
+
+                    b.Property<int?>("EndZone")
+                        .HasColumnType("integer")
+                        .HasColumnName("end_zone")
+                        .HasJsonPropertyName("end_zone");
+
+                    b.Property<int?>("FairCatch")
+                        .HasColumnType("integer")
+                        .HasColumnName("fair_catch")
+                        .HasJsonPropertyName("fair_catch");
+
+                    b.Property<double?>("HangTime")
+                        .HasColumnType("double precision")
+                        .HasColumnName("hang_time")
+                        .HasJsonPropertyName("hang_time");
+
+                    b.Property<int>("Inside20")
+                        .HasColumnType("integer")
+                        .HasColumnName("inside20")
+                        .HasJsonPropertyName("inside_20");
+
+                    b.Property<int>("NetYards")
+                        .HasColumnType("integer")
+                        .HasColumnName("net_yards")
+                        .HasJsonPropertyName("net_yards");
+
+                    b.Property<int?>("Nullified")
+                        .HasColumnType("integer")
+                        .HasColumnName("nullified")
+                        .HasJsonPropertyName("nullified");
+
+                    b.Property<int?>("ReturnYards")
+                        .HasColumnType("integer")
+                        .HasColumnName("return_yards")
+                        .HasJsonPropertyName("return_yards");
+
+                    b.Property<int>("Touchback")
+                        .HasColumnType("integer")
+                        .HasColumnName("touchback")
+                        .HasJsonPropertyName("touchback");
+
+                    b.Property<int>("Yards")
+                        .HasColumnType("integer")
+                        .HasColumnName("yards")
+                        .HasJsonPropertyName("yards");
+
+                    b.ToTable("play_statistics", null, t =>
+                        {
+                            t.Property("Attempt")
+                                .HasColumnName("punt_play_stat_attempt");
+
+                            t.Property("Blocked")
+                                .HasColumnName("punt_play_stat_blocked");
+
+                            t.Property("Inside20")
+                                .HasColumnName("punt_play_stat_inside20");
+
+                            t.Property("NetYards")
+                                .HasColumnName("punt_play_stat_net_yards");
+
+                            t.Property("Nullified")
+                                .HasColumnName("punt_play_stat_nullified");
+
+                            t.Property("Touchback")
+                                .HasColumnName("punt_play_stat_touchback");
+
+                            t.Property("Yards")
+                                .HasColumnName("punt_play_stat_yards");
+                        });
+
+                    b.HasDiscriminator().HasValue("punt");
+                });
+
+            modelBuilder.Entity("PatriotIndex.Domain.Entities.ReceivePlayStat", b =>
+                {
+                    b.HasBaseType("PatriotIndex.Domain.Entities.PlayStatistic");
+
+                    b.Property<int>("AirYards")
+                        .HasColumnType("integer")
+                        .HasColumnName("air_yards")
+                        .HasJsonPropertyName("air_yards");
+
+                    b.Property<int>("BrokenTackles")
+                        .HasColumnType("integer")
+                        .HasColumnName("broken_tackles")
+                        .HasJsonPropertyName("broken_tackles");
+
+                    b.Property<int>("Catchable")
+                        .HasColumnType("integer")
+                        .HasColumnName("catchable")
+                        .HasJsonPropertyName("catchable");
+
+                    b.Property<int>("Dropped")
+                        .HasColumnType("integer")
+                        .HasColumnName("dropped")
+                        .HasJsonPropertyName("dropped");
+
+                    b.Property<int>("FirstDown")
+                        .HasColumnType("integer")
+                        .HasColumnName("first_down")
+                        .HasJsonPropertyName("first_down");
+
+                    b.Property<int?>("GoalToGo")
+                        .HasColumnType("integer")
+                        .HasColumnName("goal_to_go")
+                        .HasJsonPropertyName("goal_to_go");
+
+                    b.Property<int?>("Inside20")
+                        .HasColumnType("integer")
+                        .HasColumnName("inside20")
+                        .HasJsonPropertyName("inside_20");
+
+                    b.Property<int?>("Nullified")
+                        .HasColumnType("integer")
+                        .HasColumnName("nullified")
+                        .HasJsonPropertyName("nullified");
+
+                    b.Property<int>("Reception")
+                        .HasColumnType("integer")
+                        .HasColumnName("reception")
+                        .HasJsonPropertyName("reception");
+
+                    b.Property<int?>("RedzoneTarget")
+                        .HasColumnType("integer")
+                        .HasColumnName("redzone_target")
+                        .HasJsonPropertyName("redzone_target");
+
+                    b.Property<int?>("Safety")
+                        .HasColumnType("integer")
+                        .HasColumnName("safety")
+                        .HasJsonPropertyName("safety");
+
+                    b.Property<int>("Target")
+                        .HasColumnType("integer")
+                        .HasColumnName("target")
+                        .HasJsonPropertyName("target");
+
+                    b.Property<int>("Touchdowns")
+                        .HasColumnType("integer")
+                        .HasColumnName("touchdowns")
+                        .HasJsonPropertyName("touchdowns");
+
+                    b.Property<int>("Yards")
+                        .HasColumnType("integer")
+                        .HasColumnName("yards")
+                        .HasJsonPropertyName("yards");
+
+                    b.Property<int>("YardsAfterCatch")
+                        .HasColumnType("integer")
+                        .HasColumnName("yards_after_catch")
+                        .HasJsonPropertyName("yards_after_catch");
+
+                    b.Property<int>("YardsAfterContact")
+                        .HasColumnType("integer")
+                        .HasColumnName("yards_after_contact")
+                        .HasJsonPropertyName("yards_after_contact");
+
+                    b.ToTable("play_statistics", null, t =>
+                        {
+                            t.Property("AirYards")
+                                .HasColumnName("receive_play_stat_air_yards");
+
+                            t.Property("Dropped")
+                                .HasColumnName("receive_play_stat_dropped");
+
+                            t.Property("FirstDown")
+                                .HasColumnName("receive_play_stat_first_down");
+
+                            t.Property("GoalToGo")
+                                .HasColumnName("receive_play_stat_goal_to_go");
+
+                            t.Property("Inside20")
+                                .HasColumnName("receive_play_stat_inside20");
+
+                            t.Property("Nullified")
+                                .HasColumnName("receive_play_stat_nullified");
+
+                            t.Property("Safety")
+                                .HasColumnName("receive_play_stat_safety");
+
+                            t.Property("Touchdowns")
+                                .HasColumnName("receive_play_stat_touchdowns");
+
+                            t.Property("Yards")
+                                .HasColumnName("receive_play_stat_yards");
+                        });
+
+                    b.HasDiscriminator().HasValue("receive");
+                });
+
+            modelBuilder.Entity("PatriotIndex.Domain.Entities.ReturnPlayStat", b =>
+                {
+                    b.HasBaseType("PatriotIndex.Domain.Entities.PlayStatistic");
+
+                    b.Property<string>("Category")
+                        .HasColumnType("text")
+                        .HasColumnName("category")
+                        .HasJsonPropertyName("category");
+
+                    b.Property<int?>("Downed")
+                        .HasColumnType("integer")
+                        .HasColumnName("downed")
+                        .HasJsonPropertyName("downed");
+
+                    b.Property<int?>("FairCatch")
+                        .HasColumnType("integer")
+                        .HasColumnName("fair_catch")
+                        .HasJsonPropertyName("fair_catch");
+
+                    b.Property<int?>("FirstDown")
+                        .HasColumnType("integer")
+                        .HasColumnName("first_down")
+                        .HasJsonPropertyName("first_down");
+
+                    b.Property<int?>("Lateral")
+                        .HasColumnType("integer")
+                        .HasColumnName("lateral")
+                        .HasJsonPropertyName("lateral");
+
+                    b.Property<int?>("Longest")
+                        .HasColumnType("integer")
+                        .HasColumnName("longest")
+                        .HasJsonPropertyName("longest");
+
+                    b.Property<int?>("Nullified")
+                        .HasColumnType("integer")
+                        .HasColumnName("nullified")
+                        .HasJsonPropertyName("nullified");
+
+                    b.Property<int?>("OutOfBounds")
+                        .HasColumnType("integer")
+                        .HasColumnName("out_of_bounds")
+                        .HasJsonPropertyName("out_of_bounds");
+
+                    b.Property<string>("PlayCategory")
+                        .HasColumnType("text")
+                        .HasColumnName("play_category")
+                        .HasJsonPropertyName("play_category");
+
+                    b.Property<int>("Touchback")
+                        .HasColumnType("integer")
+                        .HasColumnName("touchback")
+                        .HasJsonPropertyName("touchback");
+
+                    b.Property<int>("Touchdowns")
+                        .HasColumnType("integer")
+                        .HasColumnName("touchdowns")
+                        .HasJsonPropertyName("touchdowns");
+
+                    b.Property<int>("Yards")
+                        .HasColumnType("integer")
+                        .HasColumnName("yards")
+                        .HasJsonPropertyName("yards");
+
+                    b.ToTable("play_statistics", null, t =>
+                        {
+                            t.Property("Category")
+                                .HasColumnName("return_play_stat_category");
+
+                            t.Property("Downed")
+                                .HasColumnName("return_play_stat_downed");
+
+                            t.Property("FairCatch")
+                                .HasColumnName("return_play_stat_fair_catch");
+
+                            t.Property("FirstDown")
+                                .HasColumnName("return_play_stat_first_down");
+
+                            t.Property("Longest")
+                                .HasColumnName("return_play_stat_longest");
+
+                            t.Property("Nullified")
+                                .HasColumnName("return_play_stat_nullified");
+
+                            t.Property("OutOfBounds")
+                                .HasColumnName("return_play_stat_out_of_bounds");
+
+                            t.Property("PlayCategory")
+                                .HasColumnName("return_play_stat_play_category");
+
+                            t.Property("Touchback")
+                                .HasColumnName("return_play_stat_touchback");
+
+                            t.Property("Touchdowns")
+                                .HasColumnName("return_play_stat_touchdowns");
+
+                            t.Property("Yards")
+                                .HasColumnName("return_play_stat_yards");
+                        });
+
+                    b.HasDiscriminator().HasValue("return");
+                });
+
+            modelBuilder.Entity("PatriotIndex.Domain.Entities.RushPlayStat", b =>
+                {
+                    b.HasBaseType("PatriotIndex.Domain.Entities.PlayStatistic");
+
+                    b.Property<int>("Attempt")
+                        .HasColumnType("integer")
+                        .HasColumnName("attempt")
+                        .HasJsonPropertyName("attempt");
+
+                    b.Property<int>("BrokenTackles")
+                        .HasColumnType("integer")
+                        .HasColumnName("broken_tackles")
+                        .HasJsonPropertyName("broken_tackles");
+
+                    b.Property<int>("FirstDown")
+                        .HasColumnType("integer")
+                        .HasColumnName("first_down")
+                        .HasJsonPropertyName("first_down");
+
+                    b.Property<int?>("GoalToGo")
+                        .HasColumnType("integer")
+                        .HasColumnName("goal_to_go")
+                        .HasJsonPropertyName("goal_to_go");
+
+                    b.Property<int?>("Inside20")
+                        .HasColumnType("integer")
+                        .HasColumnName("inside20")
+                        .HasJsonPropertyName("inside_20");
+
+                    b.Property<int>("KneelDown")
+                        .HasColumnType("integer")
+                        .HasColumnName("kneel_down")
+                        .HasJsonPropertyName("kneel_down");
+
+                    b.Property<int?>("Lateral")
+                        .HasColumnType("integer")
+                        .HasColumnName("lateral")
+                        .HasJsonPropertyName("lateral");
+
+                    b.Property<int?>("Nullified")
+                        .HasColumnType("integer")
+                        .HasColumnName("nullified")
+                        .HasJsonPropertyName("nullified");
+
+                    b.Property<int?>("Safety")
+                        .HasColumnType("integer")
+                        .HasColumnName("safety")
+                        .HasJsonPropertyName("safety");
+
+                    b.Property<int>("Scramble")
+                        .HasColumnType("integer")
+                        .HasColumnName("scramble")
+                        .HasJsonPropertyName("scramble");
+
+                    b.Property<int>("TackleForLoss")
+                        .HasColumnType("integer")
+                        .HasColumnName("tackle_for_loss")
+                        .HasJsonPropertyName("tlost");
+
+                    b.Property<int>("TackleForLossYards")
+                        .HasColumnType("integer")
+                        .HasColumnName("tackle_for_loss_yards")
+                        .HasJsonPropertyName("tlost_yards");
+
+                    b.Property<int>("Touchdowns")
+                        .HasColumnType("integer")
+                        .HasColumnName("touchdowns")
+                        .HasJsonPropertyName("touchdowns");
+
+                    b.Property<int>("Yards")
+                        .HasColumnType("integer")
+                        .HasColumnName("yards")
+                        .HasJsonPropertyName("yards");
+
+                    b.Property<int>("YardsAfterContact")
+                        .HasColumnType("integer")
+                        .HasColumnName("yards_after_contact")
+                        .HasJsonPropertyName("yards_after_contact");
+
+                    b.ToTable("play_statistics", null, t =>
+                        {
+                            t.Property("Attempt")
+                                .HasColumnName("rush_play_stat_attempt");
+
+                            t.Property("BrokenTackles")
+                                .HasColumnName("rush_play_stat_broken_tackles");
+
+                            t.Property("FirstDown")
+                                .HasColumnName("rush_play_stat_first_down");
+
+                            t.Property("GoalToGo")
+                                .HasColumnName("rush_play_stat_goal_to_go");
+
+                            t.Property("Inside20")
+                                .HasColumnName("rush_play_stat_inside20");
+
+                            t.Property("Lateral")
+                                .HasColumnName("rush_play_stat_lateral");
+
+                            t.Property("Nullified")
+                                .HasColumnName("rush_play_stat_nullified");
+
+                            t.Property("Safety")
+                                .HasColumnName("rush_play_stat_safety");
+
+                            t.Property("TackleForLoss")
+                                .HasColumnName("rush_play_stat_tackle_for_loss");
+
+                            t.Property("TackleForLossYards")
+                                .HasColumnName("rush_play_stat_tackle_for_loss_yards");
+
+                            t.Property("Touchdowns")
+                                .HasColumnName("rush_play_stat_touchdowns");
+
+                            t.Property("Yards")
+                                .HasColumnName("rush_play_stat_yards");
+
+                            t.Property("YardsAfterContact")
+                                .HasColumnName("rush_play_stat_yards_after_contact");
+                        });
+
+                    b.HasDiscriminator().HasValue("rush");
+                });
+
             modelBuilder.Entity("PatriotIndex.Domain.Entities.Coach", b =>
                 {
                     b.HasOne("PatriotIndex.Domain.Entities.Team", "Team")
@@ -1774,6 +3231,108 @@ namespace PatriotIndex.Domain.Migrations
                     b.Navigation("Game");
                 });
 
+            modelBuilder.Entity("PatriotIndex.Domain.Entities.PlayStatistic", b =>
+                {
+                    b.HasOne("PatriotIndex.Domain.Entities.DriveEvent", "PlayEvent")
+                        .WithMany("PlayStats")
+                        .HasForeignKey("PlayId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_play_statistics_pbp_drive_events_play_id");
+
+                    b.OwnsOne("PatriotIndex.Domain.Entities.PlayStatPlayer", "Player", b1 =>
+                        {
+                            b1.Property<long>("PlayStatisticId")
+                                .HasColumnType("bigint")
+                                .HasColumnName("id");
+
+                            b1.Property<string>("Id")
+                                .HasColumnType("text")
+                                .HasColumnName("player_id")
+                                .HasJsonPropertyName("id");
+
+                            b1.Property<string>("Jersey")
+                                .HasColumnType("text")
+                                .HasColumnName("player_jersey")
+                                .HasJsonPropertyName("jersey");
+
+                            b1.Property<string>("Name")
+                                .IsRequired()
+                                .HasColumnType("text")
+                                .HasColumnName("player_name")
+                                .HasJsonPropertyName("name");
+
+                            b1.Property<string>("Position")
+                                .HasColumnType("text")
+                                .HasColumnName("player_position")
+                                .HasJsonPropertyName("position");
+
+                            b1.Property<string>("SrId")
+                                .HasColumnType("text")
+                                .HasColumnName("player_sr_id")
+                                .HasJsonPropertyName("sr_id");
+
+                            b1.HasKey("PlayStatisticId");
+
+                            b1.ToTable("play_statistics");
+
+                            b1.HasJsonPropertyName("player");
+
+                            b1.WithOwner()
+                                .HasForeignKey("PlayStatisticId")
+                                .HasConstraintName("fk_play_statistics_play_statistics_id");
+                        });
+
+                    b.OwnsOne("PatriotIndex.Domain.Entities.PlayStatTeam", "Team", b1 =>
+                        {
+                            b1.Property<long>("PlayStatisticId")
+                                .HasColumnType("bigint")
+                                .HasColumnName("id");
+
+                            b1.Property<string>("Alias")
+                                .HasColumnType("text")
+                                .HasColumnName("team_alias")
+                                .HasJsonPropertyName("alias");
+
+                            b1.Property<string>("Id")
+                                .HasColumnType("text")
+                                .HasColumnName("team_id")
+                                .HasJsonPropertyName("id");
+
+                            b1.Property<string>("Market")
+                                .HasColumnType("text")
+                                .HasColumnName("team_market")
+                                .HasJsonPropertyName("market");
+
+                            b1.Property<string>("Name")
+                                .IsRequired()
+                                .HasColumnType("text")
+                                .HasColumnName("team_name")
+                                .HasJsonPropertyName("name");
+
+                            b1.Property<string>("SrId")
+                                .HasColumnType("text")
+                                .HasColumnName("team_sr_id")
+                                .HasJsonPropertyName("sr_id");
+
+                            b1.HasKey("PlayStatisticId");
+
+                            b1.ToTable("play_statistics");
+
+                            b1.HasJsonPropertyName("team");
+
+                            b1.WithOwner()
+                                .HasForeignKey("PlayStatisticId")
+                                .HasConstraintName("fk_play_statistics_play_statistics_id");
+                        });
+
+                    b.Navigation("PlayEvent");
+
+                    b.Navigation("Player");
+
+                    b.Navigation("Team");
+                });
+
             modelBuilder.Entity("PatriotIndex.Domain.Entities.Player", b =>
                 {
                     b.HasOne("PatriotIndex.Domain.Entities.Team", "DraftTeam")
@@ -1917,6 +3476,8 @@ namespace PatriotIndex.Domain.Migrations
             modelBuilder.Entity("PatriotIndex.Domain.Entities.DriveEvent", b =>
                 {
                     b.Navigation("EventStats");
+
+                    b.Navigation("PlayStats");
                 });
 
             modelBuilder.Entity("PatriotIndex.Domain.Entities.Game", b =>

@@ -82,7 +82,6 @@ public abstract class PlayStatistic
     
     
     /// <summary>Identifies which statistical category this object represents.</summary>
-    [NotMapped]
     [JsonPropertyName("stat_type")]
     public abstract PlayStatType StatType { get; }
 

@@ -355,7 +355,7 @@ public class PatriotIndexDbContext : DbContext
             });
 
             // Index the discriminator — nearly every query will filter by it
-            entity.HasIndex(e => new { e.PlayId, e.StatType });
+            entity.HasIndex("PlayId", "stat_type");
         });
     }
 }
