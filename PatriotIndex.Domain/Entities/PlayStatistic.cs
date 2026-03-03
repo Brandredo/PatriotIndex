@@ -77,7 +77,7 @@ public abstract class PlayStatistic
 {
     
     public long Id { get; init; }
-    public Guid PlayId { get; init; }
+    public Guid PlayId { get; set; }
     public DriveEvent PlayEvent { get; init; }
     
     
@@ -135,7 +135,7 @@ public sealed class RushPlayStat : PlayStatistic
     /// <summary>1 if the rusher lateralled the ball on this play.</summary>
     [JsonPropertyName("lateral")]              public int?    Lateral              { get; init; }
     /// <summary>1 if the play was nullified by a penalty.</summary>
-    [JsonPropertyName("nullified")]            public int?    Nullified            { get; init; }
+    [JsonPropertyName("nullified")]            public bool?    Nullified            { get; init; }
     /// <summary>1 if the rush resulted in a safety.</summary>
     [JsonPropertyName("safety")]               public int?    Safety               { get; init; }
 }
@@ -179,7 +179,7 @@ public sealed class PassPlayStat : PlayStatistic
     /// Reason the pass was incomplete (e.g. "overthrown", "dropped", "defensed", "batted").
     /// </summary>
     [JsonPropertyName("incompletion_type")]    public string? IncompletionType     { get; init; }
-    [JsonPropertyName("nullified")]            public int?    Nullified            { get; init; }
+    [JsonPropertyName("nullified")]            public bool?    Nullified            { get; init; }
     [JsonPropertyName("safety")]               public int?    Safety               { get; init; }
 }
 
@@ -205,7 +205,7 @@ public sealed class ReceivePlayStat : PlayStatistic
     [JsonPropertyName("redzone_target")]       public int? RedzoneTarget       { get; init; }
     [JsonPropertyName("inside_20")]            public int? Inside20            { get; init; }
     [JsonPropertyName("goal_to_go")]           public int? GoalToGo            { get; init; }
-    [JsonPropertyName("nullified")]            public int? Nullified           { get; init; }
+    [JsonPropertyName("nullified")]            public bool? Nullified           { get; init; }
     [JsonPropertyName("safety")]               public int? Safety              { get; init; }
 }
 
@@ -273,7 +273,7 @@ public sealed class DefensePlayStat : PlayStatistic
     [JsonPropertyName("misc_forced_fumble")]   public int?    MiscForcedFumble      { get; init; }
     [JsonPropertyName("misc_fumble_recovery")] public int?    MiscFumbleRecovery    { get; init; }
 
-    [JsonPropertyName("nullified")]            public int?    Nullified             { get; init; }
+    [JsonPropertyName("nullified")]            public bool?    Nullified             { get; init; }
 }
 
 /// <summary>
@@ -300,7 +300,7 @@ public sealed class FumblePlayStat : PlayStatistic
     [JsonPropertyName("own_rec_tds")]          public int     OwnRecoveryTds    { get; init; }
     [JsonPropertyName("opp_rec_tds")]          public int     OppRecoveryTds    { get; init; }
     [JsonPropertyName("ez_rec_tds")]           public int     EndZoneRecoveryTds{ get; init; }
-    [JsonPropertyName("nullified")]            public int?    Nullified         { get; init; }
+    [JsonPropertyName("nullified")]            public bool?    Nullified         { get; init; }
 }
 
 /// <summary>
@@ -343,7 +343,7 @@ public sealed class KickPlayStat : PlayStatistic
     [JsonPropertyName("own_recovery")]         public int? OwnRecovery          { get; init; }
     /// <summary>1 if the kicking team's own recovery resulted in a touchdown.</summary>
     [JsonPropertyName("own_recovery_td")]      public int? OwnRecoveryTouchdown { get; init; }
-    [JsonPropertyName("nullified")]            public int? Nullified            { get; init; }
+    [JsonPropertyName("nullified")]            public bool? Nullified            { get; init; }
 }
 
 /// <summary>
@@ -367,7 +367,7 @@ public sealed class PuntPlayStat : PlayStatistic
     [JsonPropertyName("downed")]               public int?    Downed      { get; init; }
     /// <summary>1 if the punt landed in or through the end zone (non-touchback).</summary>
     [JsonPropertyName("end_zone")]             public int?    EndZone     { get; init; }
-    [JsonPropertyName("nullified")]            public int?    Nullified   { get; init; }
+    [JsonPropertyName("nullified")]            public bool?    Nullified   { get; init; }
 }
 
 /// <summary>
@@ -399,7 +399,7 @@ public sealed class ReturnPlayStat : PlayStatistic
     [JsonPropertyName("out_of_bounds")]        public int?    OutOfBounds   { get; init; }
     /// <summary>1 if the returner lateralled the ball.</summary>
     [JsonPropertyName("lateral")]              public int?    Lateral       { get; init; }
-    [JsonPropertyName("nullified")]            public int?    Nullified     { get; init; }
+    [JsonPropertyName("nullified")]            public bool?    Nullified     { get; init; }
 }
 
 /// <summary>
@@ -453,7 +453,7 @@ public sealed class FieldGoalPlayStat : PlayStatistic
     [JsonPropertyName("inside_20")]            public int? Inside20      { get; init; }
     /// <summary>1 if the missed/blocked FG was returned by the defense.</summary>
     [JsonPropertyName("returned")]             public int? Returned      { get; init; }
-    [JsonPropertyName("nullified")]            public int? Nullified     { get; init; }
+    [JsonPropertyName("nullified")]            public bool? Nullified     { get; init; }
 }
 
 /// <summary>

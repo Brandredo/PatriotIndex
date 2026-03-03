@@ -1,3 +1,4 @@
+using System.Text.Json;
 using PatriotIndex.Domain.Entities;
 using PatriotIndex.Domain.Helpers;
 
@@ -153,6 +154,8 @@ public class GamePbpTransformer(string json)
                         // StartTeam = null,
                         // EndTeam = null
                     };
+                    
+                    e.PlayStats = TransformPlayStats(driveEvent, e.Id);
 
                     return e;
                 });
@@ -176,6 +179,21 @@ public class GamePbpTransformer(string json)
             
         return periods;
     }
-    
-    
+
+    private static List<PlayStatistic> TransformPlayStats(JsonTraverserItem driveEvent, Guid playId)
+    {
+        var statsEl = driveEvent.Navigate("statistics");
+        if (statsEl is null || statsEl.Value.ValueKind != JsonValueKind.Array)
+            return [];
+
+        var stats = new List<PlayStatistic>();
+        foreach (var el in statsEl.Value.EnumerateArray())
+        {
+            var stat = JsonSerializer.Deserialize<PlayStatistic>(el.GetRawText(), PlayStatistic.JsonOptions);
+            if (stat is null) continue;
+            stat.PlayId = playId;
+            stats.Add(stat);
+        }
+        return stats;
+    }
 }

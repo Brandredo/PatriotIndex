@@ -271,10 +271,10 @@ public class PatriotIndexDbContext : DbContext
                 .HasForeignKey(x => x.EndPossessionTeamId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            e.HasMany(x => x.EventStats)
-                .WithOne(x => x.DriveEvent)
-                .HasForeignKey(x => x.EventId)
-                .OnDelete(DeleteBehavior.Cascade);
+            // e.HasMany(x => x.EventStats)
+            //     .WithOne(x => x.DriveEvent)
+            //     .HasForeignKey(x => x.EventId)
+            //     .OnDelete(DeleteBehavior.Cascade);
             
             // this is the used relationship
             e.HasMany(x => x.PlayStats)

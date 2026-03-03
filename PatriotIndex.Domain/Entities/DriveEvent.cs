@@ -57,7 +57,7 @@ public class DriveEvent
     public Guid? EndPossessionTeamId { get; set; }
 
     public Drive? Drive { get; set; }
-    public IEnumerable<PbpEventStatistics> EventStats { get; set; } = [];
+    //public IEnumerable<PbpEventStatistics> EventStats { get; set; } = [];
     public Period? Period { get; set; }
     public Team? StartTeam { get; set; }
     public Team? EndTeam { get; set; }

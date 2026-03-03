@@ -46,14 +46,47 @@ public class GamesRepository(ILogger<GamesRepository> logger, PatriotIndexDbCont
 
     public async Task SaveAsync(Game game, CancellationToken ct)
     {
-        await UpsertGameAsync(game);
-        await UpsertPeriod(game.Periods);
-        var allDrives = game.Drives.ToList();
-        await UpsertDrives(allDrives);
-        await UpsertDriveEvents(allDrives.SelectMany(d => d.Plays));
+        var strategy = ctx.Database.CreateExecutionStrategy();
+        await strategy.ExecuteAsync(async () =>
+        {
+            await using var tx = await ctx.Database.BeginTransactionAsync(ct);
+
+            await UpsertGameAsync(game, ct);
+            await UpsertPeriod(game.Periods, ct);
+
+            var allDrives = game.Drives.ToList();
+            var allPlays  = allDrives.SelectMany(d => d.Plays).ToList();
+
+            var incomingDriveIds = allDrives.Select(d => d.Id).ToArray();
+            var incomingPlayIds  = allPlays.Select(p => p.Id).ToArray();
+
+            await DeleteOrphanedDriveEvents(incomingDriveIds, incomingPlayIds, ct);
+            await DeleteOrphanedDrives(game.Id, incomingDriveIds, ct);
+
+            await UpsertDrives(allDrives, ct);
+            await UpsertDriveEvents(allPlays, ct);
+            await UpsertPlayStatistics(allPlays, ct);
+
+            await tx.CommitAsync(ct);
+        });
     }
 
-    private async Task UpsertGameAsync(Game game)
+    private async Task DeleteOrphanedDrives(Guid gameId, Guid[] incomingDriveIds, CancellationToken ct)
+    {
+        await ctx.Database.ExecuteSqlRawAsync(
+            "DELETE FROM drives WHERE game_id = {0} AND id != ALL({1})",
+            new object[] { gameId, incomingDriveIds }, ct);
+    }
+
+    private async Task DeleteOrphanedDriveEvents(Guid[] incomingDriveIds, Guid[] incomingPlayIds, CancellationToken ct)
+    {
+        if (incomingDriveIds.Length == 0) return;
+        await ctx.Database.ExecuteSqlRawAsync(
+            "DELETE FROM pbp_drive_events WHERE drive_id = ANY({0}) AND id != ALL({1})",
+            new object[] { incomingDriveIds, incomingPlayIds }, ct);
+    }
+
+    private async Task UpsertGameAsync(Game game, CancellationToken ct)
     {
         await ctx.Database.ExecuteSqlRawAsync(@"
             INSERT INTO games (
@@ -96,16 +129,19 @@ public class GamesRepository(ILogger<GamesRepository> logger, PatriotIndexDbCont
                 neutral_site = EXCLUDED.neutral_site,
                 conference_game = EXCLUDED.conference_game,
                 week_id = EXCLUDED.week_id",
-            game.Id, game.SrId, game.Status, game.Scheduled, game.Attendance,
-            game.GameType, game.Title, game.Duration,
-            game.SeasonYear, game.SeasonType, game.SeasonId, game.WeekSequence, game.WeekTitle,
-            game.HomeTeamId, game.AwayTeamId, game.HomePoints, game.AwayPoints, game.VenueId,
-            game.WeatherCondition, game.WeatherTemp, game.WeatherHumidity, game.WeatherWindSpeed,
-            game.WeatherWindDirection, game.BroadcastNetwork, game.NeutralSite, game.ConferenceGame,
-            game.WeekId);
+            new object[]
+            {
+                game.Id, game.SrId, game.Status, game.Scheduled, game.Attendance,
+                game.GameType, game.Title, game.Duration,
+                game.SeasonYear, game.SeasonType, game.SeasonId, game.WeekSequence, game.WeekTitle,
+                game.HomeTeamId, game.AwayTeamId, game.HomePoints, game.AwayPoints, game.VenueId,
+                game.WeatherCondition, game.WeatherTemp, game.WeatherHumidity, game.WeatherWindSpeed,
+                game.WeatherWindDirection, game.BroadcastNetwork, game.NeutralSite, game.ConferenceGame,
+                game.WeekId
+            }, ct);
     }
 
-    private async Task UpsertPeriod(IEnumerable<Period> periods)
+    private async Task UpsertPeriod(IEnumerable<Period> periods, CancellationToken ct)
     {
         var list = periods.ToList();
         if (list.Count == 0) return;
@@ -132,10 +168,10 @@ public class GamesRepository(ILogger<GamesRepository> logger, PatriotIndexDbCont
                   " number = EXCLUDED.number, game_id = EXCLUDED.game_id, type = EXCLUDED.type," +
                   " sequence = EXCLUDED.sequence, home_score = EXCLUDED.home_score, away_score = EXCLUDED.away_score");
 
-        await ctx.Database.ExecuteSqlRawAsync(sb.ToString(), parameters);
+        await ctx.Database.ExecuteSqlRawAsync(sb.ToString(), parameters, ct);
     }
 
-    private async Task UpsertDrives(IEnumerable<Drive> drives)
+    private async Task UpsertDrives(IEnumerable<Drive> drives, CancellationToken ct)
     {
         var list = drives.ToList();
         if (list.Count == 0) return;
@@ -192,10 +228,10 @@ public class GamesRepository(ILogger<GamesRepository> logger, PatriotIndexDbCont
             " last_drive_yard_line = EXCLUDED.last_drive_yard_line, farthest_drive_yard_line = EXCLUDED.farthest_drive_yard_line," +
             " pat_points_attempted = EXCLUDED.pat_points_attempted");
 
-        await ctx.Database.ExecuteSqlRawAsync(sb.ToString(), parameters);
+        await ctx.Database.ExecuteSqlRawAsync(sb.ToString(), parameters, ct);
     }
-    
-    private async Task UpsertDriveEvents(IEnumerable<DriveEvent> driveEvents)
+
+    private async Task UpsertDriveEvents(IEnumerable<DriveEvent> driveEvents, CancellationToken ct)
     {
         var list = driveEvents.ToList();
         if (list.Count == 0) return;
@@ -274,11 +310,34 @@ public class GamesRepository(ILogger<GamesRepository> logger, PatriotIndexDbCont
             " end_down = EXCLUDED.end_down, end_yards_to_gain = EXCLUDED.end_yards_to_gain," +
             " end_location_yard_line = EXCLUDED.end_location_yard_line, end_possession_team_id = EXCLUDED.end_possession_team_id");
 
-        await ctx.Database.ExecuteSqlRawAsync(sb.ToString(), parameters);
+        await ctx.Database.ExecuteSqlRawAsync(sb.ToString(), parameters, ct);
     }
-    
-    
-    
-    
-    
+
+    private async Task UpsertPlayStatistics(IEnumerable<DriveEvent> driveEvents, CancellationToken ct)
+    {
+        var plays = driveEvents.ToList();
+        if (plays.Count == 0) return;
+
+        var allStats = plays
+            .SelectMany(p => p.PlayStats)
+            .Where(s => s is not UnknownPlayStat)
+            .ToList();
+
+        var unknownCount = plays.SelectMany(p => p.PlayStats).Count(s => s is UnknownPlayStat);
+        if (unknownCount > 0)
+            logger.LogWarning("Skipping {Count} UnknownPlayStat entries (no EF mapping).", unknownCount);
+
+        if (allStats.Count == 0) return;
+
+        // Delete existing rows so re-saves are idempotent
+        var playIds = plays.Select(p => p.Id).ToArray();
+        await ctx.Database.ExecuteSqlRawAsync(
+            "DELETE FROM play_statistics WHERE play_id = ANY({0})",
+            new object[] { playIds }, ct);
+
+        logger.LogInformation("Inserting {Count} play statistics.", allStats.Count);
+        await ctx.PlayStatistics.AddRangeAsync(allStats, ct);
+        await ctx.SaveChangesAsync(ct);
+        ctx.ChangeTracker.Clear();
+    }
 }
