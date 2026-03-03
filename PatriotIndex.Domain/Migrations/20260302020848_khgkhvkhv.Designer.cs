@@ -3279,8 +3279,6 @@ namespace PatriotIndex.Domain.Migrations
 
                             b1.ToTable("play_statistics");
 
-                            b1.HasJsonPropertyName("player");
-
                             b1.WithOwner()
                                 .HasForeignKey("PlayStatisticId")
                                 .HasConstraintName("fk_play_statistics_play_statistics_id");
@@ -3321,8 +3319,6 @@ namespace PatriotIndex.Domain.Migrations
                             b1.HasKey("PlayStatisticId");
 
                             b1.ToTable("play_statistics");
-
-                            b1.HasJsonPropertyName("team");
 
                             b1.WithOwner()
                                 .HasForeignKey("PlayStatisticId")

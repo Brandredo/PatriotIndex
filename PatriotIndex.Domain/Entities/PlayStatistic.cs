@@ -89,11 +89,9 @@ public abstract class PlayStatistic
     /// The player credited with this statistic.
     /// Absent on team-level stats (e.g. touchback returns, first-down summaries).
     /// </summary>
-    [JsonPropertyName("player")]
     public PlayStatPlayer? Player { get; init; }
 
     /// <summary>The team credited with this statistic.</summary>
-    [JsonPropertyName("team")]
     public PlayStatTeam? Team { get; init; }
 
     /// <summary>
