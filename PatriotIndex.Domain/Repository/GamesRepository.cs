@@ -1,4 +1,5 @@
 using System.Text;
+using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using PatriotIndex.Domain.Context;
@@ -8,18 +9,6 @@ namespace PatriotIndex.Domain.Repository;
 
 public class GamesRepository(ILogger<GamesRepository> logger, PatriotIndexDbContext ctx)
 {
-    // public async Task SaveAsync(Game game, CancellationToken ct)
-    // {
-    //     bool exists = await ctx.Games.AnyAsync(g => g.Id == game.Id, ct);
-    //     if (exists)
-    //     {
-    //         logger.LogWarning("Game {GameId} already exists, skipping.", game.Id);
-    //         return;
-    //     }
-    //     ctx.Games.Add(game);
-    //     await ctx.SaveChangesAsync(ct);
-    // }
-    
     public async Task SaveAsync(IEnumerable<Game> games, CancellationToken ct)
     {
         var gameList = games.ToList();
@@ -56,16 +45,14 @@ public class GamesRepository(ILogger<GamesRepository> logger, PatriotIndexDbCont
 
             var allDrives = game.Drives.ToList();
             var allPlays  = allDrives.SelectMany(d => d.Plays).ToList();
+            var allEvents = allDrives.SelectMany(d => d.Events).ToList();
 
             var incomingDriveIds = allDrives.Select(d => d.Id).ToArray();
-            var incomingPlayIds  = allPlays.Select(p => p.Id).ToArray();
 
-            await DeleteOrphanedDriveEvents(incomingDriveIds, incomingPlayIds, ct);
             await DeleteOrphanedDrives(game.Id, incomingDriveIds, ct);
-
             await UpsertDrives(allDrives, ct);
-            await UpsertDriveEvents(allPlays, ct);
-            await UpsertPlayStatistics(allPlays, ct);
+            await UpsertPlays(allPlays, ct);
+            await UpsertGameEvents(allEvents, ct);
 
             await tx.CommitAsync(ct);
         });
@@ -76,14 +63,6 @@ public class GamesRepository(ILogger<GamesRepository> logger, PatriotIndexDbCont
         await ctx.Database.ExecuteSqlRawAsync(
             "DELETE FROM drives WHERE game_id = {0} AND id != ALL({1})",
             new object[] { gameId, incomingDriveIds }, ct);
-    }
-
-    private async Task DeleteOrphanedDriveEvents(Guid[] incomingDriveIds, Guid[] incomingPlayIds, CancellationToken ct)
-    {
-        if (incomingDriveIds.Length == 0) return;
-        await ctx.Database.ExecuteSqlRawAsync(
-            "DELETE FROM pbp_drive_events WHERE drive_id = ANY({0}) AND id != ALL({1})",
-            new object[] { incomingDriveIds, incomingPlayIds }, ct);
     }
 
     private async Task UpsertGameAsync(Game game, CancellationToken ct)
@@ -231,112 +210,34 @@ public class GamesRepository(ILogger<GamesRepository> logger, PatriotIndexDbCont
         await ctx.Database.ExecuteSqlRawAsync(sb.ToString(), parameters, ct);
     }
 
-    private async Task UpsertDriveEvents(IEnumerable<DriveEvent> driveEvents, CancellationToken ct)
+    private async Task UpsertPlays(IEnumerable<Play> plays, CancellationToken ct)
     {
-        var list = driveEvents.ToList();
+        var list = plays.ToList();
         if (list.Count == 0) return;
 
-        const int cols = 37;
-        var sb = new StringBuilder(
-            "INSERT INTO pbp_drive_events (" +
-            "id, drive_id, period_id, event_type, sequence, clock, wall_clock, description, " +
-            "home_score, away_score, play_type, pass_route, qb_snap, huddle, men_in_box, " +
-            "left_tight_ends, right_tight_ends, hash_mark, players_rushed, play_direction, pocket_location, " +
-            "fake_punt, fake_field_goal, screen_pass, blitz, play_action, run_pass_option, " +
-            "start_clock, start_down, start_yards_to_gain, start_location_yard_line, start_possession_team_id, " +
-            "end_clock, end_down, end_yards_to_gain, end_location_yard_line, end_possession_team_id) VALUES ");
-        var parameters = new List<object>();
-        int i = 0;
+        // Delete then re-insert: EF Core handles JSONB serialization for statistics and details
+        var driveIds = list.Select(p => p.DriveId).Distinct().ToArray();
+        await ctx.Database.ExecuteSqlRawAsync(
+            "DELETE FROM plays WHERE drive_id = ANY({0})",
+            new object[] { driveIds }, ct);
 
-        foreach (var evt in list)
-        {
-            if (i > 0) sb.Append(", ");
-            sb.Append($"({string.Join(", ", Enumerable.Range(i * cols, cols).Select(n => $"{{{n}}}"))})");
-            parameters.Add(evt.Id);
-            parameters.Add(evt.DriveId);
-            parameters.Add(evt.PeriodId);
-            parameters.Add(evt.EventType);
-            parameters.Add(evt.Sequence);
-            parameters.Add(evt.Clock);
-            parameters.Add(evt.WallClock);
-            parameters.Add(evt.Description);
-            parameters.Add(evt.HomeScore);
-            parameters.Add(evt.AwayScore);
-            parameters.Add(evt.PlayType);
-            parameters.Add(evt.PassRoute);
-            parameters.Add(evt.QbSnap);
-            parameters.Add(evt.Huddle);
-            parameters.Add(evt.MenInBox);
-            parameters.Add(evt.LeftTightEnds);
-            parameters.Add(evt.RightTightEnds);
-            parameters.Add(evt.HashMark);
-            parameters.Add(evt.PlayersRushed);
-            parameters.Add(evt.PlayDirection);
-            parameters.Add(evt.PocketLocation);
-            parameters.Add(evt.FakePunt);
-            parameters.Add(evt.FakeFieldGoal);
-            parameters.Add(evt.ScreenPass);
-            parameters.Add(evt.Blitz);
-            parameters.Add(evt.PlayAction);
-            parameters.Add(evt.RunPassOption);
-            parameters.Add(evt.StartClock);
-            parameters.Add(evt.StartDown);
-            parameters.Add(evt.StartYardsToGain);
-            parameters.Add(evt.StartLocationYardLine);
-            parameters.Add(evt.StartPossessionTeamId);
-            parameters.Add(evt.EndClock);
-            parameters.Add(evt.EndDown);
-            parameters.Add(evt.EndYardsToGain);
-            parameters.Add(evt.EndLocationYardLine);
-            parameters.Add(evt.EndPossessionTeamId);
-            i++;
-        }
-
-        sb.Append(
-            " ON CONFLICT (id) DO UPDATE SET" +
-            " drive_id = EXCLUDED.drive_id, period_id = EXCLUDED.period_id, event_type = EXCLUDED.event_type," +
-            " sequence = EXCLUDED.sequence, clock = EXCLUDED.clock, wall_clock = EXCLUDED.wall_clock," +
-            " description = EXCLUDED.description, home_score = EXCLUDED.home_score, away_score = EXCLUDED.away_score," +
-            " play_type = EXCLUDED.play_type, pass_route = EXCLUDED.pass_route, qb_snap = EXCLUDED.qb_snap," +
-            " huddle = EXCLUDED.huddle, men_in_box = EXCLUDED.men_in_box, left_tight_ends = EXCLUDED.left_tight_ends," +
-            " right_tight_ends = EXCLUDED.right_tight_ends, hash_mark = EXCLUDED.hash_mark," +
-            " players_rushed = EXCLUDED.players_rushed, play_direction = EXCLUDED.play_direction," +
-            " pocket_location = EXCLUDED.pocket_location, fake_punt = EXCLUDED.fake_punt," +
-            " fake_field_goal = EXCLUDED.fake_field_goal, screen_pass = EXCLUDED.screen_pass," +
-            " blitz = EXCLUDED.blitz, play_action = EXCLUDED.play_action, run_pass_option = EXCLUDED.run_pass_option," +
-            " start_clock = EXCLUDED.start_clock, start_down = EXCLUDED.start_down," +
-            " start_yards_to_gain = EXCLUDED.start_yards_to_gain, start_location_yard_line = EXCLUDED.start_location_yard_line," +
-            " start_possession_team_id = EXCLUDED.start_possession_team_id, end_clock = EXCLUDED.end_clock," +
-            " end_down = EXCLUDED.end_down, end_yards_to_gain = EXCLUDED.end_yards_to_gain," +
-            " end_location_yard_line = EXCLUDED.end_location_yard_line, end_possession_team_id = EXCLUDED.end_possession_team_id");
-
-        await ctx.Database.ExecuteSqlRawAsync(sb.ToString(), parameters, ct);
+        logger.LogInformation("Inserting {Count} plays.", list.Count);
+        await ctx.Plays.AddRangeAsync(list, ct);
+        await ctx.SaveChangesAsync(ct);
+        ctx.ChangeTracker.Clear();
     }
 
-    private async Task UpsertPlayStatistics(IEnumerable<DriveEvent> driveEvents, CancellationToken ct)
+    private async Task UpsertGameEvents(IEnumerable<GameEvent> events, CancellationToken ct)
     {
-        var plays = driveEvents.ToList();
-        if (plays.Count == 0) return;
+        var list = events.ToList();
+        if (list.Count == 0) return;
 
-        var allStats = plays
-            .SelectMany(p => p.PlayStats)
-            .Where(s => s is not UnknownPlayStat)
-            .ToList();
-
-        var unknownCount = plays.SelectMany(p => p.PlayStats).Count(s => s is UnknownPlayStat);
-        if (unknownCount > 0)
-            logger.LogWarning("Skipping {Count} UnknownPlayStat entries (no EF mapping).", unknownCount);
-
-        if (allStats.Count == 0) return;
-
-        // Delete existing rows so re-saves are idempotent
-        var playIds = plays.Select(p => p.Id).ToArray();
+        var driveIds = list.Select(e => e.DriveId).Distinct().ToArray();
         await ctx.Database.ExecuteSqlRawAsync(
-            "DELETE FROM play_statistics WHERE play_id = ANY({0})",
-            new object[] { playIds }, ct);
+            "DELETE FROM game_events WHERE drive_id = ANY({0})",
+            new object[] { driveIds }, ct);
 
-        logger.LogInformation("Inserting {Count} play statistics.", allStats.Count);
-        await ctx.PlayStatistics.AddRangeAsync(allStats, ct);
+        await ctx.GameEvents.AddRangeAsync(list, ct);
         await ctx.SaveChangesAsync(ct);
         ctx.ChangeTracker.Clear();
     }

@@ -31,5 +31,6 @@ public class Drive
     public Team? DefensiveTeam { get; set; }
 
     //public Period? Period { get; set; }
-    public IEnumerable<DriveEvent> Plays { get; set; } = [];
+    public ICollection<Play>      Plays  { get; set; } = new List<Play>();
+    public ICollection<GameEvent> Events { get; set; } = new List<GameEvent>();
 }

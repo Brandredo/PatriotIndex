@@ -15,18 +15,16 @@ public class PatriotIndexDbContext : DbContext
     public DbSet<Division> Divisions { get; set; }
     public DbSet<Drive> Drives { get; set; }
     public DbSet<Game> Games { get; set; }
-    public DbSet<DriveEvent> PbpDriveEvents { get; set; }
-    public DbSet<PbpEventStatistics> PbpEventStatistics { get; set; }
-    public DbSet<Period> Periods { get; set; }
-    public DbSet<Player> Players { get; set; }
-    public DbSet<PlayerGameStats> PlayerGameStats { get; set; }
-    public DbSet<PlayerSeasonStats> PlayerSeasonStats { get; set; }
-    public DbSet<SyncLog> SyncLogs { get; set; }
-    public DbSet<Team> Teams { get; set; }
-    public DbSet<TeamSeasonStats> TeamSeasonStats { get; set; }
-    public DbSet<Venue> Venues { get; set; }
-    
-    public DbSet<PlayStatistic> PlayStatistics { get; set; }
+    public DbSet<Play>              Plays              { get; set; }
+    public DbSet<GameEvent>         GameEvents         { get; set; }
+    public DbSet<Period>            Periods            { get; set; }
+    public DbSet<Player>            Players            { get; set; }
+    public DbSet<PlayerGameStats>   PlayerGameStats    { get; set; }
+    public DbSet<PlayerSeasonStats> PlayerSeasonStats  { get; set; }
+    public DbSet<SyncLog>           SyncLogs           { get; set; }
+    public DbSet<Team>              Teams              { get; set; }
+    public DbSet<TeamSeasonStats>   TeamSeasonStats    { get; set; }
+    public DbSet<Venue>             Venues             { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -169,8 +167,6 @@ public class PatriotIndexDbContext : DbContext
         modelBuilder.Entity<Drive>(e =>
         {
             e.HasIndex(x => x.GameId);
-            //e.HasIndex(x => x.Sequence);
-            //e.HasIndex(x => new { x.GameId, x.Sequence });
             e.HasKey(x => x.Id);
 
             e.HasOne(x => x.Game)
@@ -178,13 +174,12 @@ public class PatriotIndexDbContext : DbContext
                 .HasForeignKey(x => x.GameId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // No nav property on Drive for Period
-            // e.HasOne<Period>()
-            //  .WithMany()
-            //  .HasForeignKey(x => x.PeriodId)
-            //  .OnDelete(DeleteBehavior.Restrict);
-
             e.HasMany(x => x.Plays)
+                .WithOne(x => x.Drive)
+                .HasForeignKey(x => x.DriveId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            e.HasMany(x => x.Events)
                 .WithOne(x => x.Drive)
                 .HasForeignKey(x => x.DriveId)
                 .OnDelete(DeleteBehavior.Cascade);
@@ -254,108 +249,98 @@ public class PatriotIndexDbContext : DbContext
                 .OnDelete(DeleteBehavior.Cascade);
         });
 
-        // ── PbpDriveEvent ─────────────────────────────────────────────
-        // NOTE: PbpDriveEvent has no DriveId — no FK to Drive can be configured until one is added.
-        // Also has duplicate-typed properties (EventType/Type, DriveType/PlayType) — review entity.
-        modelBuilder.Entity<DriveEvent>(e =>
-        {
-            e.HasIndex(x => x.Sequence);
-
-            e.HasOne(x => x.StartTeam)
-                .WithMany()
-                .HasForeignKey(x => x.StartPossessionTeamId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            e.HasOne(x => x.EndTeam)
-                .WithMany()
-                .HasForeignKey(x => x.EndPossessionTeamId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            // e.HasMany(x => x.EventStats)
-            //     .WithOne(x => x.DriveEvent)
-            //     .HasForeignKey(x => x.EventId)
-            //     .OnDelete(DeleteBehavior.Cascade);
-            
-            // this is the used relationship
-            e.HasMany(x => x.PlayStats)
-                .WithOne(x => x.PlayEvent)
-                .HasForeignKey(x => x.PlayId)
-                .OnDelete(DeleteBehavior.Cascade);
-        });
-
-        // ── PbpEventStatistics ────────────────────────────────────────
-        // No surrogate PK — composite key on (EventId, StatType).
-        // Add a Guid Id if multiple rows per (event, type) are needed.
-        modelBuilder.Entity<PbpEventStatistics>(e =>
-        {
-            e.HasKey(x => new { x.EventId, x.StatType });
-
-            e.HasOne<DriveEvent>()
-                .WithMany()
-                .HasForeignKey(x => x.EventId)
-                .OnDelete(DeleteBehavior.Cascade);
-        });
-
         // ── SyncLog ───────────────────────────────────────────────────
         modelBuilder.Entity<SyncLog>(e =>
         {
             e.HasIndex(x => x.EntityType);
             e.HasIndex(x => x.StartedAt);
         });
-        
-        
-        modelBuilder.Entity<PlayStatistic>(entity =>
+
+        // ── Play ──────────────────────────────────────────────────────
+        modelBuilder.Entity<Play>(entity =>
         {
-            entity.ToTable("play_statistics");
+            entity.ToTable("plays");
             entity.HasKey(e => e.Id);
 
-            entity.Property(e => e.Id).ValueGeneratedOnAdd();
-            
-            // Not to map StatType as a regular column
-            //entity.Ignore(e => e.StatType);
-            
-            // Map the stat_type string directly as the EF discriminator
-            entity.HasDiscriminator<string>("stat_type")
-                .HasValue<RushPlayStat>              ("rush")
-                .HasValue<PassPlayStat>              ("pass")
-                .HasValue<ReceivePlayStat>           ("receive")
-                .HasValue<DefensePlayStat>           ("defense")
-                .HasValue<FumblePlayStat>            ("fumble")
-                .HasValue<PenaltyPlayStat>           ("penalty")
-                .HasValue<KickPlayStat>              ("kick")
-                .HasValue<PuntPlayStat>              ("punt")
-                .HasValue<ReturnPlayStat>            ("return")
-                .HasValue<IntReturnPlayStat>         ("int_return")
-                .HasValue<MiscReturnPlayStat>        ("misc_return")
-                .HasValue<FieldGoalPlayStat>         ("field_goal")
-                .HasValue<ExtraPointPlayStat>        ("extra_point")
-                .HasValue<ConversionPlayStat>        ("conversion")
-                .HasValue<DefenseConversionPlayStat> ("defense_conversion")
-                .HasValue<DownConversionPlayStat>    ("down_conversion")
-                .HasValue<BlockPlayStat>             ("block")
-                .HasValue<FirstDownPlayStat>         ("first_down");
-            
-            // Owned entities for the embedded Player/Team references
-            entity.OwnsOne(e => e.Player, player =>
+            entity.Property(e => e.PlayType).HasMaxLength(50).IsRequired();
+            entity.Property(e => e.Clock).HasMaxLength(10).IsRequired();
+            entity.Property(e => e.Description).HasMaxLength(2000);
+
+            entity.OwnsOne(e => e.StartSituation, s =>
             {
-                player.Property(p => p.Id)      .HasColumnName("player_id");
-                player.Property(p => p.Name)    .HasColumnName("player_name");
-                player.Property(p => p.Jersey)  .HasColumnName("player_jersey");
-                player.Property(p => p.Position).HasColumnName("player_position");
-                player.Property(p => p.SrId)    .HasColumnName("player_sr_id");
+                s.Property(x => x.Clock)            .HasColumnName("start_clock").HasMaxLength(10);
+                s.Property(x => x.Down)             .HasColumnName("start_down");
+                s.Property(x => x.YardsToFirstDown) .HasColumnName("start_yfd");
+                s.Property(x => x.Yardline)         .HasColumnName("start_yardline");
+                s.Property(x => x.YardlineTeam)     .HasColumnName("start_yardline_team").HasMaxLength(10);
+                s.Property(x => x.PossessionTeamId) .HasColumnName("start_possession_team_id");
+                s.HasOne<Team>().WithMany()
+                    .HasForeignKey(x => x.PossessionTeamId)
+                    .OnDelete(DeleteBehavior.Restrict);
             });
 
-            entity.OwnsOne(e => e.Team, team =>
+            entity.OwnsOne(e => e.EndSituation, s =>
             {
-                team.Property(t => t.Id)    .HasColumnName("team_id");
-                team.Property(t => t.Name)  .HasColumnName("team_name");
-                team.Property(t => t.Market).HasColumnName("team_market");
-                team.Property(t => t.Alias) .HasColumnName("team_alias");
-                team.Property(t => t.SrId)  .HasColumnName("team_sr_id");
+                s.Property(x => x.Clock)            .HasColumnName("end_clock").HasMaxLength(10);
+                s.Property(x => x.Down)             .HasColumnName("end_down");
+                s.Property(x => x.YardsToFirstDown) .HasColumnName("end_yfd");
+                s.Property(x => x.Yardline)         .HasColumnName("end_yardline");
+                s.Property(x => x.YardlineTeam)     .HasColumnName("end_yardline_team").HasMaxLength(10);
+                s.Property(x => x.PossessionTeamId) .HasColumnName("end_possession_team_id");
+                s.HasOne<Team>().WithMany()
+                    .HasForeignKey(x => x.PossessionTeamId)
+                    .OnDelete(DeleteBehavior.Restrict);
             });
 
-            // Index the discriminator — nearly every query will filter by it
-            entity.HasIndex("PlayId", "stat_type");
+            entity.OwnsMany(e => e.Statistics, stat =>
+            {
+                stat.ToJson("statistics");
+                stat.OwnsOne(s => s.Player);
+                stat.OwnsOne(s => s.Team);
+            });
+
+            entity.OwnsMany(e => e.Details, detail =>
+            {
+                detail.ToJson("details");
+                detail.OwnsMany(d => d.Players);
+            });
+
+            entity.HasOne(e => e.Game)
+                .WithMany()
+                .HasForeignKey(e => e.GameId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(e => e.PossessionTeam)
+                .WithMany()
+                .HasForeignKey(e => e.PossessionTeamId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasIndex(e => e.GameId);
+            entity.HasIndex(e => e.DriveId);
+            entity.HasIndex(e => e.PossessionTeamId);
+            entity.HasIndex(e => new { e.GameId, e.PlayType });
+            entity.HasIndex(e => new { e.GameId, e.Down });
+            // GIN indexes on statistics and details are added via raw SQL in the migration
+        });
+
+        // ── GameEvent ─────────────────────────────────────────────────
+        modelBuilder.Entity<GameEvent>(entity =>
+        {
+            entity.ToTable("game_events");
+            entity.HasKey(e => e.Id);
+
+            entity.Property(e => e.EventType).HasMaxLength(50).IsRequired();
+            entity.Property(e => e.Clock).HasMaxLength(10).IsRequired();
+            entity.Property(e => e.Description).HasMaxLength(2000);
+
+            entity.HasOne(e => e.Game)
+                .WithMany()
+                .HasForeignKey(e => e.GameId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasIndex(e => e.GameId);
+            entity.HasIndex(e => e.DriveId);
+            entity.HasIndex(e => new { e.GameId, e.EventType });
         });
     }
 }
