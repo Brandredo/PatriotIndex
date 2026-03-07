@@ -211,6 +211,25 @@ public class PatriotIndexDbContext : DbContext
                 .WithMany()
                 .HasForeignKey(x => x.TeamId)
                 .OnDelete(DeleteBehavior.SetNull);
+
+            e.OwnsOne(x => x.Stats, block =>
+            {
+                block.ToJson("stats");
+                block.OwnsOne(b => b.Rushing);
+                block.OwnsOne(b => b.Passing);
+                block.OwnsOne(b => b.Receiving);
+                block.OwnsOne(b => b.Defense);
+                block.OwnsOne(b => b.FieldGoals);
+                block.OwnsOne(b => b.ExtraPoints);
+                block.OwnsOne(b => b.Punts);
+                block.OwnsOne(b => b.Kickoffs);
+                block.OwnsOne(b => b.PuntReturns);
+                block.OwnsOne(b => b.KickReturns);
+                block.OwnsOne(b => b.MiscReturns);
+                block.OwnsOne(b => b.Fumbles);
+                block.OwnsOne(b => b.Penalties);
+                block.OwnsOne(b => b.IntReturns);
+            });
         });
 
         // ── PlayerGameStats ───────────────────────────────────────────
@@ -247,6 +266,51 @@ public class PatriotIndexDbContext : DbContext
                 .WithMany()
                 .HasForeignKey(x => x.TeamId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            void ConfigureTeamStatBlock(
+                Microsoft.EntityFrameworkCore.Metadata.Builders.OwnedNavigationBuilder<TeamSeasonStats, TeamStatBlock> block)
+            {
+                block.OwnsOne(b => b.Touchdowns);
+                block.OwnsOne(b => b.Rushing);
+                block.OwnsOne(b => b.Passing);
+                block.OwnsOne(b => b.Receiving);
+                block.OwnsOne(b => b.Defense);
+                block.OwnsOne(b => b.FieldGoals);
+                block.OwnsOne(b => b.Kickoffs);
+                block.OwnsOne(b => b.KickReturns);
+                block.OwnsOne(b => b.Punts);
+                block.OwnsOne(b => b.PuntReturns);
+                block.OwnsOne(b => b.Interceptions);
+                block.OwnsOne(b => b.IntReturns);
+                block.OwnsOne(b => b.Fumbles);
+                block.OwnsOne(b => b.FirstDowns);
+                block.OwnsOne(b => b.Penalties);
+                block.OwnsOne(b => b.MiscReturns);
+                block.OwnsOne(b => b.ExtraPoints, ep =>
+                {
+                    ep.OwnsOne(x => x.Kicks);
+                    ep.OwnsOne(x => x.Conversions);
+                });
+                block.OwnsOne(b => b.Efficiency, eff =>
+                {
+                    eff.OwnsOne(x => x.Goaltogo);
+                    eff.OwnsOne(x => x.Redzone);
+                    eff.OwnsOne(x => x.Thirddown);
+                    eff.OwnsOne(x => x.Fourthdown);
+                });
+            }
+
+            e.OwnsOne(x => x.Record, block =>
+            {
+                block.ToJson("record");
+                ConfigureTeamStatBlock(block);
+            });
+
+            e.OwnsOne(x => x.Opponents, block =>
+            {
+                block.ToJson("opponents");
+                ConfigureTeamStatBlock(block);
+            });
         });
 
         // ── SyncLog ───────────────────────────────────────────────────
