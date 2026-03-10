@@ -64,11 +64,16 @@ public class Program
 
         // Register job classes
         builder.Services.AddScoped<TeamProfileJobOrchestrator>();
+        builder.Services.AddScoped<CurrentWeekScheduleJob>();
+        builder.Services.AddScoped<TeamProfileJob>();
+        builder.Services.AddScoped<GamePbpJob>();
+        builder.Services.AddScoped<SeasonalStatsJob>();
 
         // Register repository classes
         builder.Services.AddScoped<TeamsRepository>();
         builder.Services.AddScoped<GamesRepository>();
         builder.Services.AddScoped<SyncLogRepository>();
+        builder.Services.AddScoped<StatsRepository>();
 
         // Register services
         builder.Services.AddHttpClient<SportsApiClient>()

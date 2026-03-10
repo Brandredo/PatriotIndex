@@ -68,7 +68,7 @@ public class SeasonRushingStats
     public double AvgYards { get; set; }
     public int Attempts { get; set; }
     public int Touchdowns { get; set; }
-    public int Tlost { get; set; }
+    public decimal Tlost { get; set; }
     public int TlostYards { get; set; }
     public int Yards { get; set; }
     public int Longest { get; set; }
@@ -86,12 +86,12 @@ public class SeasonPassingStats
 {
     public int Attempts { get; set; }
     public int Completions { get; set; }
-    public double CmpPct { get; set; }
+    public decimal CmpPct { get; set; }
     public int Interceptions { get; set; }
     public int SackYards { get; set; }
-    public double Rating { get; set; }
+    public decimal Rating { get; set; }
     public int Touchdowns { get; set; }
-    public double AvgYards { get; set; }
+    public decimal AvgYards { get; set; }
     public int Sacks { get; set; }
     public int Longest { get; set; }
     public int LongestTouchdown { get; set; }
@@ -121,7 +121,7 @@ public class SeasonReceivingStats
 {
     public int Targets { get; set; }
     public int Receptions { get; set; }
-    public double AvgYards { get; set; }
+    public decimal AvgYards { get; set; }
     public int Yards { get; set; }
     public int Touchdowns { get; set; }
     public int YardsAfterCatch { get; set; }
@@ -142,15 +142,15 @@ public class SeasonDefenseStats
     public int Tackles { get; set; }
     public int Assists { get; set; }
     public int Combined { get; set; }
-    public double Sacks { get; set; }
-    public int SackYards { get; set; }
+    public decimal Sacks { get; set; }
+    public decimal SackYards { get; set; }
     public int Interceptions { get; set; }
     public int PassesDefended { get; set; }
     public int ForcedFumbles { get; set; }
     public int FumbleRecoveries { get; set; }
     public int QbHits { get; set; }
-    public int Tloss { get; set; }
-    public int TlossYards { get; set; }
+    public decimal Tloss { get; set; }
+    public decimal TlossYards { get; set; }
     public int Safeties { get; set; }
     public int SpTackles { get; set; }
     public int SpAssists { get; set; }
@@ -181,10 +181,10 @@ public class SeasonFieldGoalStats
     public int Made { get; set; }
     public int Blocked { get; set; }
     public int Yards { get; set; }
-    public double AvgYards { get; set; }
+    public decimal AvgYards { get; set; }
     public int Longest { get; set; }
     public int Missed { get; set; }
-    public double Pct { get; set; }
+    public decimal Pct { get; set; }
     public int Attempts19 { get; set; }
     public int Attempts29 { get; set; }
     public int Attempts39 { get; set; }
@@ -216,7 +216,7 @@ public class SeasonKickoffStats
 [Owned]
 public class SeasonKickReturnStats
 {
-    public double AvgYards { get; set; }
+    public decimal AvgYards { get; set; }
     public int Yards { get; set; }
     public int Longest { get; set; }
     public int Touchdowns { get; set; }
@@ -235,8 +235,8 @@ public class SeasonPuntStats
     public int Touchbacks { get; set; }
     public int Inside20 { get; set; }
     public int ReturnYards { get; set; }
-    public double AvgNetYards { get; set; }
-    public double AvgYards { get; set; }
+    public decimal AvgNetYards { get; set; }
+    public decimal AvgYards { get; set; }
     public int Longest { get; set; }
     public double HangTime { get; set; }
     public double AvgHangTime { get; set; }
@@ -245,7 +245,7 @@ public class SeasonPuntStats
 [Owned]
 public class SeasonPuntReturnStats
 {
-    public double AvgYards { get; set; }
+    public decimal AvgYards { get; set; }
     public int Returns { get; set; }
     public int Yards { get; set; }
     public int Longest { get; set; }
@@ -265,7 +265,7 @@ public class SeasonInterceptionStats
 [Owned]
 public class SeasonIntReturnStats
 {
-    public double AvgYards { get; set; }
+    public decimal AvgYards { get; set; }
     public int Yards { get; set; }
     public int Longest { get; set; }
     public int Touchdowns { get; set; }
@@ -334,7 +334,7 @@ public class SeasonEpKickStats
     public int Attempts { get; set; }
     public int Blocked { get; set; }
     public int Made { get; set; }
-    public double Pct { get; set; }
+    public decimal Pct { get; set; }
 }
 
 [Owned]
@@ -358,7 +358,7 @@ public class SeasonPlayerExtraPointStats
     public int Made { get; set; }
     public int Blocked { get; set; }
     public int Missed { get; set; }
-    public double Pct { get; set; }
+    public decimal Pct { get; set; }
 }
 
 // ── Efficiency ────────────────────────────────────────────────────────────
@@ -377,5 +377,5 @@ public class SeasonEfficiencyBlock
 {
     public int Attempts { get; set; }
     public int Successes { get; set; }
-    public double Pct { get; set; }
+    public decimal Pct { get; set; }
 }

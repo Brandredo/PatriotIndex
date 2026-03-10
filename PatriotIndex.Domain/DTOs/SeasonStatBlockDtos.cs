@@ -22,7 +22,7 @@ public record SeasonRushingDto(
     [property: JsonPropertyName("avg_yards")] double AvgYards,
     [property: JsonPropertyName("attempts")] int Attempts,
     [property: JsonPropertyName("touchdowns")] int Touchdowns,
-    [property: JsonPropertyName("tlost")] int Tlost,
+    [property: JsonPropertyName("tlost")] decimal Tlost,
     [property: JsonPropertyName("tlost_yards")] int TlostYards,
     [property: JsonPropertyName("yards")] int Yards,
     [property: JsonPropertyName("longest")] int Longest,
@@ -41,12 +41,12 @@ public record SeasonRushingDto(
 public record SeasonPassingDto(
     [property: JsonPropertyName("attempts")] int Attempts,
     [property: JsonPropertyName("completions")] int Completions,
-    [property: JsonPropertyName("cmp_pct")] double CmpPct,
+    [property: JsonPropertyName("cmp_pct")] decimal CmpPct,
     [property: JsonPropertyName("interceptions")] int Interceptions,
     [property: JsonPropertyName("sack_yards")] int SackYards,
-    [property: JsonPropertyName("rating")] double Rating,
+    [property: JsonPropertyName("rating")] decimal Rating,
     [property: JsonPropertyName("touchdowns")] int Touchdowns,
-    [property: JsonPropertyName("avg_yards")] double AvgYards,
+    [property: JsonPropertyName("avg_yards")] decimal AvgYards,
     [property: JsonPropertyName("sacks")] int Sacks,
     [property: JsonPropertyName("longest")] int Longest,
     [property: JsonPropertyName("longest_touchdown")] int LongestTouchdown,
@@ -77,7 +77,7 @@ public record SeasonPassingDto(
 public record SeasonReceivingDto(
     [property: JsonPropertyName("targets")] int Targets,
     [property: JsonPropertyName("receptions")] int Receptions,
-    [property: JsonPropertyName("avg_yards")] double AvgYards,
+    [property: JsonPropertyName("avg_yards")] decimal AvgYards,
     [property: JsonPropertyName("yards")] int Yards,
     [property: JsonPropertyName("touchdowns")] int Touchdowns,
     [property: JsonPropertyName("yards_after_catch")] int YardsAfterCatch,
@@ -99,15 +99,15 @@ public record SeasonDefenseDto(
     [property: JsonPropertyName("tackles")] int Tackles,
     [property: JsonPropertyName("assists")] int Assists,
     [property: JsonPropertyName("combined")] int Combined,
-    [property: JsonPropertyName("sacks")] double Sacks,
-    [property: JsonPropertyName("sack_yards")] int SackYards,
+    [property: JsonPropertyName("sacks")] decimal Sacks,
+    [property: JsonPropertyName("sack_yards")] decimal SackYards,
     [property: JsonPropertyName("interceptions")] int Interceptions,
     [property: JsonPropertyName("passes_defended")] int PassesDefended,
     [property: JsonPropertyName("forced_fumbles")] int ForcedFumbles,
     [property: JsonPropertyName("fumble_recoveries")] int FumbleRecoveries,
     [property: JsonPropertyName("qb_hits")] int QbHits,
-    [property: JsonPropertyName("tloss")] int Tloss,
-    [property: JsonPropertyName("tloss_yards")] int TlossYards,
+    [property: JsonPropertyName("tloss")] decimal Tloss,
+    [property: JsonPropertyName("tloss_yards")] decimal TlossYards,
     [property: JsonPropertyName("safeties")] int Safeties,
     [property: JsonPropertyName("sp_tackles")] int SpTackles,
     [property: JsonPropertyName("sp_assists")] int SpAssists,
@@ -138,10 +138,10 @@ public record SeasonFieldGoalsDto(
     [property: JsonPropertyName("made")] int Made,
     [property: JsonPropertyName("blocked")] int Blocked,
     [property: JsonPropertyName("yards")] int Yards,
-    [property: JsonPropertyName("avg_yards")] double AvgYards,
+    [property: JsonPropertyName("avg_yards")] decimal AvgYards,
     [property: JsonPropertyName("longest")] int Longest,
     [property: JsonPropertyName("missed")] int Missed,
-    [property: JsonPropertyName("pct")] double Pct,
+    [property: JsonPropertyName("pct")] decimal Pct,
     [property: JsonPropertyName("attempts_19")] int Attempts19,
     [property: JsonPropertyName("attempts_29")] int Attempts29,
     [property: JsonPropertyName("attempts_39")] int Attempts39,
@@ -173,7 +173,7 @@ public record SeasonKickoffsDto(
 // ── Kick Returns ──────────────────────────────────────────────────────────
 
 public record SeasonKickReturnsDto(
-    [property: JsonPropertyName("avg_yards")] double AvgYards,
+    [property: JsonPropertyName("avg_yards")] decimal AvgYards,
     [property: JsonPropertyName("yards")] int Yards,
     [property: JsonPropertyName("longest")] int Longest,
     [property: JsonPropertyName("touchdowns")] int Touchdowns,
@@ -192,8 +192,8 @@ public record SeasonPuntsDto(
     [property: JsonPropertyName("touchbacks")] int Touchbacks,
     [property: JsonPropertyName("inside_20")] int Inside20,
     [property: JsonPropertyName("return_yards")] int ReturnYards,
-    [property: JsonPropertyName("avg_net_yards")] double AvgNetYards,
-    [property: JsonPropertyName("avg_yards")] double AvgYards,
+    [property: JsonPropertyName("avg_net_yards")] decimal AvgNetYards,
+    [property: JsonPropertyName("avg_yards")] decimal AvgYards,
     [property: JsonPropertyName("longest")] int Longest,
     [property: JsonPropertyName("hang_time")] double HangTime,
     [property: JsonPropertyName("avg_hang_time")] double AvgHangTime
@@ -202,7 +202,7 @@ public record SeasonPuntsDto(
 // ── Punt Returns ──────────────────────────────────────────────────────────
 
 public record SeasonPuntReturnsDto(
-    [property: JsonPropertyName("avg_yards")] double AvgYards,
+    [property: JsonPropertyName("avg_yards")] decimal AvgYards,
     [property: JsonPropertyName("returns")] int Returns,
     [property: JsonPropertyName("yards")] int Yards,
     [property: JsonPropertyName("longest")] int Longest,
@@ -222,7 +222,7 @@ public record SeasonInterceptionsDto(
 // ── Int Returns ───────────────────────────────────────────────────────────
 
 public record SeasonIntReturnsDto(
-    [property: JsonPropertyName("avg_yards")] double AvgYards,
+    [property: JsonPropertyName("avg_yards")] decimal AvgYards,
     [property: JsonPropertyName("yards")] int Yards,
     [property: JsonPropertyName("longest")] int Longest,
     [property: JsonPropertyName("touchdowns")] int Touchdowns,
@@ -284,11 +284,12 @@ public record SeasonTeamExtraPointsDto(
     [property: JsonPropertyName("conversions")] SeasonEpConversionsDto? Conversions
 );
 
+
 public record SeasonEpKicksDto(
     [property: JsonPropertyName("attempts")] int Attempts,
     [property: JsonPropertyName("blocked")] int Blocked,
     [property: JsonPropertyName("made")] int Made,
-    [property: JsonPropertyName("pct")] double Pct
+    [property: JsonPropertyName("pct")] decimal Pct
 );
 
 public record SeasonEpConversionsDto(
@@ -308,7 +309,7 @@ public record SeasonPlayerExtraPointsDto(
     [property: JsonPropertyName("made")] int Made,
     [property: JsonPropertyName("blocked")] int Blocked,
     [property: JsonPropertyName("missed")] int Missed,
-    [property: JsonPropertyName("pct")] double Pct
+    [property: JsonPropertyName("pct")] decimal Pct
 );
 
 // ── Efficiency ────────────────────────────────────────────────────────────
@@ -323,5 +324,5 @@ public record SeasonEfficiencyDto(
 public record SeasonEfficiencyBlockDto(
     [property: JsonPropertyName("attempts")] int Attempts,
     [property: JsonPropertyName("successes")] int Successes,
-    [property: JsonPropertyName("pct")] double Pct
+    [property: JsonPropertyName("pct")] decimal Pct
 );

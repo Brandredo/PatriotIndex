@@ -25,10 +25,17 @@ public class PatriotIndexDbContext : DbContext
     public DbSet<Team>              Teams              { get; set; }
     public DbSet<TeamSeasonStats>   TeamSeasonStats    { get; set; }
     public DbSet<Venue>             Venues             { get; set; }
+    public DbSet<AppConfig>         AppConfigs         { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
+
+        modelBuilder.Entity<AppConfig>(e =>
+        {
+            e.Property(x => x.Id).ValueGeneratedOnAdd();
+            e.HasIndex(x => x.Key).IsUnique();
+        });
 
         // ── Conference ────────────────────────────────────────────────
         modelBuilder.Entity<Conference>(e => { e.HasIndex(x => x.Alias).IsUnique(); });
@@ -316,6 +323,7 @@ public class PatriotIndexDbContext : DbContext
         // ── SyncLog ───────────────────────────────────────────────────
         modelBuilder.Entity<SyncLog>(e =>
         {
+            e.Property(x => x.Id).ValueGeneratedOnAdd();
             e.HasIndex(x => x.EntityType);
             e.HasIndex(x => x.StartedAt);
         });

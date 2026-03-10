@@ -4,7 +4,7 @@ namespace PatriotIndex.Domain.Entities;
 
 public class SyncLog
 {
-    public Guid Id { get; set; }
+    public long Id { get; set; }
     public string EntityType { get; set; } = "";
     public DateTime StartedAt { get; set; }
     public DateTime? CompletedAt { get; set; }

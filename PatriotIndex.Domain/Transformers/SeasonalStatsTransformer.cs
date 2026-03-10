@@ -1,15 +1,17 @@
 using PatriotIndex.Domain.DTOs;
 using PatriotIndex.Domain.Entities;
+using PatriotIndex.Domain.Enums;
 
 namespace PatriotIndex.Domain.Transformers;
 
 public class SeasonalStatsTransformer(SeasonalStatsApiResponse dto)
 {
-    public (TeamSeasonStats Team, IReadOnlyList<PlayerSeasonStats> Players) Transform()
+    public (TeamSeasonStats Team, IReadOnlyList<Player> Players, IReadOnlyList<PlayerSeasonStats> PlayerStats) Transform()
     {
         var teamStats   = MapTeamStats();
+        var players     = MapPlayers(teamStats.TeamId);
         var playerStats = MapPlayerStats(teamStats.TeamId, teamStats.SeasonYear, teamStats.SeasonType, teamStats.SeasonSrId);
-        return (teamStats, playerStats);
+        return (teamStats, players, playerStats);
     }
 
     // ── Team ─────────────────────────────────────────────────────────────
@@ -49,6 +51,32 @@ public class SeasonalStatsTransformer(SeasonalStatsApiResponse dto)
     };
 
     // ── Players ───────────────────────────────────────────────────────────
+
+    private IReadOnlyList<Player> MapPlayers(Guid teamId) =>
+        dto.Players.Select(p =>
+        {
+            var (firstName, lastName) = SplitName(p.Name);
+            return new Player
+            {
+                Id        = p.Id,
+                TeamId    = teamId,
+                Name      = p.Name,
+                FirstName = firstName,
+                LastName  = lastName,
+                Jersey    = p.Jersey,
+                Position  = Enum.TryParse<PlayerPosition>(p.Position, out var pos) ? pos : null,
+                SrId      = p.SrId,
+            };
+        }).ToList();
+
+    private static (string first, string last) SplitName(string? name)
+    {
+        if (string.IsNullOrWhiteSpace(name)) return ("", "");
+        var idx = name.LastIndexOf(' ');
+        return idx < 0
+            ? (name, "")
+            : (name[..idx], name[(idx + 1)..]);
+    }
 
     private IReadOnlyList<PlayerSeasonStats> MapPlayerStats(
         Guid teamId, int seasonYear, string seasonType, string? seasonSrId)
