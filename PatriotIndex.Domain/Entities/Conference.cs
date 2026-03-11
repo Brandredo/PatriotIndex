@@ -6,5 +6,5 @@ public class Conference
     public string Name { get; set; } = "";
     public string Alias { get; set; } = "";
 
-    public IEnumerable<Division> Divisions { get; set; } = [];
+    public ICollection<Division> Divisions { get; set; } = [];
 }

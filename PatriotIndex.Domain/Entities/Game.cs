@@ -32,7 +32,7 @@ public class Game
     public Team? HomeTeam { get; set; }
     public Team? AwayTeam { get; set; }
     public Venue? Venue { get; set; }
-    public IEnumerable<Drive> Drives { get; set; } = [];
-    public IEnumerable<Period> Periods { get; set; } = [];
+    public ICollection<Drive> Drives { get; set; } = [];
+    public ICollection<Period> Periods { get; set; } = [];
     public Guid? WeekId { get; set; }
 }

@@ -48,7 +48,7 @@ public class GamePbpTransformer(string json)
         return _game;
     }
 
-    private IEnumerable<Period> TransformPeriods(JsonTraverser trf)
+    private ICollection<Period> TransformPeriods(JsonTraverser trf)
     {
         return trf.GetArrayList("periods", period =>
         {

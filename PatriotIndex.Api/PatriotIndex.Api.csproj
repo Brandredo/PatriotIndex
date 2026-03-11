@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+    <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <UserSecretsId>d3f2e1a0-4c5b-6d7e-8f9a-0b1c2d3e4f5a</UserSecretsId>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Aspire.Npgsql.EntityFrameworkCore.PostgreSQL" Version="13.1.2"/>
+        <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.3"/>
+        <PackageReference Include="Scalar.AspNetCore" Version="2.13.6" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\PatriotIndex.Domain\PatriotIndex.Domain.csproj"/>
+        <ProjectReference Include="..\PatriotIndex.ServiceDefaults\PatriotIndex.ServiceDefaults.csproj"/>
+    </ItemGroup>
+
+</Project>

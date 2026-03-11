@@ -25,6 +25,6 @@ public class Team
     public TeamColors? Colors { get; set; }
     public Division? Division { get; set; }
     public Venue? Venue { get; set; }
-    public IEnumerable<Coach> Coaches { get; set; } = [];
-    public IEnumerable<Player> Players { get; set; } = [];
+    public ICollection<Coach> Coaches { get; set; } = [];
+    public ICollection<Player> Players { get; set; } = [];
 }

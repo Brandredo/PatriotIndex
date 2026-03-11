@@ -1,0 +1,29 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "Angular Frontend",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["start", "--prefix", "/Users/brandon/RiderProjects/patriot-index-ui"],
+      "port": 4200
+    },
+    {
+      "name": "Aspire AppHost",
+      "runtimeExecutable": "dotnet",
+      "runtimeArgs": ["run", "--project", "PatriotIndex.AppHost/PatriotIndex.AppHost.csproj", "--launch-profile", "http"],
+      "port": 15198
+    },
+    {
+      "name": "PatriotIndex API",
+      "runtimeExecutable": "dotnet",
+      "runtimeArgs": ["run", "--project", "PatriotIndex.Api/PatriotIndex.Api.csproj", "--launch-profile", "http"],
+      "port": 5020
+    },
+    {
+      "name": "Scheduler (standalone)",
+      "runtimeExecutable": "dotnet",
+      "runtimeArgs": ["run", "--project", "PatriotIndex.Scheduler/PatriotIndex.Scheduler.csproj", "--launch-profile", "http"],
+      "port": 5014
+    }
+  ]
+}
