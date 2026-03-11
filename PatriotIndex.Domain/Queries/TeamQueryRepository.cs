@@ -20,6 +20,18 @@ public class TeamQueryRepository(PatriotIndexDbContext db) : ITeamRepository
 
         return teams.Select(ToSummary).ToList();
     }
+    
+    public async Task<IReadOnlyList<TeamSummaryWithRosterDto>> GetTeamsAndPlayers()
+    {
+        var teams = await db.Teams
+            .AsNoTracking()
+            .Include(t => t.Players)
+            .Where(t => t.IsActive)
+            .OrderBy(t => t.Market)
+            .ToListAsync();
+
+        return teams.Select(ToSummaryWithRoster).ToList();
+    }
 
     public async Task<TeamDetailDto?> GetByIdAsync(Guid id)
     {
@@ -74,4 +86,8 @@ public class TeamQueryRepository(PatriotIndexDbContext db) : ITeamRepository
             t.Division.Id, t.Division.Name, t.Division.Alias,
             new ConferenceSummaryDto(
                 t.Division.Conference!.Id, t.Division.Conference.Name, t.Division.Conference.Alias)));
+    
+    private static TeamSummaryWithRosterDto ToSummaryWithRoster(Team t) => new(
+        t.Id, t.Name, t.Market, t.Alias,
+        t.Players.Select(p => new PlayerMinDto(p.Id, p.Name)).ToList());
 }

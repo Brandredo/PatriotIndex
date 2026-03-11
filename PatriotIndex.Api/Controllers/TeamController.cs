@@ -12,7 +12,7 @@ public class TeamController(ITeamRepository teams) : ControllerBase
     
     [HttpGet]
     public async Task<IActionResult> GetAll()
-        => Ok(await teams.GetAllAsync());
+        => Ok(await teams.GetTeamsAndPlayers());
 
     [HttpGet("{id:guid}")]
     public async Task<IActionResult> GetById(Guid id)

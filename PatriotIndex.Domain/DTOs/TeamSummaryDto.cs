@@ -9,3 +9,13 @@ public record TeamSummaryDto(
     string Alias,
     TeamColors? Colors,
     DivisionSummaryDto? Division);
+    
+    
+public record PlayerMinDto(Guid Id, string? Name);
+
+public record TeamSummaryWithRosterDto(
+    Guid Id,
+    string Name,
+    string Market,
+    string Alias,
+    IReadOnlyList<PlayerMinDto> Roster);
