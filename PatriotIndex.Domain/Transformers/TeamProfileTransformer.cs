@@ -40,7 +40,7 @@ public class TeamProfileTransformer(string json)
         return _team;
     }
 
-    private IEnumerable<Player> TransformPlayers(JsonTraverser trf)
+    private ICollection<Player> TransformPlayers(JsonTraverser trf)
     {
         var players = trf.GetArrayList("players", p => new Player
         {
@@ -74,7 +74,7 @@ public class TeamProfileTransformer(string json)
     }
 
 
-    private IEnumerable<Coach> TransformCoaches(JsonTraverser trf)
+    private ICollection<Coach> TransformCoaches(JsonTraverser trf)
     {
         var coaches = trf.GetArrayList("coaches", c => new Coach
         {

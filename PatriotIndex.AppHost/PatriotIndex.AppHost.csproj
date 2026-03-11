@@ -11,6 +11,7 @@
     <ItemGroup>
         <ProjectReference Include="..\PatriotIndex.Domain\PatriotIndex.Domain.csproj"/>
         <ProjectReference Include="..\PatriotIndex.Scheduler\PatriotIndex.Scheduler.csproj"/>
+        <ProjectReference Include="..\PatriotIndex.Api\PatriotIndex.Api.csproj"/>
     </ItemGroup>
 
     <ItemGroup>
