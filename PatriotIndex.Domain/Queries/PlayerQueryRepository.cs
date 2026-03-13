@@ -49,7 +49,7 @@ public class PlayerQueryRepository(PatriotIndexDbContext db) : IPlayerRepository
             .Include(p => p.Team!.Colors)
             .Include(p => p.Team!.Division!.Conference)
             .Include(p => p.DraftTeam)
-            .Include(p => p.SeasonStats)
+            .Include(p => p.SeasonStats).ThenInclude(playerSeasonStats => playerSeasonStats.Team)
             .FirstOrDefaultAsync(p => p.Id == id);
 
         if (p is null) return null;
@@ -58,7 +58,7 @@ public class PlayerQueryRepository(PatriotIndexDbContext db) : IPlayerRepository
             .OrderByDescending(s => s.SeasonYear)
             .ThenBy(s => s.SeasonType)
             .Select(s => new PlayerSeasonStatsDto(
-                s.Id, s.SeasonYear, s.SeasonType, s.GamesPlayed, s.GamesStarted,
+                s.Id, s.SeasonYear, s.SeasonType, s.GamesPlayed, s.GamesStarted, s?.Team?.Name ?? "NoTeam",
                 MapStatBlock(s.Stats)))
             .ToList();
 

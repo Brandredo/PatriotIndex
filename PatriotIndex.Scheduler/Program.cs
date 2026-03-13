@@ -25,22 +25,6 @@ public class Program
             options.EnableDetailedErrors();
         });
 
-        // builder.EnrichNpgsqlDbContext<PatriotIndexDbContext>(settings =>
-        // {
-        //     settings.Ena
-        //     settings.DisableRetry = true;
-        //     settings.CommandTimeout = 30;
-        // });
-
-        // Add a database
-        // builder.Services.AddDbContextFactory<PatriotIndexDbContext>(options =>
-        // {
-        //     options.UseNpgsql(builder.Configuration.GetConnectionString("PatriotIndexDb"));
-        //     options.UseSnakeCaseNamingConvention();
-        //     options.EnableDetailedErrors();
-        //     options.EnableSensitiveDataLogging();
-        // });
-
         // Hangfire
         builder.Services.AddHangfire(config => config
             .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
@@ -68,12 +52,14 @@ public class Program
         builder.Services.AddScoped<TeamProfileJob>();
         builder.Services.AddScoped<GamePbpJob>();
         builder.Services.AddScoped<SeasonalStatsJob>();
+        builder.Services.AddScoped<SeasonalStatsJobOrchestrator>();
 
         // Register repository classes
         builder.Services.AddScoped<TeamsRepository>();
         builder.Services.AddScoped<GamesRepository>();
         builder.Services.AddScoped<SyncLogRepository>();
         builder.Services.AddScoped<StatsRepository>();
+        builder.Services.AddScoped<SeasonsRepository>();
 
         // Register services
         builder.Services.AddHttpClient<SportsApiClient>()
@@ -110,16 +96,7 @@ public class Program
         {
             Authorization = []
         });
-
-        // app.MapGet("/temp", (HttpContext httpContext) => "")
-        //     .WithName("TempEndpoint");
         
-        using (var scope = app.Services.CreateScope())
-        {
-            var db = scope.ServiceProvider.GetRequiredService<PatriotIndexDbContext>();
-            await db.Database.MigrateAsync();
-        }
-
         // Misfire modes
         // Relaxed: (Default) If a job was missed, fire it once immediately on startup
         // Ignorable: If a job was missed, skip it and wait for the next scheduled time
@@ -140,6 +117,15 @@ public class Program
             "week-schedule-orchestrator",
             job => job.RunAsync(),
             "0 0 * * *",
+            new RecurringJobOptions
+            {
+                MisfireHandling = MisfireHandlingMode.Ignorable // Key setting
+            });
+        
+        RecurringJob.AddOrUpdate<SeasonalStatsJobOrchestrator>(
+            "seasonal_stats-orchestrator",
+            job => job.RunAsync(),
+            "0 6 * * *",
             new RecurringJobOptions
             {
                 MisfireHandling = MisfireHandlingMode.Ignorable // Key setting

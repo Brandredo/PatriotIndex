@@ -76,8 +76,77 @@ public class TeamQueryRepository(PatriotIndexDbContext db) : ITeamRepository
             .ToList();
     }
 
-    public Task<StatBlockDto?> GetSeasonStatsAsync(Guid teamId, int seasonYear, string seasonType)
-        => Task.FromResult<StatBlockDto?>(null);
+    public async Task<StatBlockDto?> GetSeasonStatsAsync(Guid teamId, int seasonYear, string seasonType)
+    {
+        var stats = await db.TeamSeasonStats
+            .AsNoTracking()
+            .FirstOrDefaultAsync(s => s.TeamId == teamId
+                                      && s.SeasonYear == seasonYear
+                                      && s.SeasonType == seasonType);
+
+        if (stats is null) return null;
+
+        var r = stats.Record;
+        return new StatBlockDto(
+            r.Passing?.Attempts ?? 0,
+            r.Passing?.Completions ?? 0,
+            r.Passing?.Yards ?? 0,
+            r.Passing?.Touchdowns ?? 0,
+            r.Passing?.Interceptions ?? 0,
+            (double)(r.Passing?.Rating ?? 0),
+            r.Passing?.Sacks ?? 0,
+            r.Passing?.SackYards ?? 0,
+            r.Rushing?.Attempts ?? 0,
+            r.Rushing?.Yards ?? 0,
+            r.Rushing?.Touchdowns ?? 0,
+            r.Rushing?.AvgYards ?? 0,
+            r.Rushing?.Longest ?? 0,
+            r.Receiving?.Targets ?? 0,
+            r.Receiving?.Receptions ?? 0,
+            r.Receiving?.Yards ?? 0,
+            r.Receiving?.Touchdowns ?? 0,
+            (double)(r.Receiving?.AvgYards ?? 0),
+            r.Receiving?.Longest ?? 0,
+            r.Defense?.Tackles ?? 0,
+            r.Defense?.Assists ?? 0,
+            (double)(r.Defense?.Sacks ?? 0),
+            r.Defense?.Interceptions ?? 0,
+            r.Defense?.ForcedFumbles ?? 0,
+            r.Defense?.PassesDefended ?? 0,
+            r.Defense?.QbHits ?? 0,
+            r.FieldGoals?.Attempts ?? 0,
+            r.FieldGoals?.Made ?? 0,
+            r.FieldGoals?.Longest ?? 0,
+            r.ExtraPoints?.Kicks?.Attempts ?? 0,
+            r.ExtraPoints?.Kicks?.Made ?? 0,
+            r.Punts?.Attempts ?? 0,
+            r.Punts?.Yards ?? 0,
+            (double)(r.Punts?.AvgYards ?? 0));
+    }
+
+    public async Task<IReadOnlyList<TeamPlayerStatsDto>> GetTeamPlayerStatsAsync(
+        Guid teamId, int seasonYear, string seasonType)
+    {
+        var stats = await db.PlayerSeasonStats
+            .AsNoTracking()
+            .Include(s => s.Player)
+            .Where(s => s.TeamId == teamId
+                        && s.SeasonYear == seasonYear
+                        && s.SeasonType == seasonType)
+            .OrderBy(s => s.Player!.Position.ToString())
+            .ThenBy(s => s.Player!.Name)
+            .ToListAsync();
+
+        return stats.Select(s => new TeamPlayerStatsDto(
+            s.PlayerId,
+            s.Player?.Name,
+            s.Player?.Jersey,
+            s.Player?.Position?.ToString(),
+            s.GamesPlayed,
+            s.GamesStarted,
+            PlayerQueryRepository.MapStatBlock(s.Stats)
+        )).ToList();
+    }
 
     private static TeamSummaryDto ToSummary(Team t) => new(
         t.Id, t.Name, t.Market, t.Alias,

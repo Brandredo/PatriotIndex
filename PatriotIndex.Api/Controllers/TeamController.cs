@@ -34,4 +34,11 @@ public class TeamController(ITeamRepository teams) : ControllerBase
         var stats = await teams.GetSeasonStatsAsync(id, season, seasonType);
         return stats is null ? NotFound() : Ok(stats);
     }
+
+    [HttpGet("{id:guid}/players/stats")]
+    public async Task<IActionResult> GetPlayerStats(
+        Guid id,
+        [FromQuery] int season = 2024,
+        [FromQuery] string seasonType = "REG")
+        => Ok(await teams.GetTeamPlayerStatsAsync(id, season, seasonType));
 }

@@ -26,11 +26,45 @@ public class PatriotIndexDbContext : DbContext
     public DbSet<TeamSeasonStats>   TeamSeasonStats    { get; set; }
     public DbSet<Venue>             Venues             { get; set; }
     public DbSet<AppConfig>         AppConfigs         { get; set; }
+    public DbSet<Season>            Seasons            { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
 
+        modelBuilder.Entity<Season>(e =>
+        {
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Id).ValueGeneratedNever();
+            
+            e.Property(x => x.Year).IsRequired();
+            
+            e.Property(x => x.Code).IsRequired();
+            
+            e.Property(x => x.StartDate)
+                .HasColumnType("date")
+                .IsRequired();
+            
+            e.Property(x => x.EndDate)
+                .HasColumnType("date")
+                .IsRequired();
+            
+            e.Property(s => s.Code)
+                .HasColumnName("code")
+                .HasMaxLength(3)
+                .IsRequired();
+            
+            e.Property(s => s.Status)
+                .HasConversion<string>()
+                .HasMaxLength(16)
+                .IsRequired();
+            
+            e.HasIndex(x => new { x.Year, x.Code })
+                .IsUnique();
+
+            e.HasIndex(s => s.Status);
+        });
+        
         modelBuilder.Entity<AppConfig>(e =>
         {
             e.Property(x => x.Id).ValueGeneratedOnAdd();
