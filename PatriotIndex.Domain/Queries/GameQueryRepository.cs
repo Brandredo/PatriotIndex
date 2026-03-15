@@ -70,10 +70,10 @@ public class GameQueryRepository(PatriotIndexDbContext db) : IGameRepository
                     p.Description,
                     p.HomePoints,
                     p.AwayPoints,
-                    p.Down,
-                    p.Distance,
-                    p.PossessionTeamId,
-                    game.HomeTeamId == p.PossessionTeamId
+                    p.StartSituation.Down,
+                    p.StartSituation.YardsToFirstDown,
+                    p.StartSituation.PossessionTeamId,
+                    game.HomeTeamId == p.StartSituation.PossessionTeamId
                         ? game.HomeTeam?.Alias
                         : game.AwayTeam?.Alias,
                     p.StartSituation.Yardline,

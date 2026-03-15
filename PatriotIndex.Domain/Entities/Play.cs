@@ -17,16 +17,13 @@ public class Play : IGameEvent
     [MaxLength(50)]
     public string PlayType { get; set; } = string.Empty;
 
-    public long Sequence { get; set; }
+    public decimal Sequence { get; set; }
 
     [Required]
     [MaxLength(10)]
     public string Clock { get; set; } = string.Empty;
 
-    public DateTimeOffset? WallClock        { get; set; }
-    public int?            Down             { get; set; }
-    public int?            Distance         { get; set; }
-    public Guid?           PossessionTeamId { get; set; }
+    public DateTimeOffset? WallClock { get; set; }
 
     [MaxLength(2000)]
     public string? Description { get; set; }
@@ -71,8 +68,7 @@ public class Play : IGameEvent
     public List<PlayDetail> Details    { get; set; } = new();
 
     // ── Navigation ──────────────────────────────────────────────────────────
-    public Game    Game           { get; set; } = null!;
-    public Drive   Drive          { get; set; } = null!;
-    public Period? Period         { get; set; }
-    public Team?   PossessionTeam { get; set; }
+    public Game    Game   { get; set; } = null!;
+    public Drive   Drive  { get; set; } = null!;
+    public Period? Period { get; set; }
 }

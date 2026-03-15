@@ -3,6 +3,7 @@ using System;
 using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using PatriotIndex.Domain.Context;
@@ -12,9 +13,11 @@ using PatriotIndex.Domain.Context;
 namespace PatriotIndex.Domain.Migrations
 {
     [DbContext(typeof(PatriotIndexDbContext))]
-    partial class PatriotIndexDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260315173609_RemoveDownAndYfd")]
+    partial class RemoveDownAndYfd
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -470,8 +473,8 @@ namespace PatriotIndex.Domain.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("period_id");
 
-                    b.Property<decimal>("Sequence")
-                        .HasColumnType("numeric")
+                    b.Property<long>("Sequence")
+                        .HasColumnType("bigint")
                         .HasColumnName("sequence");
 
                     b.HasKey("Id")
@@ -621,6 +624,10 @@ namespace PatriotIndex.Domain.Migrations
                         .HasColumnType("character varying(50)")
                         .HasColumnName("play_type");
 
+                    b.Property<Guid?>("PossessionTeamId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("possession_team_id");
+
                     b.Property<string>("QbSnap")
                         .HasMaxLength(20)
                         .HasColumnType("character varying(20)")
@@ -638,8 +645,8 @@ namespace PatriotIndex.Domain.Migrations
                         .HasColumnType("boolean")
                         .HasColumnName("screen_pass");
 
-                    b.Property<decimal>("Sequence")
-                        .HasColumnType("numeric")
+                    b.Property<long>("Sequence")
+                        .HasColumnType("bigint")
                         .HasColumnName("sequence");
 
                     b.Property<DateTimeOffset?>("WallClock")
@@ -657,6 +664,9 @@ namespace PatriotIndex.Domain.Migrations
 
                     b.HasIndex("PeriodId")
                         .HasDatabaseName("ix_plays_period_id");
+
+                    b.HasIndex("PossessionTeamId")
+                        .HasDatabaseName("ix_plays_possession_team_id");
 
                     b.HasIndex("GameId", "PlayType")
                         .HasDatabaseName("ix_plays_game_id_play_type");
@@ -1360,6 +1370,12 @@ namespace PatriotIndex.Domain.Migrations
                         .HasForeignKey("PeriodId")
                         .HasConstraintName("fk_plays_periods_period_id");
 
+                    b.HasOne("PatriotIndex.Domain.Entities.Team", "PossessionTeam")
+                        .WithMany()
+                        .HasForeignKey("PossessionTeamId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_plays_teams_possession_team_id");
+
                     b.OwnsOne("PatriotIndex.Domain.Entities.GameSituation", "EndSituation", b1 =>
                         {
                             b1.Property<Guid>("PlayId")
@@ -1744,6 +1760,8 @@ namespace PatriotIndex.Domain.Migrations
                     b.Navigation("Game");
 
                     b.Navigation("Period");
+
+                    b.Navigation("PossessionTeam");
 
                     b.Navigation("StartSituation")
                         .IsRequired();

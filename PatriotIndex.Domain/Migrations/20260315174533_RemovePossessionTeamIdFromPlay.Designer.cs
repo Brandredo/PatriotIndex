@@ -3,6 +3,7 @@ using System;
 using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using PatriotIndex.Domain.Context;
@@ -12,9 +13,11 @@ using PatriotIndex.Domain.Context;
 namespace PatriotIndex.Domain.Migrations
 {
     [DbContext(typeof(PatriotIndexDbContext))]
-    partial class PatriotIndexDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260315174533_RemovePossessionTeamIdFromPlay")]
+    partial class RemovePossessionTeamIdFromPlay
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -470,8 +473,8 @@ namespace PatriotIndex.Domain.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("period_id");
 
-                    b.Property<decimal>("Sequence")
-                        .HasColumnType("numeric")
+                    b.Property<long>("Sequence")
+                        .HasColumnType("bigint")
                         .HasColumnName("sequence");
 
                     b.HasKey("Id")
@@ -638,8 +641,8 @@ namespace PatriotIndex.Domain.Migrations
                         .HasColumnType("boolean")
                         .HasColumnName("screen_pass");
 
-                    b.Property<decimal>("Sequence")
-                        .HasColumnType("numeric")
+                    b.Property<long>("Sequence")
+                        .HasColumnType("bigint")
                         .HasColumnName("sequence");
 
                     b.Property<DateTimeOffset?>("WallClock")

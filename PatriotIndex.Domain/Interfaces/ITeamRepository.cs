@@ -12,4 +12,5 @@ public interface ITeamRepository
     Task<IReadOnlyList<TeamPlayerStatsDto>> GetTeamPlayerStatsAsync(Guid teamId, int seasonYear, string seasonType);
     Task<IReadOnlyList<TeamSummaryWithRosterDto>> GetTeamsAndPlayers();
     Task<IReadOnlyList<TeamGameLogDto>> GetTeamGameLogAsync(Guid teamId, int? seasonYear, string? seasonType);
+    Task<PlayCallStatsDto> GetPlayCallStatsAsync(Guid teamId, int season, string seasonType);
 }

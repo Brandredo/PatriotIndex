@@ -475,16 +475,9 @@ public class PatriotIndexDbContext : DbContext
                 .HasForeignKey(e => e.GameId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            entity.HasOne(e => e.PossessionTeam)
-                .WithMany()
-                .HasForeignKey(e => e.PossessionTeamId)
-                .OnDelete(DeleteBehavior.Restrict);
-
             entity.HasIndex(e => e.GameId);
             entity.HasIndex(e => e.DriveId);
-            entity.HasIndex(e => e.PossessionTeamId);
             entity.HasIndex(e => new { e.GameId, e.PlayType });
-            entity.HasIndex(e => new { e.GameId, e.Down });
             // GIN indexes on statistics and details are added via raw SQL in the migration
         });
 

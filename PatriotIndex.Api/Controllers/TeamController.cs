@@ -48,4 +48,11 @@ public class TeamController(ITeamRepository teams) : ControllerBase
         [FromQuery] int? season,
         [FromQuery] string? seasonType)
         => Ok(await teams.GetTeamGameLogAsync(id, season, seasonType));
+
+    [HttpGet("{id:guid}/play-call-stats")]
+    public async Task<IActionResult> GetPlayCallStats(
+        Guid id,
+        [FromQuery] int season = 2025,
+        [FromQuery] string seasonType = "REG")
+        => Ok(await teams.GetPlayCallStatsAsync(id, season, seasonType));
 }

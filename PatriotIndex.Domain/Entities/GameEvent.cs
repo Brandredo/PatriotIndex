@@ -15,7 +15,7 @@ public class GameEvent : IGameEvent
     [MaxLength(50)]
     public string EventType { get; set; } = string.Empty;
 
-    public long Sequence { get; set; }
+    public decimal Sequence { get; set; }
 
     [Required]
     [MaxLength(10)]

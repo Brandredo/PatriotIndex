@@ -328,6 +328,63 @@ public class TeamQueryRepository(PatriotIndexDbContext db) : ITeamRepository
         }).ToList();
     }
 
+    public async Task<PlayCallStatsDto> GetPlayCallStatsAsync(Guid teamId, int season, string seasonType)
+    {
+        var plays = await db.Plays
+            .AsNoTracking()
+            .Where(p => p.Drive.OffensiveTeamId == teamId
+                        && p.Game.SeasonYear == season
+                        && p.Game.SeasonType == seasonType
+                        && (p.PlayType == "pass" || p.PlayType == "rush")
+                        && p.Statistics.All(s => s.Nullified != true) // ← exclude nullified
+                        && !(p.PlayType == "pass"
+                             && p.Statistics.Any(s => s.Sack > 0)))          // ← exclude sacks (pass plays only)
+            .Select(p => new {
+                p.PlayType,
+                p.PlayAction,
+                p.ScreenPass,
+                p.RunPassOption,
+                IsScramble = p.Statistics.Any(s => s.Scramble > 0),
+                IsKneel    = p.Statistics.Any(s => s.KneelDown > 0),
+            })
+            .ToListAsync();
+
+        var gamesPlayed = await db.Games
+            .AsNoTracking()
+            .CountAsync(g => g.SeasonYear == season
+                          && g.SeasonType == seasonType
+                          && (g.HomeTeamId == teamId || g.AwayTeamId == teamId));
+
+        int rushTotal = 0, rushScramble = 0, rushKneel = 0, rushRpo = 0, rushStd = 0;
+        int passTotal = 0, passAction = 0, passScreen = 0, passRpo = 0, passStd = 0;
+
+        foreach (var p in plays)
+        {
+            if (p.PlayType == "rush")
+            {
+                rushTotal++;
+                if (p.IsKneel)                   rushKneel++;
+                else if (p.IsScramble)            rushScramble++;
+                else if (p.RunPassOption == true) rushRpo++;
+                else                              rushStd++;
+            }
+            else
+            {
+                passTotal++;
+                if (p.PlayAction == true)          passAction++;
+                else if (p.ScreenPass == true)     passScreen++;
+                else if (p.RunPassOption == true)  passRpo++;
+                else                               passStd++;
+            }
+        }
+
+        return new PlayCallStatsDto(
+            gamesPlayed,
+            rushTotal + passTotal,
+            new PlayCallRushDto(rushTotal, rushScramble, rushKneel, rushRpo, rushStd),
+            new PlayCallPassDto(passTotal, passAction, passScreen, passRpo, passStd));
+    }
+
     private static TeamSummaryDto ToSummary(Team t) => new(
         t.Id, t.Name, t.Market, t.Alias,
         t.Colors,
