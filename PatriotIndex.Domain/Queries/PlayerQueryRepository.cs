@@ -63,7 +63,7 @@ public class PlayerQueryRepository(PatriotIndexDbContext db) : IPlayerRepository
             .ToList();
 
         return new PlayerDetailDto(
-            p.Id, p.Name, p.FirstName, p.LastName, p.Jersey, p.Position,
+            p.Id, p.Name, p.FirstName, p.LastName, p.Jersey, p.Position.ToString(),
             p.Status, p.Experience, p.Height, (int?)p.Weight,
             p.BirthDate?.ToString("yyyy-MM-dd"),
             p.College, p.RookieYear, p.Salary, p.SrId,
@@ -111,17 +111,45 @@ public class PlayerQueryRepository(PatriotIndexDbContext db) : IPlayerRepository
 
             return new PlayerGameLogDto(
                 g.Id, g.Scheduled, opponent, isHome, g.HomePoints, g.AwayPoints,
-                new StatBlockDto(
-                    gs.PassAtt, gs.PassCmp, gs.PassYds, gs.PassTd, gs.PassInt,
-                    gs.PassRating, gs.PassSacks, gs.PassSackYds,
-                    gs.RushAtt, gs.RushYds, gs.RushTd, gs.RushAvg, gs.RushLong,
-                    gs.RecTargets, gs.RecReceptions, gs.RecYds, gs.RecTd, gs.RecAvg, gs.RecLong,
-                    gs.DefTackles, gs.DefAssists, gs.DefSacks, gs.DefInterceptions,
-                    gs.DefForcedFumbles, gs.DefPassesDefended, gs.DefQbHits,
-                    gs.FgAtt, gs.FgMade, gs.FgLong, gs.XpAtt, gs.XpMade,
-                    gs.PuntAtt, gs.PuntYds, gs.PuntAvg));
+                MapStatBlock(gs.Stats));
         }).ToList();
     }
+
+    internal static StatBlockDto MapStatBlock(PlayerGameStatsBlock s) => new(
+        s.Passing?.Attempts ?? 0,
+        s.Passing?.Completions ?? 0,
+        s.Passing?.Yards ?? 0,
+        s.Passing?.Touchdowns ?? 0,
+        s.Passing?.Interceptions ?? 0,
+        (double)(s.Passing?.Rating ?? 0),
+        s.Passing?.Sacks ?? 0,
+        s.Passing?.SackYards ?? 0,
+        s.Rushing?.Attempts ?? 0,
+        s.Rushing?.Yards ?? 0,
+        s.Rushing?.Touchdowns ?? 0,
+        (double)(s.Rushing?.AvgYards ?? 0),
+        s.Rushing?.Longest ?? 0,
+        s.Receiving?.Targets ?? 0,
+        s.Receiving?.Receptions ?? 0,
+        s.Receiving?.Yards ?? 0,
+        s.Receiving?.Touchdowns ?? 0,
+        (double)(s.Receiving?.AvgYards ?? 0),
+        s.Receiving?.Longest ?? 0,
+        s.Defense?.Tackles ?? 0,
+        s.Defense?.Assists ?? 0,
+        (double)(s.Defense?.Sacks ?? 0),
+        s.Defense?.Interceptions ?? 0,
+        s.Defense?.ForcedFumbles ?? 0,
+        s.Defense?.PassesDefended ?? 0,
+        s.Defense?.QbHits ?? 0,
+        s.FieldGoals?.Attempts ?? 0,
+        s.FieldGoals?.Made ?? 0,
+        s.FieldGoals?.Longest ?? 0,
+        s.ExtraPoints?.Attempts ?? 0,
+        s.ExtraPoints?.Made ?? 0,
+        s.Punts?.Attempts ?? 0,
+        s.Punts?.Yards ?? 0,
+        (double)(s.Punts?.AvgYards ?? 0));
 
     internal static StatBlockDto MapStatBlock(PlayerStatBlock s) => new(
         s.Passing?.Attempts ?? 0,

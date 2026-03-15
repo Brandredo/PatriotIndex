@@ -9,6 +9,38 @@ namespace PatriotIndex.Domain.Repository;
 
 public class GamesRepository(ILogger<GamesRepository> logger, PatriotIndexDbContext ctx)
 {
+
+    public async Task<List<Guid>> GetGameIdsAsync(CancellationToken ct)
+    {
+        var gameIds =  await ctx.Games.Select(g => g.Id).ToListAsync(ct);
+        return gameIds;
+    }
+    
+    // get games by team and season
+    public async Task<List<Guid>> GetGamesAsync(Guid teamId, int year, CancellationToken ct)
+    {
+        var games = await ctx.Games
+            .Where(g => g.HomeTeamId == teamId || g.AwayTeamId == teamId)
+            .Where(g => g.SeasonYear == year)
+            .Where(g => g.SeasonType == "REG")
+            .Select(g => g.Id)
+            .ToListAsync(ct);
+        return games;
+    }
+    
+    // get games by team name and season
+    public async Task<List<Guid>> GetGamesAsync(string teamName, int year, CancellationToken ct)
+    {
+        var games = await ctx.Games
+            .Where(g => g.HomeTeam.Alias == teamName || g.AwayTeam.Alias == teamName)
+            .Where(g => g.SeasonYear == year)
+            .Where(g => g.SeasonType == "REG")
+            .Select(g => g.Id)
+            .ToListAsync(ct);
+        return games;
+    }
+    
+    
     public async Task SaveAsync(IEnumerable<Game> games, CancellationToken ct)
     {
         var gameList = games.ToList();

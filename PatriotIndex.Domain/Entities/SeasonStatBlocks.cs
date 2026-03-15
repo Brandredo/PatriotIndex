@@ -68,8 +68,8 @@ public class SeasonRushingStats
     public double AvgYards { get; set; }
     public int Attempts { get; set; }
     public int Touchdowns { get; set; }
-    public decimal Tlost { get; set; }
-    public int TlostYards { get; set; }
+    public decimal TacklesForLoss { get; set; }
+    public int TacklesForLossYards { get; set; }
     public int Yards { get; set; }
     public int Longest { get; set; }
     public int LongestTouchdown { get; set; }

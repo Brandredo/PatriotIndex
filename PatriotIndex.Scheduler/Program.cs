@@ -53,6 +53,8 @@ public class Program
         builder.Services.AddScoped<GamePbpJob>();
         builder.Services.AddScoped<SeasonalStatsJob>();
         builder.Services.AddScoped<SeasonalStatsJobOrchestrator>();
+        builder.Services.AddScoped<GamePbpJobOrchestrator>();
+        builder.Services.AddScoped<GameSummaryStatsJob>();
 
         // Register repository classes
         builder.Services.AddScoped<TeamsRepository>();
@@ -60,6 +62,7 @@ public class Program
         builder.Services.AddScoped<SyncLogRepository>();
         builder.Services.AddScoped<StatsRepository>();
         builder.Services.AddScoped<SeasonsRepository>();
+        builder.Services.AddScoped<GameStatsRepository>();
 
         // Register services
         builder.Services.AddHttpClient<SportsApiClient>()
@@ -124,6 +127,15 @@ public class Program
         
         RecurringJob.AddOrUpdate<SeasonalStatsJobOrchestrator>(
             "seasonal_stats-orchestrator",
+            job => job.RunAsync(),
+            "0 6 * * *",
+            new RecurringJobOptions
+            {
+                MisfireHandling = MisfireHandlingMode.Ignorable // Key setting
+            });
+        
+        RecurringJob.AddOrUpdate<GamePbpJobOrchestrator>(
+            "game-pbp-orchestrator",
             job => job.RunAsync(),
             "0 6 * * *",
             new RecurringJobOptions

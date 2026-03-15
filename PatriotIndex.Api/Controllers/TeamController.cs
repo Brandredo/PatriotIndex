@@ -28,7 +28,7 @@ public class TeamController(ITeamRepository teams) : ControllerBase
     [HttpGet("{id:guid}/stats")]
     public async Task<IActionResult> GetStats(
         Guid id,
-        [FromQuery] int season = 2024,
+        [FromQuery] int season = 2025,
         [FromQuery] string seasonType = "REG")
     {
         var stats = await teams.GetSeasonStatsAsync(id, season, seasonType);
@@ -41,4 +41,11 @@ public class TeamController(ITeamRepository teams) : ControllerBase
         [FromQuery] int season = 2024,
         [FromQuery] string seasonType = "REG")
         => Ok(await teams.GetTeamPlayerStatsAsync(id, season, seasonType));
+
+    [HttpGet("{id:guid}/gamelog")]
+    public async Task<IActionResult> GetGameLog(
+        Guid id,
+        [FromQuery] int? season,
+        [FromQuery] string? seasonType)
+        => Ok(await teams.GetTeamGameLogAsync(id, season, seasonType));
 }
