@@ -6,4 +6,5 @@ public record PlayerSeasonStatsDto(
     string SeasonType,
     int GamesPlayed,
     int GamesStarted,
+    string TeamName,
     StatBlockDto Stats);

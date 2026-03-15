@@ -8,7 +8,7 @@ public record PlayerDetailDto(
     string? FirstName,
     string? LastName,
     string? Jersey,
-    PlayerPosition? Position,
+    string? Position,
     string? Status,
     int? Experience,
     int? Height,

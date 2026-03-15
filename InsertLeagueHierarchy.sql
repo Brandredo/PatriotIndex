@@ -12,72 +12,6 @@ insert into divisions(id, name, alias, conference_id) values ('390d000d-9949-42e
 insert into divisions(id, name, alias, conference_id) values ('6dab3ca1-b9cb-403f-91dd-b2a3708ab060', 'NFC East', 'NFC_EAST', 'b1808e5f-d40b-47c0-8af8-5175c0fdcd26');
 insert into divisions(id, name, alias, conference_id) values ('6dc1933f-ca90-46e6-aaf7-9b95cc44306a', 'NFC North', 'NFC_NORTH', 'b1808e5f-d40b-47c0-8af8-5175c0fdcd26');
 
-commit;
-
-select name, count(*) from players group by name having count(*) > 1;
-
-select team_id, count(*) from players group by team_id having count(*) > 0;
-
-select * from players where name = 'Jaylon Jones';
-commit;
-
-select A.id, count(1) from divisions A join teams B on A.id = B.division_id group by A.id having count(1) >= 1;
-
-select * from sync_logs;
-select * from conferences;
-select * from divisions;
-select * from teams;
-select * from team_colors;
-select * from players;
-select * from games;
-select * from periods;
-select * from drives;
-select * from drives order by sequence;
-
--- truncate table games cascade;
--- truncate table periods;
--- truncate table coin_tosses cascade;
--- truncate table drives;
--- truncate table pbp_drive_events;
--- truncate table pbp_event_statistics;
--- 
--- 
--- truncate table players;
--- truncate table teams;
-
-CREATE SCHEMA IF NOT EXISTS hangfire;
-
--- Allow the user to use the schema
-GRANT USAGE ON SCHEMA hangfire TO postgres;
-
--- Allow the user to create tables (needed on first run)
-GRANT CREATE ON SCHEMA hangfire TO postgres;
-
--- Allow full access to all current tables in the schema
-GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA hangfire TO postgres;
-
--- Allow full access to any tables created in the future
-ALTER DEFAULT PRIVILEGES IN SCHEMA hangfire
-    GRANT ALL PRIVILEGES ON TABLES TO postgres;
-
--- Same for sequences (Hangfire uses these for IDs)
-GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA hangfire TO postgres;
-
-ALTER DEFAULT PRIVILEGES IN SCHEMA hangfire
-    GRANT ALL PRIVILEGES ON SEQUENCES TO postgres;
-
-
-
-select * from hangfire.jobqueue;
-select * from hangfire.job order by createdat desc;
---delete from hangfire.jobqueue where queue = 'default';
-
-commit;
-
-
-update teams set is_active=true where id != '9dbb9060-ba0f-4920-829e-16d4d9246b5d';
-
-
 INSERT INTO teams (id, name, market, alias) VALUES
                                                 ('f0e724b0-4cbf-495a-be47-013907608da9', '49ers', 'San Francisco', 'SF'),
                                                 ('7b112545-38e6-483c-a55c-96cf6ee49cb8', 'Bears', 'Chicago', 'CHI'),
@@ -120,5 +54,6 @@ INSERT INTO teams (id, name, market, alias) VALUES
 
 
 update teams set is_active=true where id != '9dbb9060-ba0f-4920-829e-16d4d9246b5d';
-update conferences set name='NFC' where id='b1808e5f-d40b-47c0-8af8-5175c0fdcd26';
+
+commit;
 

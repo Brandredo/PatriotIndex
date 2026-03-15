@@ -18,7 +18,7 @@ namespace PatriotIndex.Domain.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "10.0.3")
+                .HasAnnotation("ProductVersion", "10.0.1")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -470,8 +470,8 @@ namespace PatriotIndex.Domain.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("period_id");
 
-                    b.Property<long>("Sequence")
-                        .HasColumnType("bigint")
+                    b.Property<decimal>("Sequence")
+                        .HasColumnType("numeric")
                         .HasColumnName("sequence");
 
                     b.HasKey("Id")
@@ -559,14 +559,6 @@ namespace PatriotIndex.Domain.Migrations
                         .HasColumnType("character varying(2000)")
                         .HasColumnName("description");
 
-                    b.Property<int?>("Distance")
-                        .HasColumnType("integer")
-                        .HasColumnName("distance");
-
-                    b.Property<int?>("Down")
-                        .HasColumnType("integer")
-                        .HasColumnName("down");
-
                     b.Property<Guid>("DriveId")
                         .HasColumnType("uuid")
                         .HasColumnName("drive_id");
@@ -629,10 +621,6 @@ namespace PatriotIndex.Domain.Migrations
                         .HasColumnType("character varying(50)")
                         .HasColumnName("play_type");
 
-                    b.Property<Guid?>("PossessionTeamId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("possession_team_id");
-
                     b.Property<string>("QbSnap")
                         .HasMaxLength(20)
                         .HasColumnType("character varying(20)")
@@ -650,8 +638,8 @@ namespace PatriotIndex.Domain.Migrations
                         .HasColumnType("boolean")
                         .HasColumnName("screen_pass");
 
-                    b.Property<long>("Sequence")
-                        .HasColumnType("bigint")
+                    b.Property<decimal>("Sequence")
+                        .HasColumnType("numeric")
                         .HasColumnName("sequence");
 
                     b.Property<DateTimeOffset?>("WallClock")
@@ -669,12 +657,6 @@ namespace PatriotIndex.Domain.Migrations
 
                     b.HasIndex("PeriodId")
                         .HasDatabaseName("ix_plays_period_id");
-
-                    b.HasIndex("PossessionTeamId")
-                        .HasDatabaseName("ix_plays_possession_team_id");
-
-                    b.HasIndex("GameId", "Down")
-                        .HasDatabaseName("ix_plays_game_id_down");
 
                     b.HasIndex("GameId", "PlayType")
                         .HasDatabaseName("ix_plays_game_id_play_type");
@@ -739,8 +721,9 @@ namespace PatriotIndex.Domain.Migrations
                         .HasColumnType("text")
                         .HasColumnName("name");
 
-                    b.Property<int?>("Position")
-                        .HasColumnType("integer")
+                    b.Property<string>("Position")
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)")
                         .HasColumnName("position");
 
                     b.Property<int?>("RookieYear")
@@ -790,161 +773,17 @@ namespace PatriotIndex.Domain.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("id");
 
-                    b.Property<int>("DefAssists")
-                        .HasColumnType("integer")
-                        .HasColumnName("def_assists");
-
-                    b.Property<int>("DefForcedFumbles")
-                        .HasColumnType("integer")
-                        .HasColumnName("def_forced_fumbles");
-
-                    b.Property<int>("DefInterceptions")
-                        .HasColumnType("integer")
-                        .HasColumnName("def_interceptions");
-
-                    b.Property<int>("DefPassesDefended")
-                        .HasColumnType("integer")
-                        .HasColumnName("def_passes_defended");
-
-                    b.Property<int>("DefQbHits")
-                        .HasColumnType("integer")
-                        .HasColumnName("def_qb_hits");
-
-                    b.Property<double>("DefSacks")
-                        .HasColumnType("double precision")
-                        .HasColumnName("def_sacks");
-
-                    b.Property<int>("DefTackles")
-                        .HasColumnType("integer")
-                        .HasColumnName("def_tackles");
-
-                    b.Property<int>("FgAtt")
-                        .HasColumnType("integer")
-                        .HasColumnName("fg_att");
-
-                    b.Property<int>("FgLong")
-                        .HasColumnType("integer")
-                        .HasColumnName("fg_long");
-
-                    b.Property<int>("FgMade")
-                        .HasColumnType("integer")
-                        .HasColumnName("fg_made");
-
                     b.Property<Guid>("GameId")
                         .HasColumnType("uuid")
                         .HasColumnName("game_id");
-
-                    b.Property<int>("PassAtt")
-                        .HasColumnType("integer")
-                        .HasColumnName("pass_att");
-
-                    b.Property<int>("PassCmp")
-                        .HasColumnType("integer")
-                        .HasColumnName("pass_cmp");
-
-                    b.Property<int>("PassInt")
-                        .HasColumnType("integer")
-                        .HasColumnName("pass_int");
-
-                    b.Property<double>("PassRating")
-                        .HasColumnType("double precision")
-                        .HasColumnName("pass_rating");
-
-                    b.Property<int>("PassSackYds")
-                        .HasColumnType("integer")
-                        .HasColumnName("pass_sack_yds");
-
-                    b.Property<int>("PassSacks")
-                        .HasColumnType("integer")
-                        .HasColumnName("pass_sacks");
-
-                    b.Property<int>("PassTd")
-                        .HasColumnType("integer")
-                        .HasColumnName("pass_td");
-
-                    b.Property<int>("PassYds")
-                        .HasColumnType("integer")
-                        .HasColumnName("pass_yds");
 
                     b.Property<Guid>("PlayerId")
                         .HasColumnType("uuid")
                         .HasColumnName("player_id");
 
-                    b.Property<int>("PuntAtt")
-                        .HasColumnType("integer")
-                        .HasColumnName("punt_att");
-
-                    b.Property<double>("PuntAvg")
-                        .HasColumnType("double precision")
-                        .HasColumnName("punt_avg");
-
-                    b.Property<int>("PuntYds")
-                        .HasColumnType("integer")
-                        .HasColumnName("punt_yds");
-
-                    b.Property<double>("RecAvg")
-                        .HasColumnType("double precision")
-                        .HasColumnName("rec_avg");
-
-                    b.Property<int>("RecFumbles")
-                        .HasColumnType("integer")
-                        .HasColumnName("rec_fumbles");
-
-                    b.Property<int>("RecLong")
-                        .HasColumnType("integer")
-                        .HasColumnName("rec_long");
-
-                    b.Property<int>("RecReceptions")
-                        .HasColumnType("integer")
-                        .HasColumnName("rec_receptions");
-
-                    b.Property<int>("RecTargets")
-                        .HasColumnType("integer")
-                        .HasColumnName("rec_targets");
-
-                    b.Property<int>("RecTd")
-                        .HasColumnType("integer")
-                        .HasColumnName("rec_td");
-
-                    b.Property<int>("RecYds")
-                        .HasColumnType("integer")
-                        .HasColumnName("rec_yds");
-
-                    b.Property<int>("RushAtt")
-                        .HasColumnType("integer")
-                        .HasColumnName("rush_att");
-
-                    b.Property<double>("RushAvg")
-                        .HasColumnType("double precision")
-                        .HasColumnName("rush_avg");
-
-                    b.Property<int>("RushFumbles")
-                        .HasColumnType("integer")
-                        .HasColumnName("rush_fumbles");
-
-                    b.Property<int>("RushLong")
-                        .HasColumnType("integer")
-                        .HasColumnName("rush_long");
-
-                    b.Property<int>("RushTd")
-                        .HasColumnType("integer")
-                        .HasColumnName("rush_td");
-
-                    b.Property<int>("RushYds")
-                        .HasColumnType("integer")
-                        .HasColumnName("rush_yds");
-
                     b.Property<Guid?>("TeamId")
                         .HasColumnType("uuid")
                         .HasColumnName("team_id");
-
-                    b.Property<int>("XpAtt")
-                        .HasColumnType("integer")
-                        .HasColumnName("xp_att");
-
-                    b.Property<int>("XpMade")
-                        .HasColumnType("integer")
-                        .HasColumnName("xp_made");
 
                     b.HasKey("Id")
                         .HasName("pk_player_game_stats");
@@ -1019,6 +858,49 @@ namespace PatriotIndex.Domain.Migrations
                         .HasDatabaseName("ix_player_season_stats_player_id_season_year_season_type");
 
                     b.ToTable("player_season_stats", (string)null);
+                });
+
+            modelBuilder.Entity("PatriotIndex.Domain.Entities.Season", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(3)
+                        .HasColumnType("character varying(3)")
+                        .HasColumnName("code");
+
+                    b.Property<DateOnly>("EndDate")
+                        .HasColumnType("date")
+                        .HasColumnName("end_date");
+
+                    b.Property<DateOnly>("StartDate")
+                        .HasColumnType("date")
+                        .HasColumnName("start_date");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("character varying(16)")
+                        .HasColumnName("status");
+
+                    b.Property<int>("Year")
+                        .HasColumnType("integer")
+                        .HasColumnName("year");
+
+                    b.HasKey("Id")
+                        .HasName("pk_seasons");
+
+                    b.HasIndex("Status")
+                        .HasDatabaseName("ix_seasons_status");
+
+                    b.HasIndex("Year", "Code")
+                        .IsUnique()
+                        .HasDatabaseName("ix_seasons_year_code");
+
+                    b.ToTable("seasons", (string)null);
                 });
 
             modelBuilder.Entity("PatriotIndex.Domain.Entities.SyncLog", b =>
@@ -1168,6 +1050,41 @@ namespace PatriotIndex.Domain.Migrations
                         .HasDatabaseName("ix_teams_venue_id");
 
                     b.ToTable("teams", (string)null);
+                });
+
+            modelBuilder.Entity("PatriotIndex.Domain.Entities.TeamGameStats", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid>("GameId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("game_id");
+
+                    b.Property<bool>("IsHome")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_home");
+
+                    b.Property<Guid>("TeamId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("team_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_team_game_stats");
+
+                    b.HasIndex("GameId")
+                        .HasDatabaseName("ix_team_game_stats_game_id");
+
+                    b.HasIndex("TeamId")
+                        .HasDatabaseName("ix_team_game_stats_team_id");
+
+                    b.HasIndex("GameId", "TeamId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_team_game_stats_game_id_team_id");
+
+                    b.ToTable("team_game_stats", (string)null);
                 });
 
             modelBuilder.Entity("PatriotIndex.Domain.Entities.TeamSeasonStats", b =>
@@ -1443,12 +1360,6 @@ namespace PatriotIndex.Domain.Migrations
                         .HasForeignKey("PeriodId")
                         .HasConstraintName("fk_plays_periods_period_id");
 
-                    b.HasOne("PatriotIndex.Domain.Entities.Team", "PossessionTeam")
-                        .WithMany()
-                        .HasForeignKey("PossessionTeamId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .HasConstraintName("fk_plays_teams_possession_team_id");
-
                     b.OwnsOne("PatriotIndex.Domain.Entities.GameSituation", "EndSituation", b1 =>
                         {
                             b1.Property<Guid>("PlayId")
@@ -1572,9 +1483,7 @@ namespace PatriotIndex.Domain.Migrations
 
                             b1.ToTable("plays");
 
-                            b1
-                                .ToJson("details")
-                                .HasColumnType("jsonb");
+                            b1.ToJson("details");
 
                             b1.WithOwner()
                                 .HasForeignKey("PlayId")
@@ -1754,9 +1663,7 @@ namespace PatriotIndex.Domain.Migrations
 
                             b1.ToTable("plays");
 
-                            b1
-                                .ToJson("statistics")
-                                .HasColumnType("jsonb");
+                            b1.ToJson("statistics");
 
                             b1.WithOwner()
                                 .HasForeignKey("PlayId")
@@ -1838,8 +1745,6 @@ namespace PatriotIndex.Domain.Migrations
 
                     b.Navigation("Period");
 
-                    b.Navigation("PossessionTeam");
-
                     b.Navigation("StartSituation")
                         .IsRequired();
 
@@ -1887,9 +1792,566 @@ namespace PatriotIndex.Domain.Migrations
                         .OnDelete(DeleteBehavior.SetNull)
                         .HasConstraintName("fk_player_game_stats_teams_team_id");
 
+                    b.OwnsOne("PatriotIndex.Domain.Entities.PlayerGameStatsBlock", "Stats", b1 =>
+                        {
+                            b1.Property<Guid>("PlayerGameStatsId");
+
+                            b1.HasKey("PlayerGameStatsId");
+
+                            b1.ToTable("player_game_stats");
+
+                            b1.ToJson("stats");
+
+                            b1.WithOwner()
+                                .HasForeignKey("PlayerGameStatsId")
+                                .HasConstraintName("fk_player_game_stats_player_game_stats_id");
+
+                            b1.OwnsOne("PatriotIndex.Domain.Entities.SeasonDefenseStats", "Defense", b2 =>
+                                {
+                                    b2.Property<Guid>("PlayerGameStatsBlockPlayerGameStatsId");
+
+                                    b2.Property<int>("Assists");
+
+                                    b2.Property<int>("BattedPasses");
+
+                                    b2.Property<int>("Blitzes");
+
+                                    b2.Property<int>("Combined");
+
+                                    b2.Property<int>("DefComps");
+
+                                    b2.Property<int>("DefTargets");
+
+                                    b2.Property<int>("ForcedFumbles");
+
+                                    b2.Property<int>("FourthDownStops");
+
+                                    b2.Property<int>("FumbleRecoveries");
+
+                                    b2.Property<int>("Hurries");
+
+                                    b2.Property<int>("Interceptions");
+
+                                    b2.Property<int>("Knockdowns");
+
+                                    b2.Property<int>("MiscAssists");
+
+                                    b2.Property<int>("MiscForcedFumbles");
+
+                                    b2.Property<int>("MiscFumbleRecoveries");
+
+                                    b2.Property<int>("MiscTackles");
+
+                                    b2.Property<int>("MissedTackles");
+
+                                    b2.Property<int>("PassesDefended");
+
+                                    b2.Property<int>("QbHits");
+
+                                    b2.Property<decimal>("SackYards");
+
+                                    b2.Property<decimal>("Sacks");
+
+                                    b2.Property<int>("Safeties");
+
+                                    b2.Property<int>("SpAssists");
+
+                                    b2.Property<int>("SpBlocks");
+
+                                    b2.Property<int>("SpForcedFumbles");
+
+                                    b2.Property<int>("SpFumbleRecoveries");
+
+                                    b2.Property<int>("SpOppFumbleRecoveries");
+
+                                    b2.Property<int>("SpOwnFumbleRecoveries");
+
+                                    b2.Property<int>("SpTackles");
+
+                                    b2.Property<int>("Tackles");
+
+                                    b2.Property<int>("ThreeAndOutsForced");
+
+                                    b2.Property<decimal>("Tloss");
+
+                                    b2.Property<decimal>("TlossYards");
+
+                                    b2.HasKey("PlayerGameStatsBlockPlayerGameStatsId");
+
+                                    b2.ToTable("player_game_stats");
+
+                                    b2.WithOwner()
+                                        .HasForeignKey("PlayerGameStatsBlockPlayerGameStatsId")
+                                        .HasConstraintName("fk_player_game_stats_player_game_stats_id");
+                                });
+
+                            b1.OwnsOne("PatriotIndex.Domain.Entities.SeasonPlayerExtraPointStats", "ExtraPoints", b2 =>
+                                {
+                                    b2.Property<Guid>("PlayerGameStatsBlockPlayerGameStatsId");
+
+                                    b2.Property<int>("Attempts");
+
+                                    b2.Property<int>("Blocked");
+
+                                    b2.Property<int>("Made");
+
+                                    b2.Property<int>("Missed");
+
+                                    b2.Property<decimal>("Pct");
+
+                                    b2.HasKey("PlayerGameStatsBlockPlayerGameStatsId");
+
+                                    b2.ToTable("player_game_stats");
+
+                                    b2.WithOwner()
+                                        .HasForeignKey("PlayerGameStatsBlockPlayerGameStatsId")
+                                        .HasConstraintName("fk_player_game_stats_player_game_stats_id");
+                                });
+
+                            b1.OwnsOne("PatriotIndex.Domain.Entities.SeasonFieldGoalStats", "FieldGoals", b2 =>
+                                {
+                                    b2.Property<Guid>("PlayerGameStatsBlockPlayerGameStatsId");
+
+                                    b2.Property<int>("Attempts");
+
+                                    b2.Property<int>("Attempts19");
+
+                                    b2.Property<int>("Attempts29");
+
+                                    b2.Property<int>("Attempts39");
+
+                                    b2.Property<int>("Attempts49");
+
+                                    b2.Property<int>("Attempts50");
+
+                                    b2.Property<decimal>("AvgYards");
+
+                                    b2.Property<int>("Blocked");
+
+                                    b2.Property<int>("Longest");
+
+                                    b2.Property<int>("Made");
+
+                                    b2.Property<int>("Made19");
+
+                                    b2.Property<int>("Made29");
+
+                                    b2.Property<int>("Made39");
+
+                                    b2.Property<int>("Made49");
+
+                                    b2.Property<int>("Made50");
+
+                                    b2.Property<int>("Missed");
+
+                                    b2.Property<decimal>("Pct");
+
+                                    b2.Property<int>("Yards");
+
+                                    b2.HasKey("PlayerGameStatsBlockPlayerGameStatsId");
+
+                                    b2.ToTable("player_game_stats");
+
+                                    b2.WithOwner()
+                                        .HasForeignKey("PlayerGameStatsBlockPlayerGameStatsId")
+                                        .HasConstraintName("fk_player_game_stats_player_game_stats_id");
+                                });
+
+                            b1.OwnsOne("PatriotIndex.Domain.Entities.SeasonFumbleStats", "Fumbles", b2 =>
+                                {
+                                    b2.Property<Guid>("PlayerGameStatsBlockPlayerGameStatsId");
+
+                                    b2.Property<int>("EzRecTds");
+
+                                    b2.Property<int>("ForcedFumbles");
+
+                                    b2.Property<int>("Fumbles");
+
+                                    b2.Property<int>("LostFumbles");
+
+                                    b2.Property<int>("OppRec");
+
+                                    b2.Property<int>("OppRecTds");
+
+                                    b2.Property<int>("OppRecYards");
+
+                                    b2.Property<int>("OutOfBounds");
+
+                                    b2.Property<int>("OwnRec");
+
+                                    b2.Property<int>("OwnRecTds");
+
+                                    b2.Property<int>("OwnRecYards");
+
+                                    b2.HasKey("PlayerGameStatsBlockPlayerGameStatsId");
+
+                                    b2.ToTable("player_game_stats");
+
+                                    b2.WithOwner()
+                                        .HasForeignKey("PlayerGameStatsBlockPlayerGameStatsId")
+                                        .HasConstraintName("fk_player_game_stats_player_game_stats_id");
+                                });
+
+                            b1.OwnsOne("PatriotIndex.Domain.Entities.SeasonIntReturnStats", "IntReturns", b2 =>
+                                {
+                                    b2.Property<Guid>("PlayerGameStatsBlockPlayerGameStatsId");
+
+                                    b2.Property<decimal>("AvgYards");
+
+                                    b2.Property<int>("Longest");
+
+                                    b2.Property<int>("LongestTouchdown");
+
+                                    b2.Property<int>("Returns");
+
+                                    b2.Property<int>("Touchdowns");
+
+                                    b2.Property<int>("Yards");
+
+                                    b2.HasKey("PlayerGameStatsBlockPlayerGameStatsId");
+
+                                    b2.ToTable("player_game_stats");
+
+                                    b2.WithOwner()
+                                        .HasForeignKey("PlayerGameStatsBlockPlayerGameStatsId")
+                                        .HasConstraintName("fk_player_game_stats_player_game_stats_id");
+                                });
+
+                            b1.OwnsOne("PatriotIndex.Domain.Entities.SeasonKickReturnStats", "KickReturns", b2 =>
+                                {
+                                    b2.Property<Guid>("PlayerGameStatsBlockPlayerGameStatsId");
+
+                                    b2.Property<decimal>("AvgYards");
+
+                                    b2.Property<int>("Faircatches");
+
+                                    b2.Property<int>("Longest");
+
+                                    b2.Property<int>("LongestTouchdown");
+
+                                    b2.Property<int>("Returns");
+
+                                    b2.Property<int>("Touchdowns");
+
+                                    b2.Property<int>("Yards");
+
+                                    b2.HasKey("PlayerGameStatsBlockPlayerGameStatsId");
+
+                                    b2.ToTable("player_game_stats");
+
+                                    b2.WithOwner()
+                                        .HasForeignKey("PlayerGameStatsBlockPlayerGameStatsId")
+                                        .HasConstraintName("fk_player_game_stats_player_game_stats_id");
+                                });
+
+                            b1.OwnsOne("PatriotIndex.Domain.Entities.SeasonKickoffStats", "Kickoffs", b2 =>
+                                {
+                                    b2.Property<Guid>("PlayerGameStatsBlockPlayerGameStatsId");
+
+                                    b2.Property<int>("Endzone");
+
+                                    b2.Property<int>("Inside20");
+
+                                    b2.Property<int>("Kickoffs");
+
+                                    b2.Property<int>("OnsideAttempts");
+
+                                    b2.Property<int>("OnsideSuccesses");
+
+                                    b2.Property<int>("OutOfBounds");
+
+                                    b2.Property<int>("ReturnYards");
+
+                                    b2.Property<int>("Returned");
+
+                                    b2.Property<int>("SquibKicks");
+
+                                    b2.Property<int>("Touchbacks");
+
+                                    b2.Property<int>("Yards");
+
+                                    b2.HasKey("PlayerGameStatsBlockPlayerGameStatsId");
+
+                                    b2.ToTable("player_game_stats");
+
+                                    b2.WithOwner()
+                                        .HasForeignKey("PlayerGameStatsBlockPlayerGameStatsId")
+                                        .HasConstraintName("fk_player_game_stats_player_game_stats_id");
+                                });
+
+                            b1.OwnsOne("PatriotIndex.Domain.Entities.SeasonPassingStats", "Passing", b2 =>
+                                {
+                                    b2.Property<Guid>("PlayerGameStatsBlockPlayerGameStatsId");
+
+                                    b2.Property<int>("AirYards");
+
+                                    b2.Property<int>("Attempts");
+
+                                    b2.Property<double?>("AvgPocketTime");
+
+                                    b2.Property<decimal>("AvgYards");
+
+                                    b2.Property<int>("BattedPasses");
+
+                                    b2.Property<int>("Blitzes");
+
+                                    b2.Property<decimal>("CmpPct");
+
+                                    b2.Property<int>("Completions");
+
+                                    b2.Property<int>("DefendedPasses");
+
+                                    b2.Property<int>("DroppedPasses");
+
+                                    b2.Property<int?>("FirstDowns");
+
+                                    b2.Property<int>("GrossYards");
+
+                                    b2.Property<int>("Hurries");
+
+                                    b2.Property<int>("IntTouchdowns");
+
+                                    b2.Property<int>("Interceptions");
+
+                                    b2.Property<int>("Knockdowns");
+
+                                    b2.Property<int>("Longest");
+
+                                    b2.Property<int>("LongestTouchdown");
+
+                                    b2.Property<int>("NetYards");
+
+                                    b2.Property<int>("OnTargetThrows");
+
+                                    b2.Property<double>("PocketTime");
+
+                                    b2.Property<int>("PoorThrows");
+
+                                    b2.Property<decimal>("Rating");
+
+                                    b2.Property<int>("RedzoneAttempts");
+
+                                    b2.Property<int>("SackYards");
+
+                                    b2.Property<int>("Sacks");
+
+                                    b2.Property<int>("Spikes");
+
+                                    b2.Property<int>("ThrowAways");
+
+                                    b2.Property<int>("Touchdowns");
+
+                                    b2.Property<int>("Yards");
+
+                                    b2.HasKey("PlayerGameStatsBlockPlayerGameStatsId");
+
+                                    b2.ToTable("player_game_stats");
+
+                                    b2.WithOwner()
+                                        .HasForeignKey("PlayerGameStatsBlockPlayerGameStatsId")
+                                        .HasConstraintName("fk_player_game_stats_player_game_stats_id");
+                                });
+
+                            b1.OwnsOne("PatriotIndex.Domain.Entities.SeasonPenaltyStats", "Penalties", b2 =>
+                                {
+                                    b2.Property<Guid>("PlayerGameStatsBlockPlayerGameStatsId");
+
+                                    b2.Property<int?>("FirstDowns");
+
+                                    b2.Property<int>("Penalties");
+
+                                    b2.Property<int>("Yards");
+
+                                    b2.HasKey("PlayerGameStatsBlockPlayerGameStatsId");
+
+                                    b2.ToTable("player_game_stats");
+
+                                    b2.WithOwner()
+                                        .HasForeignKey("PlayerGameStatsBlockPlayerGameStatsId")
+                                        .HasConstraintName("fk_player_game_stats_player_game_stats_id");
+                                });
+
+                            b1.OwnsOne("PatriotIndex.Domain.Entities.SeasonPuntReturnStats", "PuntReturns", b2 =>
+                                {
+                                    b2.Property<Guid>("PlayerGameStatsBlockPlayerGameStatsId");
+
+                                    b2.Property<decimal>("AvgYards");
+
+                                    b2.Property<int>("Faircatches");
+
+                                    b2.Property<int>("Longest");
+
+                                    b2.Property<int>("LongestTouchdown");
+
+                                    b2.Property<int>("Returns");
+
+                                    b2.Property<int>("Touchdowns");
+
+                                    b2.Property<int>("Yards");
+
+                                    b2.HasKey("PlayerGameStatsBlockPlayerGameStatsId");
+
+                                    b2.ToTable("player_game_stats");
+
+                                    b2.WithOwner()
+                                        .HasForeignKey("PlayerGameStatsBlockPlayerGameStatsId")
+                                        .HasConstraintName("fk_player_game_stats_player_game_stats_id");
+                                });
+
+                            b1.OwnsOne("PatriotIndex.Domain.Entities.SeasonPuntStats", "Punts", b2 =>
+                                {
+                                    b2.Property<Guid>("PlayerGameStatsBlockPlayerGameStatsId");
+
+                                    b2.Property<int>("Attempts");
+
+                                    b2.Property<double>("AvgHangTime");
+
+                                    b2.Property<decimal>("AvgNetYards");
+
+                                    b2.Property<decimal>("AvgYards");
+
+                                    b2.Property<int>("Blocked");
+
+                                    b2.Property<double>("HangTime");
+
+                                    b2.Property<int>("Inside20");
+
+                                    b2.Property<int>("Longest");
+
+                                    b2.Property<int>("NetYards");
+
+                                    b2.Property<int>("ReturnYards");
+
+                                    b2.Property<int>("Touchbacks");
+
+                                    b2.Property<int>("Yards");
+
+                                    b2.HasKey("PlayerGameStatsBlockPlayerGameStatsId");
+
+                                    b2.ToTable("player_game_stats");
+
+                                    b2.WithOwner()
+                                        .HasForeignKey("PlayerGameStatsBlockPlayerGameStatsId")
+                                        .HasConstraintName("fk_player_game_stats_player_game_stats_id");
+                                });
+
+                            b1.OwnsOne("PatriotIndex.Domain.Entities.SeasonReceivingStats", "Receiving", b2 =>
+                                {
+                                    b2.Property<Guid>("PlayerGameStatsBlockPlayerGameStatsId");
+
+                                    b2.Property<int>("AirYards");
+
+                                    b2.Property<decimal>("AvgYards");
+
+                                    b2.Property<int>("BrokenTackles");
+
+                                    b2.Property<int>("CatchablePasses");
+
+                                    b2.Property<int>("DroppedPasses");
+
+                                    b2.Property<int?>("FirstDowns");
+
+                                    b2.Property<int>("Longest");
+
+                                    b2.Property<int>("LongestTouchdown");
+
+                                    b2.Property<int>("Receptions");
+
+                                    b2.Property<int>("RedzoneTargets");
+
+                                    b2.Property<int>("Targets");
+
+                                    b2.Property<int>("Touchdowns");
+
+                                    b2.Property<int>("Yards");
+
+                                    b2.Property<int>("YardsAfterCatch");
+
+                                    b2.Property<int>("YardsAfterContact");
+
+                                    b2.HasKey("PlayerGameStatsBlockPlayerGameStatsId");
+
+                                    b2.ToTable("player_game_stats");
+
+                                    b2.WithOwner()
+                                        .HasForeignKey("PlayerGameStatsBlockPlayerGameStatsId")
+                                        .HasConstraintName("fk_player_game_stats_player_game_stats_id");
+                                });
+
+                            b1.OwnsOne("PatriotIndex.Domain.Entities.SeasonRushingStats", "Rushing", b2 =>
+                                {
+                                    b2.Property<Guid>("PlayerGameStatsBlockPlayerGameStatsId");
+
+                                    b2.Property<int>("Attempts");
+
+                                    b2.Property<double>("AvgYards");
+
+                                    b2.Property<int>("BrokenTackles");
+
+                                    b2.Property<int?>("FirstDowns");
+
+                                    b2.Property<int>("KneelDowns");
+
+                                    b2.Property<int>("Longest");
+
+                                    b2.Property<int>("LongestTouchdown");
+
+                                    b2.Property<int>("RedzoneAttempts");
+
+                                    b2.Property<int>("Scrambles");
+
+                                    b2.Property<decimal>("TacklesForLoss");
+
+                                    b2.Property<int>("TacklesForLossYards");
+
+                                    b2.Property<int>("Touchdowns");
+
+                                    b2.Property<int>("Yards");
+
+                                    b2.Property<int>("YardsAfterContact");
+
+                                    b2.HasKey("PlayerGameStatsBlockPlayerGameStatsId");
+
+                                    b2.ToTable("player_game_stats");
+
+                                    b2.WithOwner()
+                                        .HasForeignKey("PlayerGameStatsBlockPlayerGameStatsId")
+                                        .HasConstraintName("fk_player_game_stats_player_game_stats_id");
+                                });
+
+                            b1.Navigation("Defense");
+
+                            b1.Navigation("ExtraPoints");
+
+                            b1.Navigation("FieldGoals");
+
+                            b1.Navigation("Fumbles");
+
+                            b1.Navigation("IntReturns");
+
+                            b1.Navigation("KickReturns");
+
+                            b1.Navigation("Kickoffs");
+
+                            b1.Navigation("Passing");
+
+                            b1.Navigation("Penalties");
+
+                            b1.Navigation("PuntReturns");
+
+                            b1.Navigation("Punts");
+
+                            b1.Navigation("Receiving");
+
+                            b1.Navigation("Rushing");
+                        });
+
                     b.Navigation("Game");
 
                     b.Navigation("Player");
+
+                    b.Navigation("Stats")
+                        .IsRequired();
 
                     b.Navigation("Team");
                 });
@@ -1917,9 +2379,7 @@ namespace PatriotIndex.Domain.Migrations
 
                             b1.ToTable("player_season_stats");
 
-                            b1
-                                .ToJson("stats")
-                                .HasColumnType("jsonb");
+                            b1.ToJson("stats");
 
                             b1.WithOwner()
                                 .HasForeignKey("PlayerSeasonStatsId")
@@ -1967,9 +2427,9 @@ namespace PatriotIndex.Domain.Migrations
 
                                     b2.Property<int>("QbHits");
 
-                                    b2.Property<int>("SackYards");
+                                    b2.Property<decimal>("SackYards");
 
-                                    b2.Property<double>("Sacks");
+                                    b2.Property<decimal>("Sacks");
 
                                     b2.Property<int>("Safeties");
 
@@ -1991,9 +2451,32 @@ namespace PatriotIndex.Domain.Migrations
 
                                     b2.Property<int>("ThreeAndOutsForced");
 
-                                    b2.Property<int>("Tloss");
+                                    b2.Property<decimal>("Tloss");
 
-                                    b2.Property<int>("TlossYards");
+                                    b2.Property<decimal>("TlossYards");
+
+                                    b2.HasKey("PlayerStatBlockPlayerSeasonStatsId");
+
+                                    b2.ToTable("player_season_stats");
+
+                                    b2.WithOwner()
+                                        .HasForeignKey("PlayerStatBlockPlayerSeasonStatsId")
+                                        .HasConstraintName("fk_player_season_stats_player_season_stats_id");
+                                });
+
+                            b1.OwnsOne("PatriotIndex.Domain.Entities.SeasonPlayerExtraPointStats", "ExtraPoints", b2 =>
+                                {
+                                    b2.Property<Guid>("PlayerStatBlockPlayerSeasonStatsId");
+
+                                    b2.Property<int>("Attempts");
+
+                                    b2.Property<int>("Blocked");
+
+                                    b2.Property<int>("Made");
+
+                                    b2.Property<int>("Missed");
+
+                                    b2.Property<decimal>("Pct");
 
                                     b2.HasKey("PlayerStatBlockPlayerSeasonStatsId");
 
@@ -2020,7 +2503,7 @@ namespace PatriotIndex.Domain.Migrations
 
                                     b2.Property<int>("Attempts50");
 
-                                    b2.Property<double>("AvgYards");
+                                    b2.Property<decimal>("AvgYards");
 
                                     b2.Property<int>("Blocked");
 
@@ -2040,7 +2523,7 @@ namespace PatriotIndex.Domain.Migrations
 
                                     b2.Property<int>("Missed");
 
-                                    b2.Property<double>("Pct");
+                                    b2.Property<decimal>("Pct");
 
                                     b2.Property<int>("Yards");
 
@@ -2092,7 +2575,7 @@ namespace PatriotIndex.Domain.Migrations
                                 {
                                     b2.Property<Guid>("PlayerStatBlockPlayerSeasonStatsId");
 
-                                    b2.Property<double>("AvgYards");
+                                    b2.Property<decimal>("AvgYards");
 
                                     b2.Property<int>("Longest");
 
@@ -2117,7 +2600,7 @@ namespace PatriotIndex.Domain.Migrations
                                 {
                                     b2.Property<Guid>("PlayerStatBlockPlayerSeasonStatsId");
 
-                                    b2.Property<double>("AvgYards");
+                                    b2.Property<decimal>("AvgYards");
 
                                     b2.Property<int>("Faircatches");
 
@@ -2214,13 +2697,13 @@ namespace PatriotIndex.Domain.Migrations
 
                                     b2.Property<double?>("AvgPocketTime");
 
-                                    b2.Property<double>("AvgYards");
+                                    b2.Property<decimal>("AvgYards");
 
                                     b2.Property<int>("BattedPasses");
 
                                     b2.Property<int>("Blitzes");
 
-                                    b2.Property<double>("CmpPct");
+                                    b2.Property<decimal>("CmpPct");
 
                                     b2.Property<int>("Completions");
 
@@ -2252,7 +2735,7 @@ namespace PatriotIndex.Domain.Migrations
 
                                     b2.Property<int>("PoorThrows");
 
-                                    b2.Property<double>("Rating");
+                                    b2.Property<decimal>("Rating");
 
                                     b2.Property<int>("RedzoneAttempts");
 
@@ -2300,7 +2783,7 @@ namespace PatriotIndex.Domain.Migrations
                                 {
                                     b2.Property<Guid>("PlayerStatBlockPlayerSeasonStatsId");
 
-                                    b2.Property<double>("AvgYards");
+                                    b2.Property<decimal>("AvgYards");
 
                                     b2.Property<int>("Faircatches");
 
@@ -2331,9 +2814,9 @@ namespace PatriotIndex.Domain.Migrations
 
                                     b2.Property<double>("AvgHangTime");
 
-                                    b2.Property<double>("AvgNetYards");
+                                    b2.Property<decimal>("AvgNetYards");
 
-                                    b2.Property<double>("AvgYards");
+                                    b2.Property<decimal>("AvgYards");
 
                                     b2.Property<int>("Blocked");
 
@@ -2366,7 +2849,7 @@ namespace PatriotIndex.Domain.Migrations
 
                                     b2.Property<int>("AirYards");
 
-                                    b2.Property<double>("AvgYards");
+                                    b2.Property<decimal>("AvgYards");
 
                                     b2.Property<int>("BrokenTackles");
 
@@ -2425,38 +2908,15 @@ namespace PatriotIndex.Domain.Migrations
 
                                     b2.Property<int>("Scrambles");
 
-                                    b2.Property<int>("Tlost");
+                                    b2.Property<decimal>("TacklesForLoss");
 
-                                    b2.Property<int>("TlostYards");
+                                    b2.Property<int>("TacklesForLossYards");
 
                                     b2.Property<int>("Touchdowns");
 
                                     b2.Property<int>("Yards");
 
                                     b2.Property<int>("YardsAfterContact");
-
-                                    b2.HasKey("PlayerStatBlockPlayerSeasonStatsId");
-
-                                    b2.ToTable("player_season_stats");
-
-                                    b2.WithOwner()
-                                        .HasForeignKey("PlayerStatBlockPlayerSeasonStatsId")
-                                        .HasConstraintName("fk_player_season_stats_player_season_stats_id");
-                                });
-
-                            b1.OwnsOne("PatriotIndex.Domain.Entities.SeasonPlayerExtraPointStats", "ExtraPoints", b2 =>
-                                {
-                                    b2.Property<Guid>("PlayerStatBlockPlayerSeasonStatsId");
-
-                                    b2.Property<int>("Attempts");
-
-                                    b2.Property<int>("Blocked");
-
-                                    b2.Property<int>("Made");
-
-                                    b2.Property<int>("Missed");
-
-                                    b2.Property<double>("Pct");
 
                                     b2.HasKey("PlayerStatBlockPlayerSeasonStatsId");
 
@@ -2549,6 +3009,594 @@ namespace PatriotIndex.Domain.Migrations
                     b.Navigation("Venue");
                 });
 
+            modelBuilder.Entity("PatriotIndex.Domain.Entities.TeamGameStats", b =>
+                {
+                    b.HasOne("PatriotIndex.Domain.Entities.Game", "Game")
+                        .WithMany()
+                        .HasForeignKey("GameId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_team_game_stats_games_game_id");
+
+                    b.HasOne("PatriotIndex.Domain.Entities.Team", "Team")
+                        .WithMany()
+                        .HasForeignKey("TeamId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_team_game_stats_teams_team_id");
+
+                    b.OwnsOne("PatriotIndex.Domain.Entities.TeamGameStatsBlock", "Stats", b1 =>
+                        {
+                            b1.Property<Guid>("TeamGameStatsId");
+
+                            b1.HasKey("TeamGameStatsId");
+
+                            b1.ToTable("team_game_stats");
+
+                            b1.ToJson("stats");
+
+                            b1.WithOwner()
+                                .HasForeignKey("TeamGameStatsId")
+                                .HasConstraintName("fk_team_game_stats_team_game_stats_id");
+
+                            b1.OwnsOne("PatriotIndex.Domain.Entities.SeasonDefenseStats", "Defense", b2 =>
+                                {
+                                    b2.Property<Guid>("TeamGameStatsBlockTeamGameStatsId");
+
+                                    b2.Property<int>("Assists");
+
+                                    b2.Property<int>("BattedPasses");
+
+                                    b2.Property<int>("Blitzes");
+
+                                    b2.Property<int>("Combined");
+
+                                    b2.Property<int>("DefComps");
+
+                                    b2.Property<int>("DefTargets");
+
+                                    b2.Property<int>("ForcedFumbles");
+
+                                    b2.Property<int>("FourthDownStops");
+
+                                    b2.Property<int>("FumbleRecoveries");
+
+                                    b2.Property<int>("Hurries");
+
+                                    b2.Property<int>("Interceptions");
+
+                                    b2.Property<int>("Knockdowns");
+
+                                    b2.Property<int>("MiscAssists");
+
+                                    b2.Property<int>("MiscForcedFumbles");
+
+                                    b2.Property<int>("MiscFumbleRecoveries");
+
+                                    b2.Property<int>("MiscTackles");
+
+                                    b2.Property<int>("MissedTackles");
+
+                                    b2.Property<int>("PassesDefended");
+
+                                    b2.Property<int>("QbHits");
+
+                                    b2.Property<decimal>("SackYards");
+
+                                    b2.Property<decimal>("Sacks");
+
+                                    b2.Property<int>("Safeties");
+
+                                    b2.Property<int>("SpAssists");
+
+                                    b2.Property<int>("SpBlocks");
+
+                                    b2.Property<int>("SpForcedFumbles");
+
+                                    b2.Property<int>("SpFumbleRecoveries");
+
+                                    b2.Property<int>("SpOppFumbleRecoveries");
+
+                                    b2.Property<int>("SpOwnFumbleRecoveries");
+
+                                    b2.Property<int>("SpTackles");
+
+                                    b2.Property<int>("Tackles");
+
+                                    b2.Property<int>("ThreeAndOutsForced");
+
+                                    b2.Property<decimal>("Tloss");
+
+                                    b2.Property<decimal>("TlossYards");
+
+                                    b2.HasKey("TeamGameStatsBlockTeamGameStatsId");
+
+                                    b2.ToTable("team_game_stats");
+
+                                    b2.WithOwner()
+                                        .HasForeignKey("TeamGameStatsBlockTeamGameStatsId")
+                                        .HasConstraintName("fk_team_game_stats_team_game_stats_id");
+                                });
+
+                            b1.OwnsOne("PatriotIndex.Domain.Entities.SeasonFieldGoalStats", "FieldGoals", b2 =>
+                                {
+                                    b2.Property<Guid>("TeamGameStatsBlockTeamGameStatsId");
+
+                                    b2.Property<int>("Attempts");
+
+                                    b2.Property<int>("Attempts19");
+
+                                    b2.Property<int>("Attempts29");
+
+                                    b2.Property<int>("Attempts39");
+
+                                    b2.Property<int>("Attempts49");
+
+                                    b2.Property<int>("Attempts50");
+
+                                    b2.Property<decimal>("AvgYards");
+
+                                    b2.Property<int>("Blocked");
+
+                                    b2.Property<int>("Longest");
+
+                                    b2.Property<int>("Made");
+
+                                    b2.Property<int>("Made19");
+
+                                    b2.Property<int>("Made29");
+
+                                    b2.Property<int>("Made39");
+
+                                    b2.Property<int>("Made49");
+
+                                    b2.Property<int>("Made50");
+
+                                    b2.Property<int>("Missed");
+
+                                    b2.Property<decimal>("Pct");
+
+                                    b2.Property<int>("Yards");
+
+                                    b2.HasKey("TeamGameStatsBlockTeamGameStatsId");
+
+                                    b2.ToTable("team_game_stats");
+
+                                    b2.WithOwner()
+                                        .HasForeignKey("TeamGameStatsBlockTeamGameStatsId")
+                                        .HasConstraintName("fk_team_game_stats_team_game_stats_id");
+                                });
+
+                            b1.OwnsOne("PatriotIndex.Domain.Entities.SeasonFumbleStats", "Fumbles", b2 =>
+                                {
+                                    b2.Property<Guid>("TeamGameStatsBlockTeamGameStatsId");
+
+                                    b2.Property<int>("EzRecTds");
+
+                                    b2.Property<int>("ForcedFumbles");
+
+                                    b2.Property<int>("Fumbles");
+
+                                    b2.Property<int>("LostFumbles");
+
+                                    b2.Property<int>("OppRec");
+
+                                    b2.Property<int>("OppRecTds");
+
+                                    b2.Property<int>("OppRecYards");
+
+                                    b2.Property<int>("OutOfBounds");
+
+                                    b2.Property<int>("OwnRec");
+
+                                    b2.Property<int>("OwnRecTds");
+
+                                    b2.Property<int>("OwnRecYards");
+
+                                    b2.HasKey("TeamGameStatsBlockTeamGameStatsId");
+
+                                    b2.ToTable("team_game_stats");
+
+                                    b2.WithOwner()
+                                        .HasForeignKey("TeamGameStatsBlockTeamGameStatsId")
+                                        .HasConstraintName("fk_team_game_stats_team_game_stats_id");
+                                });
+
+                            b1.OwnsOne("PatriotIndex.Domain.Entities.SeasonIntReturnStats", "IntReturns", b2 =>
+                                {
+                                    b2.Property<Guid>("TeamGameStatsBlockTeamGameStatsId");
+
+                                    b2.Property<decimal>("AvgYards");
+
+                                    b2.Property<int>("Longest");
+
+                                    b2.Property<int>("LongestTouchdown");
+
+                                    b2.Property<int>("Returns");
+
+                                    b2.Property<int>("Touchdowns");
+
+                                    b2.Property<int>("Yards");
+
+                                    b2.HasKey("TeamGameStatsBlockTeamGameStatsId");
+
+                                    b2.ToTable("team_game_stats");
+
+                                    b2.WithOwner()
+                                        .HasForeignKey("TeamGameStatsBlockTeamGameStatsId")
+                                        .HasConstraintName("fk_team_game_stats_team_game_stats_id");
+                                });
+
+                            b1.OwnsOne("PatriotIndex.Domain.Entities.SeasonKickReturnStats", "KickReturns", b2 =>
+                                {
+                                    b2.Property<Guid>("TeamGameStatsBlockTeamGameStatsId");
+
+                                    b2.Property<decimal>("AvgYards");
+
+                                    b2.Property<int>("Faircatches");
+
+                                    b2.Property<int>("Longest");
+
+                                    b2.Property<int>("LongestTouchdown");
+
+                                    b2.Property<int>("Returns");
+
+                                    b2.Property<int>("Touchdowns");
+
+                                    b2.Property<int>("Yards");
+
+                                    b2.HasKey("TeamGameStatsBlockTeamGameStatsId");
+
+                                    b2.ToTable("team_game_stats");
+
+                                    b2.WithOwner()
+                                        .HasForeignKey("TeamGameStatsBlockTeamGameStatsId")
+                                        .HasConstraintName("fk_team_game_stats_team_game_stats_id");
+                                });
+
+                            b1.OwnsOne("PatriotIndex.Domain.Entities.SeasonKickoffStats", "Kickoffs", b2 =>
+                                {
+                                    b2.Property<Guid>("TeamGameStatsBlockTeamGameStatsId");
+
+                                    b2.Property<int>("Endzone");
+
+                                    b2.Property<int>("Inside20");
+
+                                    b2.Property<int>("Kickoffs");
+
+                                    b2.Property<int>("OnsideAttempts");
+
+                                    b2.Property<int>("OnsideSuccesses");
+
+                                    b2.Property<int>("OutOfBounds");
+
+                                    b2.Property<int>("ReturnYards");
+
+                                    b2.Property<int>("Returned");
+
+                                    b2.Property<int>("SquibKicks");
+
+                                    b2.Property<int>("Touchbacks");
+
+                                    b2.Property<int>("Yards");
+
+                                    b2.HasKey("TeamGameStatsBlockTeamGameStatsId");
+
+                                    b2.ToTable("team_game_stats");
+
+                                    b2.WithOwner()
+                                        .HasForeignKey("TeamGameStatsBlockTeamGameStatsId")
+                                        .HasConstraintName("fk_team_game_stats_team_game_stats_id");
+                                });
+
+                            b1.OwnsOne("PatriotIndex.Domain.Entities.SeasonPassingStats", "Passing", b2 =>
+                                {
+                                    b2.Property<Guid>("TeamGameStatsBlockTeamGameStatsId");
+
+                                    b2.Property<int>("AirYards");
+
+                                    b2.Property<int>("Attempts");
+
+                                    b2.Property<double?>("AvgPocketTime");
+
+                                    b2.Property<decimal>("AvgYards");
+
+                                    b2.Property<int>("BattedPasses");
+
+                                    b2.Property<int>("Blitzes");
+
+                                    b2.Property<decimal>("CmpPct");
+
+                                    b2.Property<int>("Completions");
+
+                                    b2.Property<int>("DefendedPasses");
+
+                                    b2.Property<int>("DroppedPasses");
+
+                                    b2.Property<int?>("FirstDowns");
+
+                                    b2.Property<int>("GrossYards");
+
+                                    b2.Property<int>("Hurries");
+
+                                    b2.Property<int>("IntTouchdowns");
+
+                                    b2.Property<int>("Interceptions");
+
+                                    b2.Property<int>("Knockdowns");
+
+                                    b2.Property<int>("Longest");
+
+                                    b2.Property<int>("LongestTouchdown");
+
+                                    b2.Property<int>("NetYards");
+
+                                    b2.Property<int>("OnTargetThrows");
+
+                                    b2.Property<double>("PocketTime");
+
+                                    b2.Property<int>("PoorThrows");
+
+                                    b2.Property<decimal>("Rating");
+
+                                    b2.Property<int>("RedzoneAttempts");
+
+                                    b2.Property<int>("SackYards");
+
+                                    b2.Property<int>("Sacks");
+
+                                    b2.Property<int>("Spikes");
+
+                                    b2.Property<int>("ThrowAways");
+
+                                    b2.Property<int>("Touchdowns");
+
+                                    b2.Property<int>("Yards");
+
+                                    b2.HasKey("TeamGameStatsBlockTeamGameStatsId");
+
+                                    b2.ToTable("team_game_stats");
+
+                                    b2.WithOwner()
+                                        .HasForeignKey("TeamGameStatsBlockTeamGameStatsId")
+                                        .HasConstraintName("fk_team_game_stats_team_game_stats_id");
+                                });
+
+                            b1.OwnsOne("PatriotIndex.Domain.Entities.SeasonPenaltyStats", "Penalties", b2 =>
+                                {
+                                    b2.Property<Guid>("TeamGameStatsBlockTeamGameStatsId");
+
+                                    b2.Property<int?>("FirstDowns");
+
+                                    b2.Property<int>("Penalties");
+
+                                    b2.Property<int>("Yards");
+
+                                    b2.HasKey("TeamGameStatsBlockTeamGameStatsId");
+
+                                    b2.ToTable("team_game_stats");
+
+                                    b2.WithOwner()
+                                        .HasForeignKey("TeamGameStatsBlockTeamGameStatsId")
+                                        .HasConstraintName("fk_team_game_stats_team_game_stats_id");
+                                });
+
+                            b1.OwnsOne("PatriotIndex.Domain.Entities.SeasonPuntReturnStats", "PuntReturns", b2 =>
+                                {
+                                    b2.Property<Guid>("TeamGameStatsBlockTeamGameStatsId");
+
+                                    b2.Property<decimal>("AvgYards");
+
+                                    b2.Property<int>("Faircatches");
+
+                                    b2.Property<int>("Longest");
+
+                                    b2.Property<int>("LongestTouchdown");
+
+                                    b2.Property<int>("Returns");
+
+                                    b2.Property<int>("Touchdowns");
+
+                                    b2.Property<int>("Yards");
+
+                                    b2.HasKey("TeamGameStatsBlockTeamGameStatsId");
+
+                                    b2.ToTable("team_game_stats");
+
+                                    b2.WithOwner()
+                                        .HasForeignKey("TeamGameStatsBlockTeamGameStatsId")
+                                        .HasConstraintName("fk_team_game_stats_team_game_stats_id");
+                                });
+
+                            b1.OwnsOne("PatriotIndex.Domain.Entities.SeasonPuntStats", "Punts", b2 =>
+                                {
+                                    b2.Property<Guid>("TeamGameStatsBlockTeamGameStatsId");
+
+                                    b2.Property<int>("Attempts");
+
+                                    b2.Property<double>("AvgHangTime");
+
+                                    b2.Property<decimal>("AvgNetYards");
+
+                                    b2.Property<decimal>("AvgYards");
+
+                                    b2.Property<int>("Blocked");
+
+                                    b2.Property<double>("HangTime");
+
+                                    b2.Property<int>("Inside20");
+
+                                    b2.Property<int>("Longest");
+
+                                    b2.Property<int>("NetYards");
+
+                                    b2.Property<int>("ReturnYards");
+
+                                    b2.Property<int>("Touchbacks");
+
+                                    b2.Property<int>("Yards");
+
+                                    b2.HasKey("TeamGameStatsBlockTeamGameStatsId");
+
+                                    b2.ToTable("team_game_stats");
+
+                                    b2.WithOwner()
+                                        .HasForeignKey("TeamGameStatsBlockTeamGameStatsId")
+                                        .HasConstraintName("fk_team_game_stats_team_game_stats_id");
+                                });
+
+                            b1.OwnsOne("PatriotIndex.Domain.Entities.SeasonReceivingStats", "Receiving", b2 =>
+                                {
+                                    b2.Property<Guid>("TeamGameStatsBlockTeamGameStatsId");
+
+                                    b2.Property<int>("AirYards");
+
+                                    b2.Property<decimal>("AvgYards");
+
+                                    b2.Property<int>("BrokenTackles");
+
+                                    b2.Property<int>("CatchablePasses");
+
+                                    b2.Property<int>("DroppedPasses");
+
+                                    b2.Property<int?>("FirstDowns");
+
+                                    b2.Property<int>("Longest");
+
+                                    b2.Property<int>("LongestTouchdown");
+
+                                    b2.Property<int>("Receptions");
+
+                                    b2.Property<int>("RedzoneTargets");
+
+                                    b2.Property<int>("Targets");
+
+                                    b2.Property<int>("Touchdowns");
+
+                                    b2.Property<int>("Yards");
+
+                                    b2.Property<int>("YardsAfterCatch");
+
+                                    b2.Property<int>("YardsAfterContact");
+
+                                    b2.HasKey("TeamGameStatsBlockTeamGameStatsId");
+
+                                    b2.ToTable("team_game_stats");
+
+                                    b2.WithOwner()
+                                        .HasForeignKey("TeamGameStatsBlockTeamGameStatsId")
+                                        .HasConstraintName("fk_team_game_stats_team_game_stats_id");
+                                });
+
+                            b1.OwnsOne("PatriotIndex.Domain.Entities.SeasonRushingStats", "Rushing", b2 =>
+                                {
+                                    b2.Property<Guid>("TeamGameStatsBlockTeamGameStatsId");
+
+                                    b2.Property<int>("Attempts");
+
+                                    b2.Property<double>("AvgYards");
+
+                                    b2.Property<int>("BrokenTackles");
+
+                                    b2.Property<int?>("FirstDowns");
+
+                                    b2.Property<int>("KneelDowns");
+
+                                    b2.Property<int>("Longest");
+
+                                    b2.Property<int>("LongestTouchdown");
+
+                                    b2.Property<int>("RedzoneAttempts");
+
+                                    b2.Property<int>("Scrambles");
+
+                                    b2.Property<decimal>("TacklesForLoss");
+
+                                    b2.Property<int>("TacklesForLossYards");
+
+                                    b2.Property<int>("Touchdowns");
+
+                                    b2.Property<int>("Yards");
+
+                                    b2.Property<int>("YardsAfterContact");
+
+                                    b2.HasKey("TeamGameStatsBlockTeamGameStatsId");
+
+                                    b2.ToTable("team_game_stats");
+
+                                    b2.WithOwner()
+                                        .HasForeignKey("TeamGameStatsBlockTeamGameStatsId")
+                                        .HasConstraintName("fk_team_game_stats_team_game_stats_id");
+                                });
+
+                            b1.OwnsOne("PatriotIndex.Domain.Entities.TeamGameSummary", "Summary", b2 =>
+                                {
+                                    b2.Property<Guid>("TeamGameStatsBlockTeamGameStatsId");
+
+                                    b2.Property<double>("AvgGain");
+
+                                    b2.Property<int>("Fumbles");
+
+                                    b2.Property<int>("Penalties");
+
+                                    b2.Property<int>("PlayCount");
+
+                                    b2.Property<string>("PossessionTime");
+
+                                    b2.Property<int>("ReturnYards");
+
+                                    b2.Property<int>("RushPlays");
+
+                                    b2.Property<int>("Safeties");
+
+                                    b2.Property<int>("TotalYards");
+
+                                    b2.Property<int>("Turnovers");
+
+                                    b2.HasKey("TeamGameStatsBlockTeamGameStatsId");
+
+                                    b2.ToTable("team_game_stats");
+
+                                    b2.WithOwner()
+                                        .HasForeignKey("TeamGameStatsBlockTeamGameStatsId")
+                                        .HasConstraintName("fk_team_game_stats_team_game_stats_id");
+                                });
+
+                            b1.Navigation("Defense");
+
+                            b1.Navigation("FieldGoals");
+
+                            b1.Navigation("Fumbles");
+
+                            b1.Navigation("IntReturns");
+
+                            b1.Navigation("KickReturns");
+
+                            b1.Navigation("Kickoffs");
+
+                            b1.Navigation("Passing");
+
+                            b1.Navigation("Penalties");
+
+                            b1.Navigation("PuntReturns");
+
+                            b1.Navigation("Punts");
+
+                            b1.Navigation("Receiving");
+
+                            b1.Navigation("Rushing");
+
+                            b1.Navigation("Summary");
+                        });
+
+                    b.Navigation("Game");
+
+                    b.Navigation("Stats")
+                        .IsRequired();
+
+                    b.Navigation("Team");
+                });
+
             modelBuilder.Entity("PatriotIndex.Domain.Entities.TeamSeasonStats", b =>
                 {
                     b.HasOne("PatriotIndex.Domain.Entities.Team", "Team")
@@ -2566,9 +3614,7 @@ namespace PatriotIndex.Domain.Migrations
 
                             b1.ToTable("team_season_stats");
 
-                            b1
-                                .ToJson("opponents")
-                                .HasColumnType("jsonb");
+                            b1.ToJson("opponents");
 
                             b1.WithOwner()
                                 .HasForeignKey("TeamSeasonStatsId")
@@ -2616,9 +3662,9 @@ namespace PatriotIndex.Domain.Migrations
 
                                     b2.Property<int>("QbHits");
 
-                                    b2.Property<int>("SackYards");
+                                    b2.Property<decimal>("SackYards");
 
-                                    b2.Property<double>("Sacks");
+                                    b2.Property<decimal>("Sacks");
 
                                     b2.Property<int>("Safeties");
 
@@ -2640,9 +3686,9 @@ namespace PatriotIndex.Domain.Migrations
 
                                     b2.Property<int>("ThreeAndOutsForced");
 
-                                    b2.Property<int>("Tloss");
+                                    b2.Property<decimal>("Tloss");
 
-                                    b2.Property<int>("TlossYards");
+                                    b2.Property<decimal>("TlossYards");
 
                                     b2.HasKey("TeamStatBlockTeamSeasonStatsId");
 
@@ -2671,7 +3717,7 @@ namespace PatriotIndex.Domain.Migrations
 
                                             b3.Property<int>("Attempts");
 
-                                            b3.Property<double>("Pct");
+                                            b3.Property<decimal>("Pct");
 
                                             b3.Property<int>("Successes");
 
@@ -2690,7 +3736,7 @@ namespace PatriotIndex.Domain.Migrations
 
                                             b3.Property<int>("Attempts");
 
-                                            b3.Property<double>("Pct");
+                                            b3.Property<decimal>("Pct");
 
                                             b3.Property<int>("Successes");
 
@@ -2709,7 +3755,7 @@ namespace PatriotIndex.Domain.Migrations
 
                                             b3.Property<int>("Attempts");
 
-                                            b3.Property<double>("Pct");
+                                            b3.Property<decimal>("Pct");
 
                                             b3.Property<int>("Successes");
 
@@ -2728,7 +3774,7 @@ namespace PatriotIndex.Domain.Migrations
 
                                             b3.Property<int>("Attempts");
 
-                                            b3.Property<double>("Pct");
+                                            b3.Property<decimal>("Pct");
 
                                             b3.Property<int>("Successes");
 
@@ -2799,7 +3845,7 @@ namespace PatriotIndex.Domain.Migrations
 
                                             b3.Property<int>("Made");
 
-                                            b3.Property<double>("Pct");
+                                            b3.Property<decimal>("Pct");
 
                                             b3.HasKey("SeasonTeamExtraPointStatsTeamStatBlockTeamSeasonStatsId");
 
@@ -2831,7 +3877,7 @@ namespace PatriotIndex.Domain.Migrations
 
                                     b2.Property<int>("Attempts50");
 
-                                    b2.Property<double>("AvgYards");
+                                    b2.Property<decimal>("AvgYards");
 
                                     b2.Property<int>("Blocked");
 
@@ -2851,7 +3897,7 @@ namespace PatriotIndex.Domain.Migrations
 
                                     b2.Property<int>("Missed");
 
-                                    b2.Property<double>("Pct");
+                                    b2.Property<decimal>("Pct");
 
                                     b2.Property<int>("Yards");
 
@@ -2924,7 +3970,7 @@ namespace PatriotIndex.Domain.Migrations
                                 {
                                     b2.Property<Guid>("TeamStatBlockTeamSeasonStatsId");
 
-                                    b2.Property<double>("AvgYards");
+                                    b2.Property<decimal>("AvgYards");
 
                                     b2.Property<int>("Longest");
 
@@ -2968,7 +4014,7 @@ namespace PatriotIndex.Domain.Migrations
                                 {
                                     b2.Property<Guid>("TeamStatBlockTeamSeasonStatsId");
 
-                                    b2.Property<double>("AvgYards");
+                                    b2.Property<decimal>("AvgYards");
 
                                     b2.Property<int>("Faircatches");
 
@@ -3065,13 +4111,13 @@ namespace PatriotIndex.Domain.Migrations
 
                                     b2.Property<double?>("AvgPocketTime");
 
-                                    b2.Property<double>("AvgYards");
+                                    b2.Property<decimal>("AvgYards");
 
                                     b2.Property<int>("BattedPasses");
 
                                     b2.Property<int>("Blitzes");
 
-                                    b2.Property<double>("CmpPct");
+                                    b2.Property<decimal>("CmpPct");
 
                                     b2.Property<int>("Completions");
 
@@ -3103,7 +4149,7 @@ namespace PatriotIndex.Domain.Migrations
 
                                     b2.Property<int>("PoorThrows");
 
-                                    b2.Property<double>("Rating");
+                                    b2.Property<decimal>("Rating");
 
                                     b2.Property<int>("RedzoneAttempts");
 
@@ -3151,7 +4197,7 @@ namespace PatriotIndex.Domain.Migrations
                                 {
                                     b2.Property<Guid>("TeamStatBlockTeamSeasonStatsId");
 
-                                    b2.Property<double>("AvgYards");
+                                    b2.Property<decimal>("AvgYards");
 
                                     b2.Property<int>("Faircatches");
 
@@ -3182,9 +4228,9 @@ namespace PatriotIndex.Domain.Migrations
 
                                     b2.Property<double>("AvgHangTime");
 
-                                    b2.Property<double>("AvgNetYards");
+                                    b2.Property<decimal>("AvgNetYards");
 
-                                    b2.Property<double>("AvgYards");
+                                    b2.Property<decimal>("AvgYards");
 
                                     b2.Property<int>("Blocked");
 
@@ -3217,7 +4263,7 @@ namespace PatriotIndex.Domain.Migrations
 
                                     b2.Property<int>("AirYards");
 
-                                    b2.Property<double>("AvgYards");
+                                    b2.Property<decimal>("AvgYards");
 
                                     b2.Property<int>("BrokenTackles");
 
@@ -3276,9 +4322,9 @@ namespace PatriotIndex.Domain.Migrations
 
                                     b2.Property<int>("Scrambles");
 
-                                    b2.Property<int>("Tlost");
+                                    b2.Property<decimal>("TacklesForLoss");
 
-                                    b2.Property<int>("TlostYards");
+                                    b2.Property<int>("TacklesForLossYards");
 
                                     b2.Property<int>("Touchdowns");
 
@@ -3371,9 +4417,7 @@ namespace PatriotIndex.Domain.Migrations
 
                             b1.ToTable("team_season_stats");
 
-                            b1
-                                .ToJson("record")
-                                .HasColumnType("jsonb");
+                            b1.ToJson("record");
 
                             b1.WithOwner()
                                 .HasForeignKey("TeamSeasonStatsId")
@@ -3421,9 +4465,9 @@ namespace PatriotIndex.Domain.Migrations
 
                                     b2.Property<int>("QbHits");
 
-                                    b2.Property<int>("SackYards");
+                                    b2.Property<decimal>("SackYards");
 
-                                    b2.Property<double>("Sacks");
+                                    b2.Property<decimal>("Sacks");
 
                                     b2.Property<int>("Safeties");
 
@@ -3445,9 +4489,9 @@ namespace PatriotIndex.Domain.Migrations
 
                                     b2.Property<int>("ThreeAndOutsForced");
 
-                                    b2.Property<int>("Tloss");
+                                    b2.Property<decimal>("Tloss");
 
-                                    b2.Property<int>("TlossYards");
+                                    b2.Property<decimal>("TlossYards");
 
                                     b2.HasKey("TeamStatBlockTeamSeasonStatsId");
 
@@ -3476,7 +4520,7 @@ namespace PatriotIndex.Domain.Migrations
 
                                             b3.Property<int>("Attempts");
 
-                                            b3.Property<double>("Pct");
+                                            b3.Property<decimal>("Pct");
 
                                             b3.Property<int>("Successes");
 
@@ -3495,7 +4539,7 @@ namespace PatriotIndex.Domain.Migrations
 
                                             b3.Property<int>("Attempts");
 
-                                            b3.Property<double>("Pct");
+                                            b3.Property<decimal>("Pct");
 
                                             b3.Property<int>("Successes");
 
@@ -3514,7 +4558,7 @@ namespace PatriotIndex.Domain.Migrations
 
                                             b3.Property<int>("Attempts");
 
-                                            b3.Property<double>("Pct");
+                                            b3.Property<decimal>("Pct");
 
                                             b3.Property<int>("Successes");
 
@@ -3533,7 +4577,7 @@ namespace PatriotIndex.Domain.Migrations
 
                                             b3.Property<int>("Attempts");
 
-                                            b3.Property<double>("Pct");
+                                            b3.Property<decimal>("Pct");
 
                                             b3.Property<int>("Successes");
 
@@ -3604,7 +4648,7 @@ namespace PatriotIndex.Domain.Migrations
 
                                             b3.Property<int>("Made");
 
-                                            b3.Property<double>("Pct");
+                                            b3.Property<decimal>("Pct");
 
                                             b3.HasKey("SeasonTeamExtraPointStatsTeamStatBlockTeamSeasonStatsId");
 
@@ -3636,7 +4680,7 @@ namespace PatriotIndex.Domain.Migrations
 
                                     b2.Property<int>("Attempts50");
 
-                                    b2.Property<double>("AvgYards");
+                                    b2.Property<decimal>("AvgYards");
 
                                     b2.Property<int>("Blocked");
 
@@ -3656,7 +4700,7 @@ namespace PatriotIndex.Domain.Migrations
 
                                     b2.Property<int>("Missed");
 
-                                    b2.Property<double>("Pct");
+                                    b2.Property<decimal>("Pct");
 
                                     b2.Property<int>("Yards");
 
@@ -3729,7 +4773,7 @@ namespace PatriotIndex.Domain.Migrations
                                 {
                                     b2.Property<Guid>("TeamStatBlockTeamSeasonStatsId");
 
-                                    b2.Property<double>("AvgYards");
+                                    b2.Property<decimal>("AvgYards");
 
                                     b2.Property<int>("Longest");
 
@@ -3773,7 +4817,7 @@ namespace PatriotIndex.Domain.Migrations
                                 {
                                     b2.Property<Guid>("TeamStatBlockTeamSeasonStatsId");
 
-                                    b2.Property<double>("AvgYards");
+                                    b2.Property<decimal>("AvgYards");
 
                                     b2.Property<int>("Faircatches");
 
@@ -3870,13 +4914,13 @@ namespace PatriotIndex.Domain.Migrations
 
                                     b2.Property<double?>("AvgPocketTime");
 
-                                    b2.Property<double>("AvgYards");
+                                    b2.Property<decimal>("AvgYards");
 
                                     b2.Property<int>("BattedPasses");
 
                                     b2.Property<int>("Blitzes");
 
-                                    b2.Property<double>("CmpPct");
+                                    b2.Property<decimal>("CmpPct");
 
                                     b2.Property<int>("Completions");
 
@@ -3908,7 +4952,7 @@ namespace PatriotIndex.Domain.Migrations
 
                                     b2.Property<int>("PoorThrows");
 
-                                    b2.Property<double>("Rating");
+                                    b2.Property<decimal>("Rating");
 
                                     b2.Property<int>("RedzoneAttempts");
 
@@ -3956,7 +5000,7 @@ namespace PatriotIndex.Domain.Migrations
                                 {
                                     b2.Property<Guid>("TeamStatBlockTeamSeasonStatsId");
 
-                                    b2.Property<double>("AvgYards");
+                                    b2.Property<decimal>("AvgYards");
 
                                     b2.Property<int>("Faircatches");
 
@@ -3987,9 +5031,9 @@ namespace PatriotIndex.Domain.Migrations
 
                                     b2.Property<double>("AvgHangTime");
 
-                                    b2.Property<double>("AvgNetYards");
+                                    b2.Property<decimal>("AvgNetYards");
 
-                                    b2.Property<double>("AvgYards");
+                                    b2.Property<decimal>("AvgYards");
 
                                     b2.Property<int>("Blocked");
 
@@ -4022,7 +5066,7 @@ namespace PatriotIndex.Domain.Migrations
 
                                     b2.Property<int>("AirYards");
 
-                                    b2.Property<double>("AvgYards");
+                                    b2.Property<decimal>("AvgYards");
 
                                     b2.Property<int>("BrokenTackles");
 
@@ -4081,9 +5125,9 @@ namespace PatriotIndex.Domain.Migrations
 
                                     b2.Property<int>("Scrambles");
 
-                                    b2.Property<int>("Tlost");
+                                    b2.Property<decimal>("TacklesForLoss");
 
-                                    b2.Property<int>("TlostYards");
+                                    b2.Property<int>("TacklesForLossYards");
 
                                     b2.Property<int>("Touchdowns");
 

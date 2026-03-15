@@ -5,7 +5,7 @@ public interface IGameEvent
     Guid    Id          { get; }
     Guid    GameId      { get; }
     Guid    DriveId     { get; }
-    long    Sequence    { get; }
+    decimal    Sequence    { get; }
     string  Clock       { get; }
     string? Description { get; }
 }

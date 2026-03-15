@@ -14,12 +14,16 @@ var postgres = builder.AddPostgres("Postgres", password: pgPassword)
 
 var postgresdb = postgres.AddDatabase("PostgresDb");
 
-builder.AddProject<PatriotIndex_Scheduler>("patriotindex-scheduler")
+var migrations = builder.AddProject<PatriotIndex_MigrationService>("patriotindex-migrations")
     .WithReference(postgresdb)
     .WaitFor(postgresdb);
 
+builder.AddProject<PatriotIndex_Scheduler>("patriotindex-scheduler")
+    .WithReference(postgresdb)
+    .WaitForCompletion(migrations);
+
 builder.AddProject<PatriotIndex_Api>("patriotindex-api")
     .WithReference(postgresdb)
-    .WaitFor(postgresdb);
+    .WaitForCompletion(migrations);
 
 builder.Build().Run();

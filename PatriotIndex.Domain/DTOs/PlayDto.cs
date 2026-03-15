@@ -2,7 +2,7 @@ namespace PatriotIndex.Domain.DTOs;
 
 public record PlayDto(
     Guid Id,
-    long? Sequence,
+    decimal? Sequence,
     string? Clock,
     string? PlayType,
     string? Description,

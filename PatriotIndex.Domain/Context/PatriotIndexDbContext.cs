@@ -23,14 +23,49 @@ public class PatriotIndexDbContext : DbContext
     public DbSet<PlayerSeasonStats> PlayerSeasonStats  { get; set; }
     public DbSet<SyncLog>           SyncLogs           { get; set; }
     public DbSet<Team>              Teams              { get; set; }
+    public DbSet<TeamGameStats>     TeamGameStats      { get; set; }
     public DbSet<TeamSeasonStats>   TeamSeasonStats    { get; set; }
     public DbSet<Venue>             Venues             { get; set; }
     public DbSet<AppConfig>         AppConfigs         { get; set; }
+    public DbSet<Season>            Seasons            { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
 
+        modelBuilder.Entity<Season>(e =>
+        {
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Id).ValueGeneratedNever();
+            
+            e.Property(x => x.Year).IsRequired();
+            
+            e.Property(x => x.Code).IsRequired();
+            
+            e.Property(x => x.StartDate)
+                .HasColumnType("date")
+                .IsRequired();
+            
+            e.Property(x => x.EndDate)
+                .HasColumnType("date")
+                .IsRequired();
+            
+            e.Property(s => s.Code)
+                .HasColumnName("code")
+                .HasMaxLength(3)
+                .IsRequired();
+            
+            e.Property(s => s.Status)
+                .HasConversion<string>()
+                .HasMaxLength(16)
+                .IsRequired();
+            
+            e.HasIndex(x => new { x.Year, x.Code })
+                .IsUnique();
+
+            e.HasIndex(s => s.Status);
+        });
+        
         modelBuilder.Entity<AppConfig>(e =>
         {
             e.Property(x => x.Id).ValueGeneratedOnAdd();
@@ -103,6 +138,10 @@ public class PatriotIndexDbContext : DbContext
         {
             e.HasIndex(x => x.SrId).IsUnique();
             e.HasIndex(x => x.TeamId);
+            
+            e.Property(x => x.Position).HasMaxLength(10)
+                .HasConversion<string>();
+                
 
             e.HasOne(x => x.Team)
                 .WithMany(x => x.Players)
@@ -261,6 +300,60 @@ public class PatriotIndexDbContext : DbContext
                 .WithMany()
                 .HasForeignKey(x => x.TeamId)
                 .OnDelete(DeleteBehavior.SetNull);
+
+            e.OwnsOne(x => x.Stats, block =>
+            {
+                block.ToJson("stats");
+                block.OwnsOne(b => b.Passing);
+                block.OwnsOne(b => b.Rushing);
+                block.OwnsOne(b => b.Receiving);
+                block.OwnsOne(b => b.Defense);
+                block.OwnsOne(b => b.FieldGoals);
+                block.OwnsOne(b => b.ExtraPoints);
+                block.OwnsOne(b => b.Punts);
+                block.OwnsOne(b => b.Kickoffs);
+                block.OwnsOne(b => b.PuntReturns);
+                block.OwnsOne(b => b.KickReturns);
+                block.OwnsOne(b => b.IntReturns);
+                block.OwnsOne(b => b.Fumbles);
+                block.OwnsOne(b => b.Penalties);
+            });
+        });
+
+        // ── TeamGameStats ─────────────────────────────────────────────
+        modelBuilder.Entity<TeamGameStats>(e =>
+        {
+            e.HasIndex(x => x.GameId);
+            e.HasIndex(x => x.TeamId);
+            e.HasIndex(x => new { x.GameId, x.TeamId }).IsUnique();
+
+            e.HasOne(x => x.Game)
+                .WithMany()
+                .HasForeignKey(x => x.GameId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            e.HasOne(x => x.Team)
+                .WithMany()
+                .HasForeignKey(x => x.TeamId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            e.OwnsOne(x => x.Stats, block =>
+            {
+                block.ToJson("stats");
+                block.OwnsOne(b => b.Summary);
+                block.OwnsOne(b => b.Passing);
+                block.OwnsOne(b => b.Rushing);
+                block.OwnsOne(b => b.Receiving);
+                block.OwnsOne(b => b.Defense);
+                block.OwnsOne(b => b.FieldGoals);
+                block.OwnsOne(b => b.Punts);
+                block.OwnsOne(b => b.Kickoffs);
+                block.OwnsOne(b => b.PuntReturns);
+                block.OwnsOne(b => b.KickReturns);
+                block.OwnsOne(b => b.IntReturns);
+                block.OwnsOne(b => b.Fumbles);
+                block.OwnsOne(b => b.Penalties);
+            });
         });
 
         // ── TeamSeasonStats ───────────────────────────────────────────
@@ -382,16 +475,9 @@ public class PatriotIndexDbContext : DbContext
                 .HasForeignKey(e => e.GameId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            entity.HasOne(e => e.PossessionTeam)
-                .WithMany()
-                .HasForeignKey(e => e.PossessionTeamId)
-                .OnDelete(DeleteBehavior.Restrict);
-
             entity.HasIndex(e => e.GameId);
             entity.HasIndex(e => e.DriveId);
-            entity.HasIndex(e => e.PossessionTeamId);
             entity.HasIndex(e => new { e.GameId, e.PlayType });
-            entity.HasIndex(e => new { e.GameId, e.Down });
             // GIN indexes on statistics and details are added via raw SQL in the migration
         });
 

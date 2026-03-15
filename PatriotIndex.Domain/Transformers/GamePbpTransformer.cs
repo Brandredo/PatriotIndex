@@ -122,7 +122,7 @@ public class GamePbpTransformer(string json)
         driveEl.GetArrayList("events", ev =>
         {
             var id       = ev.GetGuid("id") ?? throw new Exception("event id is null");
-            var sequence = ev.GetLong("sequence");
+            var sequence = ev.GetDecimal("sequence");
             var clock    = ev.GetString("clock");
             var desc     = ev.GetStringN("description");
             var evType   = ev.GetStringN("type") ?? string.Empty;
@@ -140,8 +140,6 @@ public class GamePbpTransformer(string json)
                     Clock            = clock,
                     WallClock        = ev.GetDateTimeOffset("wall_clock"),
                     PlayType         = playType,
-                    Down             = ev.GetIntN("down"),
-                    Distance         = ev.GetIntN("distance"),
                     Description      = desc,
                     HomePoints       = ev.GetInt("home_points"),
                     AwayPoints       = ev.GetInt("away_points"),
