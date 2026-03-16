@@ -40,6 +40,16 @@ public class GamesRepository(ILogger<GamesRepository> logger, PatriotIndexDbCont
         return games;
     }
     
+    public async Task<List<Guid>> GetGamesByTypeAndYearAsync(string seasonType, int year, CancellationToken ct)
+    {
+        var games = await ctx.Games
+            .Where(g => g.SeasonYear == year)
+            .Where(g => g.SeasonType == seasonType)
+            .Select(g => g.Id)
+            .ToListAsync(ct);
+        return games;
+    }
+    
     
     public async Task SaveAsync(IEnumerable<Game> games, CancellationToken ct)
     {

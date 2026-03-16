@@ -10,4 +10,8 @@ public interface IPlayerRepository
 
     Task<PlayerDetailDto?> GetByIdAsync(Guid id);
     Task<IReadOnlyList<PlayerGameLogDto>> GetGameLogAsync(Guid playerId, int? seasonYear, string? seasonType);
+
+    Task<PagedResultDto<PlayerStatsSummaryDto>> GetAllPlayersStatsAsync(
+        string? positionGroup, int season, string seasonType,
+        string? cursor, int limit, CancellationToken ct = default);
 }

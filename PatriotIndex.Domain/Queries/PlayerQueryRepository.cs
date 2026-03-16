@@ -7,7 +7,7 @@ using PatriotIndex.Domain.Interfaces;
 
 namespace PatriotIndex.Domain.Queries;
 
-public class PlayerQueryRepository(PatriotIndexDbContext db) : IPlayerRepository
+public class PlayerQueryRepository(PatriotIndexDbContext db, ICacheService cache) : IPlayerRepository
 {
     public async Task<IReadOnlyList<PlayerSummaryDto>> SearchAsync(
         string? search, Guid? teamId, PlayerPosition? position, string? status)
@@ -150,6 +150,183 @@ public class PlayerQueryRepository(PatriotIndexDbContext db) : IPlayerRepository
         s.Punts?.Attempts ?? 0,
         s.Punts?.Yards ?? 0,
         (double)(s.Punts?.AvgYards ?? 0));
+
+    // ── Stats page ────────────────────────────────────────────────────────
+
+    public async Task<PagedResultDto<PlayerStatsSummaryDto>> GetAllPlayersStatsAsync(
+        string? positionGroup, int season, string seasonType,
+        string? cursor, int limit, CancellationToken ct = default)
+    {
+        var cacheKey = $"stats:players:{positionGroup ?? "all"}:{season}:{seasonType}";
+        var full = await cache.GetOrSetAsync(
+            cacheKey,
+            () => FetchAllPlayersFromDb(positionGroup, season, seasonType),
+            season < DateTime.UtcNow.Year ? TimeSpan.FromHours(24) : TimeSpan.FromMinutes(30),
+            ct);
+
+        return Paginate(full ?? [], cursor, limit, x => x.PlayerId.ToString());
+    }
+
+    private async Task<PlayerStatsSummaryDto[]> FetchAllPlayersFromDb(
+        string? positionGroup, int season, string seasonType)
+    {
+        var positions = ParsePositionGroup(positionGroup);
+
+        var query = db.PlayerSeasonStats
+            .AsNoTracking()
+            .Include(s => s.Player!.Team!.Colors)
+            .Where(s => s.SeasonYear == season && s.SeasonType == seasonType
+                        && s.Player != null && s.GamesPlayed > 0);
+
+        if (positions.Length > 0)
+            query = query.Where(s => s.Player!.Position != null && positions.Contains(s.Player.Position!.Value));
+
+        var rows = await query.ToListAsync();
+
+        return rows
+            .Select(s => MapPlayerSummary(s, positionGroup))
+            .OrderByDescending(x => DefaultSortValue(x, positionGroup))
+            .ToArray();
+    }
+
+    private static PlayerPosition[] ParsePositionGroup(string? group) => group?.ToUpper() switch
+    {
+        "QB"    => [PlayerPosition.QB],
+        "RB"    => [PlayerPosition.RB, PlayerPosition.FB],
+        "WR_TE" => [PlayerPosition.WR, PlayerPosition.TE],
+        "DEF"   => [PlayerPosition.DL, PlayerPosition.DE, PlayerPosition.DT,
+                    PlayerPosition.LB, PlayerPosition.MLB, PlayerPosition.OLB,
+                    PlayerPosition.CB, PlayerPosition.FS, PlayerPosition.SS,
+                    PlayerPosition.SAF, PlayerPosition.DB],
+        "ST"    => [PlayerPosition.K, PlayerPosition.P, PlayerPosition.LS],
+        _       => []
+    };
+
+    private static decimal DefaultSortValue(PlayerStatsSummaryDto x, string? group) =>
+        group?.ToUpper() switch
+        {
+            "QB"    => x.PassYds ?? 0,
+            "RB"    => x.RushYds ?? 0,
+            "WR_TE" => x.RecYds  ?? 0,
+            "DEF"   => x.DefTackles ?? 0,
+            "ST"    => x.FgMade ?? x.PuntAtt ?? 0,
+            _       => 0
+        };
+
+    private static PlayerStatsSummaryDto MapPlayerSummary(PlayerSeasonStats s, string? group)
+    {
+        var p   = s.Player!;
+        var st  = s.Stats;
+        var pas = st.Passing;
+        var rus = st.Rushing;
+        var rec = st.Receiving;
+        var def = st.Defense;
+        var fg  = st.FieldGoals;
+        var xp  = st.ExtraPoints;
+        var pun = st.Punts;
+        int gp  = Math.Max(s.GamesPlayed, 1);
+
+        static decimal? SafeDiv(decimal? num, int den) =>
+            num.HasValue && den > 0 ? Math.Round(num.Value / den, 2) : null;
+        static decimal? SafeDivInt(int num, int den) =>
+            den > 0 ? Math.Round((decimal)num / den, 2) : null;
+        static decimal? Pct(int num, int den) =>
+            den > 0 ? Math.Round((decimal)num / den * 100, 1) : null;
+
+        return new PlayerStatsSummaryDto(
+            p.Id,
+            p.Name,
+            p.Position?.ToString(),
+            p.TeamId,
+            p.Team?.Alias,
+            p.Team?.Market,
+            s.GamesPlayed,
+            s.GamesStarted,
+            // Passing core
+            pas?.Attempts,
+            pas?.Completions,
+            pas is not null ? Pct(pas.Completions, pas.Attempts) : null,
+            pas?.Yards,
+            pas is not null ? SafeDivInt(pas.Yards, gp) : null,
+            pas?.Touchdowns,
+            pas?.Interceptions,
+            pas is not null ? (decimal?)pas.Rating : null,
+            pas?.Sacks,
+            // Passing advanced
+            pas?.AirYards,
+            pas is not null ? SafeDivInt(pas.AirYards, pas.Attempts) : null,
+            pas?.AvgPocketTime,
+            pas is not null ? Pct(pas.PoorThrows, pas.Attempts) : null,
+            pas?.Blitzes,
+            pas?.Hurries,
+            // Rushing core
+            rus?.Attempts,
+            rus?.Yards,
+            rus is not null ? SafeDiv((decimal?)rus.AvgYards, 1) : null,
+            rus?.Touchdowns,
+            // Rushing advanced
+            rus?.BrokenTackles,
+            rus is not null ? Pct(rus.BrokenTackles, rus.Attempts) : null,
+            rus?.YardsAfterContact,
+            rus is not null ? SafeDivInt(rus.YardsAfterContact, rus.Attempts) : null,
+            // Receiving core
+            rec?.Targets,
+            rec?.Receptions,
+            rec?.Yards,
+            rec is not null ? (decimal?)rec.AvgYards : null,
+            rec?.Touchdowns,
+            rec is not null ? Pct(rec.Receptions, rec.Targets) : null,
+            // Receiving advanced
+            rec?.YardsAfterCatch,
+            rec is not null ? SafeDivInt(rec.YardsAfterCatch, rec.Receptions) : null,
+            rec?.AirYards,
+            rec?.DroppedPasses,
+            rec is not null ? Pct(rec.DroppedPasses, rec.Targets) : null,
+            // Defense core
+            def?.Tackles,
+            def?.Assists,
+            def is not null ? (decimal?)def.Sacks : null,
+            def?.Interceptions,
+            def?.PassesDefended,
+            def?.ForcedFumbles,
+            def?.QbHits,
+            // Defense advanced
+            def?.MissedTackles,
+            def?.Blitzes,
+            def?.Hurries,
+            def?.Knockdowns,
+            // Kicker
+            fg?.Made,
+            fg?.Attempts,
+            fg?.Pct,
+            fg?.Longest,
+            fg?.Made19, fg?.Attempts19,
+            fg?.Made29, fg?.Attempts29,
+            fg?.Made39, fg?.Attempts39,
+            fg?.Made49, fg?.Attempts49,
+            fg?.Made50, fg?.Attempts50,
+            xp?.Made,
+            xp?.Attempts,
+            // Punter
+            pun?.Attempts,
+            pun?.AvgYards,
+            pun?.AvgNetYards,
+            pun?.Inside20,
+            pun?.AvgHangTime
+        );
+    }
+
+    private static PagedResultDto<T> Paginate<T>(
+        T[] all, string? cursor, int limit, Func<T, string> getId)
+    {
+        var start = cursor is null ? 0
+            : Array.FindIndex(all, x => getId(x) == cursor) + 1;
+        if (start < 0) start = 0;
+        var page = all.Skip(start).Take(limit).ToArray();
+        var nextCursor = page.Length == limit && start + limit < all.Length
+            ? getId(page.Last()) : null;
+        return new PagedResultDto<T>(page, nextCursor, all.Length);
+    }
 
     internal static StatBlockDto MapStatBlock(PlayerStatBlock s) => new(
         s.Passing?.Attempts ?? 0,

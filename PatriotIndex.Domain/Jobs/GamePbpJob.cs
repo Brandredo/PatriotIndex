@@ -91,8 +91,8 @@ public class GamePbpJob(SportsApiClient apiClient,
         // get the current season from configuration
         var seasonId = await syncLogRepository.GetCurrentSeasonId(cancellationToken);
         
-        backgroundJobClient.Enqueue<SeasonalStatsJob>(job => job.RunAsync(hId, new SeasonInput { SeasonId = seasonId }, cancellationToken));
-        backgroundJobClient.Enqueue<SeasonalStatsJob>(job => job.RunAsync(aId, new SeasonInput { SeasonId = seasonId }, cancellationToken));
-        backgroundJobClient.Enqueue<GameSummaryStatsJob>(job => job.RunAsync(game.Id, cancellationToken));
+        //backgroundJobClient.Enqueue<SeasonalStatsJob>(job => job.RunAsync(hId, new SeasonInput { SeasonId = seasonId }, cancellationToken)); // home team
+        //backgroundJobClient.Enqueue<SeasonalStatsJob>(job => job.RunAsync(aId, new SeasonInput { SeasonId = seasonId }, cancellationToken)); // away team
+        backgroundJobClient.Enqueue<GameSummaryStatsJob>(job => job.RunAsync(game.Id, cancellationToken)); // game summary/box-score stats
     }
 }

@@ -167,7 +167,7 @@ public class TeamsRepository(PatriotIndexDbContext ctx, ILogger<TeamsRepository>
     {
         await ctx.Database.ExecuteSqlRawAsync(
             @"INSERT INTO players(id, team_id, first_name, last_name, name, jersey, position, height, weight, birth_date, college, rookie_year, status, experience, salary, sr_id, draft_year, draft_round, draft_pick, draft_team_id) values ({0}, {1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}, {9}, {10}, {11}, {12}, {13}, {14}, {15}, {16}, {17}, {18}, {19}) ON CONFLICT(id) DO UPDATE SET team_id = EXCLUDED.team_id, first_name = EXCLUDED.first_name, last_name = EXCLUDED.last_name, name = EXCLUDED.name, jersey = EXCLUDED.jersey, position = EXCLUDED.position, height = EXCLUDED.height, weight = EXCLUDED.weight, birth_date = EXCLUDED.birth_date, college = EXCLUDED.college, rookie_year = EXCLUDED.rookie_year, status = EXCLUDED.status, experience = EXCLUDED.experience, salary = EXCLUDED.salary, sr_id = EXCLUDED.sr_id, draft_year = EXCLUDED.draft_year, draft_round = EXCLUDED.draft_round, draft_pick = EXCLUDED.draft_pick, draft_team_id = EXCLUDED.draft_team_id",
-            player.Id, player.TeamId, player.FirstName, player.LastName, player.Name, player.Jersey, player.Position,
+            player.Id, player.TeamId, player.FirstName, player.LastName, player.Name, player.Jersey, player.Position?.ToString(),
             player.Height, player.Weight, player.BirthDate, player.College, player.RookieYear, player.Status,
             player.Experience, player.Salary, player.SrId, player.DraftYear, player.DraftRound, player.DraftPick,
             player.DraftTeamId);

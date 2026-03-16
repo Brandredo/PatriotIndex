@@ -19,7 +19,7 @@ public class GamePbpJobOrchestrator(
 
         logger.LogInformation("Starting Game Pbp Job Orchestrator");
 
-        var gameIds = await gamesRepository.GetGamesAsync("NE", 2025, CancellationToken.None); // returns all 32 team ids
+        var gameIds = await gamesRepository.GetGamesByTypeAndYearAsync("REG", 2025, CancellationToken.None); // returns all 32 team ids
 
 
         if (gameIds.Count == 0)

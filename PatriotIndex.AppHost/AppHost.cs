@@ -14,6 +14,13 @@ var postgres = builder.AddPostgres("Postgres", password: pgPassword)
 
 var postgresdb = postgres.AddDatabase("PostgresDb");
 
+var cache = builder.AddRedis("Cache")
+    .WithRedisInsight()
+    .WithDataVolume("patriotindex-redis-data", isReadOnly: false)
+    .WithPersistence(
+        interval: TimeSpan.FromMinutes(5),
+        keysChangedThreshold: 1);
+
 var migrations = builder.AddProject<PatriotIndex_MigrationService>("patriotindex-migrations")
     .WithReference(postgresdb)
     .WaitFor(postgresdb);
@@ -24,6 +31,7 @@ builder.AddProject<PatriotIndex_Scheduler>("patriotindex-scheduler")
 
 builder.AddProject<PatriotIndex_Api>("patriotindex-api")
     .WithReference(postgresdb)
+    .WithReference(cache)
     .WaitForCompletion(migrations);
 
 builder.Build().Run();

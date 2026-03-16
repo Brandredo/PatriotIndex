@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using PatriotIndex.Domain.Context;
 using PatriotIndex.Domain.Interfaces;
 using PatriotIndex.Domain.Queries;
+using PatriotIndex.Domain.Services;
 using PatriotIndex.ServiceDefaults;
 using Scalar.AspNetCore;
 
@@ -15,12 +16,16 @@ builder.AddNpgsqlDbContext<PatriotIndexDbContext>("PostgresDb", configureDbConte
     options.EnableDetailedErrors();
 });
 
+builder.AddRedisClient(connectionName: "Cache");
+
 // Read repositories
 builder.Services.AddScoped<ITeamRepository, TeamQueryRepository>();
 builder.Services.AddScoped<IPlayerRepository, PlayerQueryRepository>();
 builder.Services.AddScoped<IGameRepository, GameQueryRepository>();
 builder.Services.AddScoped<ILeaderboardRepository, LeaderboardQueryRepository>();
 builder.Services.AddScoped<IConferenceRepository, ConferenceQueryRepository>();
+
+builder.Services.AddSingleton<ICacheService, CacheService>();
 
 builder.Services.AddControllers()
     .AddJsonOptions(options =>

@@ -1,12 +1,13 @@
 using Microsoft.AspNetCore.Mvc;
 using PatriotIndex.Domain.Enums;
 using PatriotIndex.Domain.Interfaces;
+using StackExchange.Redis;
 
 namespace PatriotIndex.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]s")]
-public class PlayerController(IPlayerRepository players) : ControllerBase
+public class PlayerController(IConnectionMultiplexer connectionMux, IPlayerRepository players) : ControllerBase
 {
     [HttpGet("{id:guid}")]
     public async Task<IActionResult> GetById(Guid id)

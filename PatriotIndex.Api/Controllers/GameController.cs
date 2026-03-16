@@ -1,11 +1,12 @@
 using Microsoft.AspNetCore.Mvc;
 using PatriotIndex.Domain.Interfaces;
+using StackExchange.Redis;
 
 namespace PatriotIndex.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]s")]
-public class GameController(IGameRepository games) : ControllerBase
+public class GameController(IConnectionMultiplexer connectionMux, IGameRepository games) : ControllerBase
 {
     [HttpGet]
     public async Task<IActionResult> GetAll(
