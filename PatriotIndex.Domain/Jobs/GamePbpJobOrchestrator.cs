@@ -2,6 +2,7 @@ using System.Diagnostics;
 using Hangfire;
 using Microsoft.Extensions.Logging;
 using PatriotIndex.Domain.Repository;
+using PatriotIndex.Domain.Telemetry;
 
 namespace PatriotIndex.Domain.Jobs;
 
@@ -11,11 +12,9 @@ public class GamePbpJobOrchestrator(
     IBackgroundJobClient backgroundJobClient,
     ILogger<GamePbpJobOrchestrator> logger)
 {
-    private static readonly ActivitySource _tracer = new("MyApp.GamePbpJobOrchestrator");
-
     public async Task RunAsync()
     {
-        using var activity = _tracer.StartActivity("GamePbpJobOrchestrator.RunAsync");
+        using var activity = PatriotIndexTelemetry.Source.StartActivity("GamePbpJobOrchestrator.RunAsync", ActivityKind.Internal);
 
         logger.LogInformation("Starting Game Pbp Job Orchestrator");
 

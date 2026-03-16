@@ -6,6 +6,7 @@ using PatriotIndex.Domain.DTOs;
 using PatriotIndex.Domain.Entities;
 using PatriotIndex.Domain.Repository;
 using PatriotIndex.Domain.Services;
+using PatriotIndex.Domain.Telemetry;
 using PatriotIndex.Domain.Transformers;
 
 namespace PatriotIndex.Domain.Jobs;
@@ -13,69 +14,82 @@ namespace PatriotIndex.Domain.Jobs;
 
 public class SeasonalStatsJob(SportsApiClient apiClient, ILogger<SeasonalStatsJob> logger, SyncLogRepository syncLogRepository, StatsRepository statsRepository)
 {
-    private static readonly ActivitySource _tracer = new("SeasonalStatsJob");
-    
     [AutomaticRetry(Attempts = 0)]
     public async Task RunAsync(Guid teamId, SeasonInput seasonInput, CancellationToken cancellationToken = default)
     {
-        logger.LogInformation("Starting Seasonal Stats Job");
-        
-        using var activity = _tracer.StartActivity("SeasonalStatsJob.RunAsync");
-        
-        var log = new SyncLog
-        {
-            //Id = default,
-            EntityType = $"SeasonalStats:{teamId}",
-            StartedAt = DateTime.UtcNow,
-            CompletedAt = null,
-            Status = "Pending",
-            RecordCount = 0,
-            ErrorMessage = null,
-            RawResponse = null
-        };
-        
+        logger.LogInformation("Starting SeasonalStatsJob for team {TeamId} ({Year}/{SeasonType})", teamId, seasonInput.SeasonYear, seasonInput.SeasonType);
+
+        using var activity = PatriotIndexTelemetry.Source.StartActivity("SeasonalStatsJob.RunAsync", ActivityKind.Internal);
+        activity?.SetTag("season.stats.job.id", $"{seasonInput.SeasonYear}.{seasonInput.SeasonType},{teamId}");
+
+        var entityId = $"SeasonalStats:{teamId}:{seasonInput.SeasonYear}:{seasonInput.SeasonType}";
+
         try
         {
-            activity?.SetTag("team.id", teamId);
-            
-            var respId = await syncLogRepository.InsertEntry(log, cancellationToken);
-            
-            var data = await apiClient.GetAsync($"seasons/{seasonInput.SeasonYear}/{seasonInput.SeasonType}/teams/{teamId}/statistics.json", cancellationToken);
-            
-            activity?.SetTag("stats.job.http", "Completed");
-            
-            await syncLogRepository.UpdateEntry(respId, entry =>
+            string? data = null;
+
+            var rawResponse = await syncLogRepository.IsDuplicateEntry(entityId, cancellationToken);
+
+            if (rawResponse == null)
             {
-                entry.RawResponse = JsonDocument.Parse(data);
-                entry.CompletedAt = DateTime.UtcNow;
-                entry.Status = "Success";
-                entry.RecordCount = 1;
-            }, cancellationToken);
-            
-            activity?.SetTag("stats.job.cached", "Completed");
-            
+                var log = new SyncLog
+                {
+                    EntityType = $"SeasonalStats:{teamId}:{seasonInput.SeasonYear}:{seasonInput.SeasonType}",
+                    StartedAt = DateTime.UtcNow,
+                    Status = "Pending",
+                    RecordCount = 0,
+                };
+
+                var respId = await syncLogRepository.InsertEntry(log, cancellationToken);
+
+                // 1. call the api to get the game data
+                data = await apiClient.GetAsync($"seasons/{seasonInput.SeasonYear}/{seasonInput.SeasonType}/teams/{teamId}/statistics.json", cancellationToken);
+
+                activity?.AddEvent(new ActivityEvent("http.fetch.complete"));
+
+                // 2. persist the api response in the database
+                await syncLogRepository.UpdateEntry(respId, entry =>
+                {
+                    entry.RawResponse = JsonDocument.Parse(data);
+                    entry.CompletedAt = DateTime.UtcNow;
+                    entry.Status = "Success";
+                    entry.RecordCount = 1;
+                }, cancellationToken);
+
+                activity?.AddEvent(new ActivityEvent("sync.log.saved"));
+            }
+            else
+            {
+                data = rawResponse.RootElement.GetRawText();
+            }
+
+            if (string.IsNullOrWhiteSpace(data)) throw new Exception("game data is null");
+
             var sst = new SeasonalStatsTransformer(JsonSerializer.Deserialize<SeasonalStatsApiResponse>(data));
             var (team, players, playerStats) = sst.Transform();
-            activity?.SetTag("stats.job.model", "Completed");
+            activity?.AddEvent(new ActivityEvent("transform.complete"));
 
             if(team == null || players == null || playerStats == null) throw new Exception("stats is null");
 
             await statsRepository.SaveAsync(team, players, playerStats, cancellationToken);
-            activity?.SetTag("stats.job.db", "Completed");
-            logger.LogInformation("Stats Job completed");
-            activity?.SetStatus(ActivityStatusCode.Ok);            
+
+            activity?.AddEvent(new ActivityEvent("db.save.complete"));
+
+            logger.LogInformation("SeasonalStatsJob completed for team {TeamId}", teamId);
+
+            activity?.SetStatus(ActivityStatusCode.Ok);
         }
         catch (Exception e)
         {
-            activity?.SetTag("stats.job.error", e.Message);
+            activity?.AddException(e);
             activity?.SetStatus(ActivityStatusCode.Error, e.Message);
-            logger.LogError(e, "Stats Job failed");
+            logger.LogError(e, "SeasonalStatsJob failed for team {TeamId}", teamId);
             throw;
         }
-        
+
     }
-    
-    
+
+
 }
 
 public record SeasonInput

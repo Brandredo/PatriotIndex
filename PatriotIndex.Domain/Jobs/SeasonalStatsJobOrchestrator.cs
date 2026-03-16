@@ -2,6 +2,7 @@ using System.Diagnostics;
 using Hangfire;
 using Microsoft.Extensions.Logging;
 using PatriotIndex.Domain.Repository;
+using PatriotIndex.Domain.Telemetry;
 
 namespace PatriotIndex.Domain.Jobs;
 
@@ -12,11 +13,9 @@ public class SeasonalStatsJobOrchestrator(
     IBackgroundJobClient backgroundJobClient,
     ILogger<SeasonalStatsJobOrchestrator> logger)
 {
-    private static readonly ActivitySource _tracer = new("MyApp.SeasonalStatsJobOrchestrator");
-
     public async Task RunAsync()
     {
-        using var activity = _tracer.StartActivity("SeasonalStatsJobOrchestrator.RunAsync");
+        using var activity = PatriotIndexTelemetry.Source.StartActivity("SeasonalStatsJobOrchestrator.RunAsync", ActivityKind.Internal);
 
         logger.LogInformation("Starting Seasonal Stats Job Orchestrator");
 

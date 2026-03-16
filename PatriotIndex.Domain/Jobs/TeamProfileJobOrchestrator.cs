@@ -2,6 +2,7 @@ using System.Diagnostics;
 using Hangfire;
 using Microsoft.Extensions.Logging;
 using PatriotIndex.Domain.Repository;
+using PatriotIndex.Domain.Telemetry;
 
 namespace PatriotIndex.Domain.Jobs;
 
@@ -11,11 +12,10 @@ public class TeamProfileJobOrchestrator(
     IBackgroundJobClient backgroundJobClient,
     ILogger<TeamProfileJobOrchestrator> logger)
 {
-    private static readonly ActivitySource _tracer = new("MyApp.TeamProfileJobOrchestrator");
 
     public async Task RunAsync()
     {
-        using var activity = _tracer.StartActivity("TeamProfileJobOrchestrator.RunAsync");
+        using var activity = PatriotIndexTelemetry.Source.StartActivity("TeamProfileJobOrchestrator.RunAsync", ActivityKind.Internal);
 
         logger.LogInformation("Starting Team Profile Job Orchestrator");
 

@@ -5,76 +5,86 @@ using Microsoft.Extensions.Logging;
 using PatriotIndex.Domain.Entities;
 using PatriotIndex.Domain.Repository;
 using PatriotIndex.Domain.Services;
+using PatriotIndex.Domain.Telemetry;
 using PatriotIndex.Domain.Transformers;
 
 namespace PatriotIndex.Domain.Jobs;
 
-[AutomaticRetry(Attempts = 0)]
 public class TeamProfileJob(
     SportsApiClient apiClient,
     SyncLogRepository syncLogRepository,
     TeamsRepository teamsRepository,
     ILogger<TeamProfileJob> logger)
 {
-    private static readonly ActivitySource _tracer = new("MyApp.TeamProfileJobOrchestrator");
-
-
+    [AutomaticRetry(Attempts = 0)]
     public async Task RunAsync(Guid teamId, CancellationToken cancellationToken)
     {
-        logger.LogInformation("Starting Team Profile Job");
+        logger.LogInformation("Starting TeamProfileJob for team {TeamId}", teamId);
 
-        using var activity = _tracer.StartActivity("TeamProfileJob.RunAsync");
+        using var activity = PatriotIndexTelemetry.Source.StartActivity("TeamProfileJob.RunAsync", ActivityKind.Internal);
+        activity?.SetTag("team.id", teamId);
+
+        var entityId = $"TeamProfile:{teamId}";
+
         try
         {
-            // BEFORE THE JOB RUNS, CHECK IN THE SYNCLOG TABLE IF THE JOB ALREADY RUNS FOR THIS TEAM BUT FAILED RECENTLY
-            //var result =
+            string? data = null;
 
-            activity?.SetTag("team.id", teamId);
+            var rawResponse = await syncLogRepository.IsDuplicateEntry(entityId, cancellationToken);
 
-            var log = new SyncLog
+            if (rawResponse == null)
             {
-                //Id = default,
-                EntityType = $"TeamProfile:{teamId}",
-                StartedAt = DateTime.UtcNow,
-                CompletedAt = null,
-                Status = null,
-                RecordCount = 0,
-                ErrorMessage = null,
-                RawResponse = null
-            };
+                var log = new SyncLog
+                {
+                    EntityType = entityId,
+                    StartedAt = DateTime.UtcNow,
+                    Status = "Pending",
+                    RecordCount = 0,
+                };
 
-            // 1. call the api to get the team profile data
-            var data = await apiClient.GetAsync($"teams/{teamId}/profile.json", cancellationToken);
-            log.CompletedAt = DateTime.UtcNow;
-            log.Status = "Completed";
-            log.RecordCount = 1;
-            log.RawResponse = JsonDocument.Parse(data);
+                var respId = await syncLogRepository.InsertEntry(log, cancellationToken);
 
-            activity?.SetTag("team.profile.job.http", "Completed");
+                // 1. call the api to get the team profile data
+                data = await apiClient.GetAsync($"teams/{teamId}/profile.json", cancellationToken);
 
-            // 2. persist the api response in the database
-            await syncLogRepository.InsertEntry(log, cancellationToken);
+                activity?.AddEvent(new ActivityEvent("http.fetch.complete"));
 
-            activity?.SetTag("team.profile.job.cached", "Completed");
+                // 2. persist the api response in the database
+                await syncLogRepository.UpdateEntry(respId, entry =>
+                {
+                    entry.RawResponse = JsonDocument.Parse(data);
+                    entry.CompletedAt = DateTime.UtcNow;
+                    entry.Status = "Success";
+                    entry.RecordCount = 1;
+                }, cancellationToken);
+
+                activity?.AddEvent(new ActivityEvent("sync.log.saved"));
+            }
+            else
+            {
+                data = rawResponse.RootElement.GetRawText();
+            }
+
+            if (string.IsNullOrWhiteSpace(data)) throw new Exception("team profile data is null");
 
             // 3. transform the data into a model
             var tpt = new TeamProfileTransformer(data);
             var team = tpt.Transform();
 
-            activity?.SetTag("team.profile.job.model", "Completed");
+            activity?.AddEvent(new ActivityEvent("transform.complete"));
 
             // 4. persist the model in the database
             await teamsRepository.SaveOrUpdateAsync(team, cancellationToken);
 
-            activity?.SetTag("team.profile.job.db", "Completed");
-            logger.LogInformation("Team Profile Job completed");
+            activity?.AddEvent(new ActivityEvent("db.save.complete"));
+            logger.LogInformation("TeamProfileJob completed for team {TeamId}", teamId);
             activity?.SetStatus(ActivityStatusCode.Ok);
         }
         catch (Exception e)
         {
-            activity?.SetTag("team.profile.job.error", e.Message);
+            activity?.AddException(e);
             activity?.SetStatus(ActivityStatusCode.Error, e.Message);
-            logger.LogError(e, "Team Profile Job failed");
+            logger.LogError(e, "TeamProfileJob failed for team {TeamId}", teamId);
             throw;
         }
     }

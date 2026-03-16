@@ -4,7 +4,7 @@ using PatriotIndex.Domain.Enums;
 
 namespace PatriotIndex.Domain.Transformers;
 
-public class SeasonalStatsTransformer(SeasonalStatsApiResponse dto)
+public class SeasonalStatsTransformer(SeasonalStatsApiResponse? dto)
 {
     public (TeamSeasonStats Team, IReadOnlyList<Player> Players, IReadOnlyList<PlayerSeasonStats> PlayerStats) Transform()
     {

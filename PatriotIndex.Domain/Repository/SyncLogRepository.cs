@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using PatriotIndex.Domain.Context;
 using PatriotIndex.Domain.Entities;
@@ -6,6 +7,21 @@ namespace PatriotIndex.Domain.Repository;
 
 public class SyncLogRepository(PatriotIndexDbContext ctx)
 {
+    
+    // check if an entry with the same entity type and id already exists from the last 24 hours
+    public async Task<JsonDocument?> IsDuplicateEntry(string entityId, CancellationToken cancellationToken)
+    {
+        var cutoff = DateTime.UtcNow.AddHours(-24);
+
+        return await ctx.SyncLogs
+            .AsNoTracking()
+            .Where(e => e.EntityType == entityId && e.CompletedAt >= cutoff && e.Status == "Success" && e.RawResponse != null)
+            .OrderByDescending(e => e.CompletedAt)
+            .Select(e => e.RawResponse)
+            .FirstOrDefaultAsync(cancellationToken);
+    }
+    
+    
     public async Task<long> InsertEntry(SyncLog entry, CancellationToken cancellationToken)
     {
         await ctx.SyncLogs.AddAsync(entry, cancellationToken);
