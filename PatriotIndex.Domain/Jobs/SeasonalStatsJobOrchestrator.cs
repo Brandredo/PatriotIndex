@@ -27,7 +27,7 @@ public class SeasonalStatsJobOrchestrator(
         activity?.SetTag("team.count", teamIds.Count());
         //teamsIds = teamsIds.Take(1);
 
-        var seasons = await seasonRepository.GetPstByYearUpAsync(2025, CancellationToken.None);
+        var seasons = await seasonRepository.GetRegSeasonCodesAndYearAsync(2025, CancellationToken.None);
 
         if (seasons.Count == 0)
             seasons = [new SeasonInput { SeasonYear = 2025, SeasonType = "REG" }];

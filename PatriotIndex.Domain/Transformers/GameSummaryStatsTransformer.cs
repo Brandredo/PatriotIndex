@@ -1,21 +1,24 @@
 using System.Text.Json;
+using Microsoft.Extensions.Logging;
 using PatriotIndex.Domain.Entities;
+using PatriotIndex.Domain.Enums;
 
 namespace PatriotIndex.Domain.Transformers;
 
-public class GameSummaryStatsTransformer(string json)
+public class GameSummaryStatsTransformer(string json, ILogger? logger = null)
 {
-    public (List<TeamGameStats> TeamStats, List<PlayerGameStats> PlayerStats) Transform()
+    public (List<TeamGameStats> TeamStats, List<PlayerGameStats> PlayerStats, List<Player> Players) Transform()
     {
         using var doc = JsonDocument.Parse(json);
         var root = doc.RootElement;
 
         var gameId = GetGuid(root, "id");
         if (!root.TryGetProperty("statistics", out var statistics))
-            return ([], []);
+            return ([], [], []);
 
         var teamStatsList   = new List<TeamGameStats>();
         var allPlayerStats  = new List<PlayerGameStats>();
+        var allPlayerStubs  = new Dictionary<Guid, Player>();
 
         foreach (var (side, isHome) in new[] { ("home", true), ("away", false) })
         {
@@ -32,10 +35,10 @@ public class GameSummaryStatsTransformer(string json)
                 Stats  = BuildTeamBlock(teamEl),
             });
 
-            var playerMap = new Dictionary<Guid, PlayerGameStatsBlock>();
-            CollectPlayerStats(teamEl, playerMap);
+            var statsMap = new Dictionary<Guid, PlayerGameStatsBlock>();
+            CollectPlayerStats(teamEl, teamId, statsMap, allPlayerStubs);
 
-            foreach (var (playerId, block) in playerMap)
+            foreach (var (playerId, block) in statsMap)
             {
                 allPlayerStats.Add(new PlayerGameStats
                 {
@@ -48,7 +51,7 @@ public class GameSummaryStatsTransformer(string json)
             }
         }
 
-        return (teamStatsList, allPlayerStats);
+        return (teamStatsList, allPlayerStats, allPlayerStubs.Values.ToList());
     }
 
     // ── Team block ──────────────────────────────────────────────────────────
@@ -90,26 +93,31 @@ public class GameSummaryStatsTransformer(string json)
 
     // ── Player collection ────────────────────────────────────────────────────
 
-    private static void CollectPlayerStats(JsonElement team, Dictionary<Guid, PlayerGameStatsBlock> map)
+    private void CollectPlayerStats(
+        JsonElement team, Guid teamId,
+        Dictionary<Guid, PlayerGameStatsBlock> statsMap,
+        Dictionary<Guid, Player> playerMap)
     {
-        ProcessCategory(team, "rushing",      map, (el, b) => b.Rushing     = MapRushing(el));
-        ProcessCategory(team, "passing",      map, (el, b) => b.Passing     = MapPassing(el));
-        ProcessCategory(team, "receiving",    map, (el, b) => b.Receiving   = MapReceiving(el));
-        ProcessCategory(team, "defense",      map, (el, b) => b.Defense     = MapDefense(el));
-        ProcessCategory(team, "field_goals",  map, (el, b) => b.FieldGoals  = MapFieldGoals(el));
-        ProcessCategory(team, "punts",        map, (el, b) => b.Punts       = MapPunts(el));
-        ProcessCategory(team, "kickoffs",     map, (el, b) => b.Kickoffs    = MapKickoffs(el));
-        ProcessCategory(team, "punt_returns", map, (el, b) => b.PuntReturns = MapPuntReturns(el));
-        ProcessCategory(team, "kick_returns", map, (el, b) => b.KickReturns = MapKickReturns(el));
-        ProcessCategory(team, "int_returns",  map, (el, b) => b.IntReturns  = MapIntReturns(el));
-        ProcessCategory(team, "fumbles",      map, (el, b) => b.Fumbles     = MapFumbles(el));
-        ProcessCategory(team, "penalties",    map, (el, b) => b.Penalties   = MapPenalties(el));
+        ProcessCategory(team, "rushing",      teamId, statsMap, playerMap, (el, b) => b.Rushing     = MapRushing(el));
+        ProcessCategory(team, "passing",      teamId, statsMap, playerMap, (el, b) => b.Passing     = MapPassing(el));
+        ProcessCategory(team, "receiving",    teamId, statsMap, playerMap, (el, b) => b.Receiving   = MapReceiving(el));
+        ProcessCategory(team, "defense",      teamId, statsMap, playerMap, (el, b) => b.Defense     = MapDefense(el));
+        ProcessCategory(team, "field_goals",  teamId, statsMap, playerMap, (el, b) => b.FieldGoals  = MapFieldGoals(el));
+        ProcessCategory(team, "punts",        teamId, statsMap, playerMap, (el, b) => b.Punts       = MapPunts(el));
+        ProcessCategory(team, "kickoffs",     teamId, statsMap, playerMap, (el, b) => b.Kickoffs    = MapKickoffs(el));
+        ProcessCategory(team, "punt_returns", teamId, statsMap, playerMap, (el, b) => b.PuntReturns = MapPuntReturns(el));
+        ProcessCategory(team, "kick_returns", teamId, statsMap, playerMap, (el, b) => b.KickReturns = MapKickReturns(el));
+        ProcessCategory(team, "int_returns",  teamId, statsMap, playerMap, (el, b) => b.IntReturns  = MapIntReturns(el));
+        ProcessCategory(team, "fumbles",      teamId, statsMap, playerMap, (el, b) => b.Fumbles     = MapFumbles(el));
+        ProcessCategory(team, "penalties",    teamId, statsMap, playerMap, (el, b) => b.Penalties   = MapPenalties(el));
     }
 
-    private static void ProcessCategory(
+    private void ProcessCategory(
         JsonElement team,
         string category,
-        Dictionary<Guid, PlayerGameStatsBlock> map,
+        Guid teamId,
+        Dictionary<Guid, PlayerGameStatsBlock> statsMap,
+        Dictionary<Guid, Player> playerMap,
         Action<JsonElement, PlayerGameStatsBlock> setter)
     {
         if (!team.TryGetProperty(category, out var cat)) return;
@@ -120,13 +128,50 @@ public class GameSummaryStatsTransformer(string json)
         {
             var id = GetGuid(p, "id");
             if (id == Guid.Empty) continue;
-            if (!map.TryGetValue(id, out var block))
+
+            if (!statsMap.TryGetValue(id, out var block))
             {
-                block    = new PlayerGameStatsBlock();
-                map[id] = block;
+                block        = new PlayerGameStatsBlock();
+                statsMap[id] = block;
             }
             setter(p, block);
+
+            if (!playerMap.ContainsKey(id))
+                playerMap[id] = BuildPlayerStub(p, id, teamId);
         }
+    }
+
+    private Player BuildPlayerStub(JsonElement p, Guid id, Guid teamId)
+    {
+        var fullName  = p.TryGetProperty("name", out var nameEl) ? nameEl.GetString() ?? "" : "";
+        var parts     = fullName.Split(' ', 2);
+        var firstName = parts[0];
+        var lastName  = parts.Length > 1 ? parts[1] : "";
+
+        var posStr   = p.TryGetProperty("position", out var posEl) ? posEl.GetString() : null;
+        PlayerPosition? position = null;
+        if (!string.IsNullOrEmpty(posStr))
+        {
+            if (Enum.TryParse<PlayerPosition>(posStr, ignoreCase: true, out var pos))
+                position = pos;
+            else
+                logger?.LogCritical("Unknown PlayerPosition value '{Position}' for player {PlayerId}.", posStr, id);
+        }
+
+        var jersey = p.TryGetProperty("jersey", out var jerseyEl) ? jerseyEl.GetString() : null;
+        var srId   = p.TryGetProperty("sr_id",  out var srIdEl)   ? srIdEl.GetString()   : null;
+
+        return new Player
+        {
+            Id        = id,
+            TeamId    = teamId,
+            Name      = string.IsNullOrEmpty(fullName) ? null : fullName,
+            FirstName = firstName,
+            LastName  = lastName,
+            Jersey    = jersey,
+            Position  = position,
+            SrId      = srId,
+        };
     }
 
     // ── Stat mappers (totals and player entries share the same field names) ─

@@ -82,6 +82,9 @@ public class GamesRepository(ILogger<GamesRepository> logger, PatriotIndexDbCont
         {
             await using var tx = await ctx.Database.BeginTransactionAsync(ct);
 
+            if (game.Venue != null)
+                await UpsertVenueAsync(game.Venue, ct);
+
             await UpsertGameAsync(game, ct);
             await UpsertPeriod(game.Periods, ct);
 
@@ -105,6 +108,21 @@ public class GamesRepository(ILogger<GamesRepository> logger, PatriotIndexDbCont
         await ctx.Database.ExecuteSqlRawAsync(
             "DELETE FROM drives WHERE game_id = {0} AND id != ALL({1})",
             new object[] { gameId, incomingDriveIds }, ct);
+    }
+
+    private async Task UpsertVenueAsync(Venue venue, CancellationToken ct)
+    {
+        await ctx.Database.ExecuteSqlRawAsync(
+            @"INSERT INTO venues(id, name, city, state, country, zip, address, capacity, surface, roof_type, sr_id, lat, lng)
+              VALUES ({0}, {1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}, {9}, {10}, {11}, {12})
+              ON CONFLICT(id) DO UPDATE SET
+                name = EXCLUDED.name, city = EXCLUDED.city, state = EXCLUDED.state,
+                country = EXCLUDED.country, zip = EXCLUDED.zip, address = EXCLUDED.address,
+                capacity = EXCLUDED.capacity, surface = EXCLUDED.surface, roof_type = EXCLUDED.roof_type,
+                sr_id = EXCLUDED.sr_id, lat = EXCLUDED.lat, lng = EXCLUDED.lng",
+            new object?[] { venue.Id, venue.Name, venue.City, venue.State, venue.Country, venue.Zip,
+                venue.Address, venue.Capacity, venue.Surface, venue.RoofType, venue.SrId, venue.Lat, venue.Lng },
+            ct);
     }
 
     private async Task UpsertGameAsync(Game game, CancellationToken ct)

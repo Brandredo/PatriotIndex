@@ -10,6 +10,7 @@ public class GameStatsRepository(PatriotIndexDbContext ctx, ILogger<GameStatsRep
     public async Task SaveAsync(
         List<TeamGameStats> teamStats,
         List<PlayerGameStats> playerStats,
+        List<Player> players,
         CancellationToken ct = default)
     {
         if (teamStats.Count == 0 && playerStats.Count == 0) return;
@@ -22,6 +23,8 @@ public class GameStatsRepository(PatriotIndexDbContext ctx, ILogger<GameStatsRep
             await using var tx = await ctx.Database.BeginTransactionAsync(ct);
             try
             {
+                await UpsertPlayersAsync(players, ct);
+
                 foreach (var ts in teamStats)
                     await UpsertTeamGameStatsAsync(ts, ct);
 
@@ -29,8 +32,8 @@ public class GameStatsRepository(PatriotIndexDbContext ctx, ILogger<GameStatsRep
 
                 await tx.CommitAsync(ct);
                 logger.LogInformation(
-                    "Saved game stats for game {GameId}: {TeamCount} team rows, {PlayerCount} player rows.",
-                    gameId, teamStats.Count, playerStats.Count);
+                    "Saved game stats for game {GameId}: {TeamCount} team rows, {PlayerCount} player rows, {PlayerStubCount} player stubs.",
+                    gameId, teamStats.Count, playerStats.Count, players.Count);
             }
             catch (Exception ex)
             {
@@ -39,6 +42,24 @@ public class GameStatsRepository(PatriotIndexDbContext ctx, ILogger<GameStatsRep
                 throw;
             }
         });
+    }
+
+    private async Task UpsertPlayersAsync(List<Player> players, CancellationToken ct)
+    {
+        if (players.Count == 0) return;
+
+        foreach (var p in players)
+        {
+            await ctx.Database.ExecuteSqlInterpolatedAsync(
+                $"""
+                INSERT INTO players (id, team_id, first_name, last_name, name, jersey, position, sr_id)
+                VALUES ({p.Id}, {p.TeamId}, {p.FirstName}, {p.LastName}, {p.Name}, {p.Jersey}, {(int?)p.Position}, {p.SrId})
+                ON CONFLICT (id) DO NOTHING
+                """,
+                ct);
+        }
+
+        logger.LogDebug("Upserted {Count} thin player stubs.", players.Count);
     }
 
     private async Task UpsertTeamGameStatsAsync(TeamGameStats stats, CancellationToken ct)

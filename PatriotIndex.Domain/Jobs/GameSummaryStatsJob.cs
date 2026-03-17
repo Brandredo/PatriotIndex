@@ -65,11 +65,11 @@ public class GameSummaryStatsJob(
 
             if (string.IsNullOrWhiteSpace(data)) throw new Exception("game data is null");
 
-            var (teamStats, playerStats) = new GameSummaryStatsTransformer(data).Transform();
+            var (teamStats, playerStats, players) = new GameSummaryStatsTransformer(data, logger).Transform();
 
             activity?.AddEvent(new ActivityEvent("transform.complete"));
 
-            await gameStatsRepository.SaveAsync(teamStats, playerStats, cancellationToken);
+            await gameStatsRepository.SaveAsync(teamStats, playerStats, players, cancellationToken);
 
             activity?.AddEvent(new ActivityEvent("db.save.complete"));
             activity?.SetStatus(ActivityStatusCode.Ok);
