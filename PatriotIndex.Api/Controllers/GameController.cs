@@ -14,7 +14,9 @@ public class GameController(IConnectionMultiplexer connectionMux, IGameRepositor
         [FromQuery] string? seasonType,
         [FromQuery] int? week,
         [FromQuery] Guid? teamId)
-        => Ok(await games.GetGamesAsync(season, seasonType, week, teamId));
+    {
+        return Ok(await games.GetGamesAsync(season, seasonType, week, teamId));
+    }
 
     [HttpGet("{id:guid}/pbp")]
     public async Task<IActionResult> GetPbp(Guid id)

@@ -5,8 +5,17 @@ using PatriotIndex.Domain.Entities;
 
 namespace PatriotIndex.Domain.Repository;
 
-public class StatsRepository(PatriotIndexDbContext ctx, ILogger<StatsRepository> logger)
+public class StatsRepository(PatriotIndexDbContext_OLD ctx, ILogger<StatsRepository> logger)
 {
+
+    public async Task SaveAsync(IReadOnlyList<TeamSeasonStats> teamStats, IReadOnlyList<PlayerSeasonStats> playerStats,
+        CancellationToken ct = default)
+    {
+        
+    }
+    
+    
+    
     /// <summary>
     /// Upserts team season stats and all associated player season stats in a single transaction.
     /// Uses delete + re-insert because EF Core serialises the JSONB blocks automatically.

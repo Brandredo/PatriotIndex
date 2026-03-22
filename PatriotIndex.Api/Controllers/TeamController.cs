@@ -8,11 +8,16 @@ namespace PatriotIndex.Api.Controllers;
 public class TeamController(ITeamRepository teams) : ControllerBase
 {
     [HttpGet("hello")]
-    public string Hello() => "Hello World!";
-    
+    public string Hello()
+    {
+        return "Hello World!";
+    }
+
     [HttpGet]
     public async Task<IActionResult> GetAll()
-        => Ok(await teams.GetTeamsAndPlayers());
+    {
+        return Ok(await teams.GetTeamsAndPlayers());
+    }
 
     [HttpGet("{id:guid}")]
     public async Task<IActionResult> GetById(Guid id)
@@ -23,7 +28,9 @@ public class TeamController(ITeamRepository teams) : ControllerBase
 
     [HttpGet("{id:guid}/roster")]
     public async Task<IActionResult> GetRoster(Guid id)
-        => Ok(await teams.GetRosterAsync(id));
+    {
+        return Ok(await teams.GetRosterAsync(id));
+    }
 
     [HttpGet("{id:guid}/stats")]
     public async Task<IActionResult> GetStats(
@@ -40,26 +47,34 @@ public class TeamController(ITeamRepository teams) : ControllerBase
         Guid id,
         [FromQuery] int season = 2024,
         [FromQuery] string seasonType = "REG")
-        => Ok(await teams.GetTeamPlayerStatsAsync(id, season, seasonType));
+    {
+        return Ok(await teams.GetTeamPlayerStatsAsync(id, season, seasonType));
+    }
 
     [HttpGet("{id:guid}/gamelog")]
     public async Task<IActionResult> GetGameLog(
         Guid id,
         [FromQuery] int? season,
         [FromQuery] string? seasonType)
-        => Ok(await teams.GetTeamGameLogAsync(id, season, seasonType));
+    {
+        return Ok(await teams.GetTeamGameLogAsync(id, season, seasonType));
+    }
 
     [HttpGet("{id:guid}/play-call-stats")]
     public async Task<IActionResult> GetPlayCallStats(
         Guid id,
         [FromQuery] int season = 2025,
         [FromQuery] string seasonType = "REG")
-        => Ok(await teams.GetPlayCallStatsAsync(id, season, seasonType));
+    {
+        return Ok(await teams.GetPlayCallStatsAsync(id, season, seasonType));
+    }
 
     [HttpGet("{id:guid}/quarter-scoring")]
     public async Task<IActionResult> GetQuarterScoring(
         Guid id,
         [FromQuery] int season = 2025,
         [FromQuery] string seasonType = "REG")
-        => Ok(await teams.GetQuarterScoringAsync(id, season, seasonType));
+    {
+        return Ok(await teams.GetQuarterScoringAsync(id, season, seasonType));
+    }
 }

@@ -1,4 +1,5 @@
 using PatriotIndex.Domain.DTOs;
+using PatriotIndex.Domain.Entities;
 using PatriotIndex.Domain.Enums;
 
 namespace PatriotIndex.Domain.Interfaces;
@@ -11,7 +12,7 @@ public interface IPlayerRepository
     Task<PlayerDetailDto?> GetByIdAsync(Guid id);
     Task<IReadOnlyList<PlayerGameLogDto>> GetGameLogAsync(Guid playerId, int? seasonYear, string? seasonType);
 
-    Task<PagedResultDto<PlayerStatsSummaryDto>> GetAllPlayersStatsAsync(
+    Task<PagedResultDto<PlayerSeasonStats>> GetAllPlayersStatsAsync(
         string? positionGroup, int season, string seasonType,
         string? cursor, int limit, CancellationToken ct = default);
 }

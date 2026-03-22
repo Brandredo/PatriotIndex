@@ -3,9 +3,9 @@ using PatriotIndex.Domain.Entities;
 
 namespace PatriotIndex.Domain.Context;
 
-public class PatriotIndexDbContext : DbContext
+public class PatriotIndexDbContext_OLD : DbContext
 {
-    public PatriotIndexDbContext(DbContextOptions<PatriotIndexDbContext> options) : base(options)
+    public PatriotIndexDbContext_OLD(DbContextOptions<PatriotIndexDbContext_OLD> options) : base(options)
     {
     }
 
@@ -247,6 +247,7 @@ public class PatriotIndexDbContext : DbContext
         {
             e.HasIndex(x => x.PlayerId);
             e.HasIndex(x => new { x.PlayerId, x.SeasonYear, x.SeasonType }).IsUnique();
+            // e.HasIndex(x => new { x.SortKey, x.PlayerId });
 
             e.HasOne(x => x.Player)
                 .WithMany(x => x.SeasonStats)

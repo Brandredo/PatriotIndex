@@ -10,11 +10,12 @@
     <ItemGroup>
         <PackageReference Include="Aspire.Npgsql.EntityFrameworkCore.PostgreSQL" Version="13.1.2"/>
         <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.3"/>
-        <PackageReference Include="Scalar.AspNetCore" Version="2.13.6" />
+        <PackageReference Include="Scalar.AspNetCore" Version="2.13.6"/>
     </ItemGroup>
 
     <ItemGroup>
         <ProjectReference Include="..\PatriotIndex.Domain\PatriotIndex.Domain.csproj"/>
+        <ProjectReference Include="..\PatriotIndex.Infrastructure\PatriotIndex.Infrastructure.csproj"/>
         <ProjectReference Include="..\PatriotIndex.ServiceDefaults\PatriotIndex.ServiceDefaults.csproj"/>
     </ItemGroup>
 

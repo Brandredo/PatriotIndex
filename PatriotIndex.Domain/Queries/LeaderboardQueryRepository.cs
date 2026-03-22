@@ -6,7 +6,7 @@ using PatriotIndex.Domain.Interfaces;
 
 namespace PatriotIndex.Domain.Queries;
 
-public class LeaderboardQueryRepository(PatriotIndexDbContext db) : ILeaderboardRepository
+public class LeaderboardQueryRepository(PatriotIndexDbContext_OLD db) : ILeaderboardRepository
 {
     private static readonly Dictionary<string, Func<PatriotIndex.Domain.Entities.PlayerSeasonStats, double>> CategorySelectors =
         new(StringComparer.OrdinalIgnoreCase)

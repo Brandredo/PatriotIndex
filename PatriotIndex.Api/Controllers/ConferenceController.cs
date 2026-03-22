@@ -10,5 +10,7 @@ public class ConferenceController(IConnectionMultiplexer connectionMux, IConfere
 {
     [HttpGet]
     public async Task<IActionResult> GetAll()
-        => Ok(await repo.GetAllWithDivisionsAsync());
+    {
+        return Ok(await repo.GetAllConferencesAsync());
+    }
 }

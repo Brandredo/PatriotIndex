@@ -7,7 +7,7 @@ using PatriotIndex.Domain.Entities;
 
 namespace PatriotIndex.Domain.Repository;
 
-public class GamesRepository(ILogger<GamesRepository> logger, PatriotIndexDbContext ctx)
+public class GamesRepository(ILogger<GamesRepository> logger, PatriotIndexDbContext_OLD ctx)
 {
 
     public async Task<List<Guid>> GetGameIdsAsync(CancellationToken ct)

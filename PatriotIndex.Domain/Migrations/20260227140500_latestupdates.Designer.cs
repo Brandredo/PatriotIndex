@@ -13,7 +13,7 @@ using PatriotIndex.Domain.Context;
 
 namespace PatriotIndex.Domain.Migrations
 {
-    [DbContext(typeof(PatriotIndexDbContext))]
+    [DbContext(typeof(PatriotIndexDbContext_OLD))]
     [Migration("20260227140500_latestupdates")]
     partial class latestupdates
     {

@@ -5,7 +5,7 @@ using PatriotIndex.Domain.Entities;
 
 namespace PatriotIndex.Domain.Repository;
 
-public class SyncLogRepository(PatriotIndexDbContext ctx)
+public class SyncLogRepository(PatriotIndexDbContext_OLD ctx)
 {
     
     // check if an entry with the same entity type and id already exists from the last 24 hours

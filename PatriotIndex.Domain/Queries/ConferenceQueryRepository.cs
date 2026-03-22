@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Microsoft.EntityFrameworkCore;
 using PatriotIndex.Domain.Context;
 using PatriotIndex.Domain.DTOs;
@@ -5,7 +6,7 @@ using PatriotIndex.Domain.Interfaces;
 
 namespace PatriotIndex.Domain.Queries;
 
-public class ConferenceQueryRepository(PatriotIndexDbContext db) : IConferenceRepository
+public class ConferenceQueryRepository(PatriotIndexDbContext_OLD db, ICacheService cache) : IConferenceRepository
 {
     public async Task<IReadOnlyList<ConferenceWithDivisionsDto>> GetAllWithDivisionsAsync()
     {
@@ -35,5 +36,20 @@ public class ConferenceQueryRepository(PatriotIndexDbContext db) : IConferenceRe
             .ToList();
         
         return result;
+    }
+
+    public async Task<IReadOnlyList<ConferenceWithDivisionsDto>> GetAllConferencesAsync()
+    {
+        var cacheKey = $"league:hierarchy";
+        var full = await cache.GetOrSetAsync(
+            cacheKey,
+            GetAllWithDivisionsAsync, TimeSpan.FromDays(30));
+
+        if (full is null)
+        {
+            throw new Exception("Failed to get conference hierarchy from cache");
+        }
+        
+        return full;
     }
 }

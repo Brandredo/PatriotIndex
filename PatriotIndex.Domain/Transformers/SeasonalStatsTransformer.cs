@@ -92,9 +92,23 @@ public class SeasonalStatsTransformer(SeasonalStatsApiResponse? dto)
             SeasonType  = seasonType,
             GamesPlayed = p.GamesPlayed,
             GamesStarted = p.GamesStarted,
+            SortKey     = ComputeSortKey(p),
             Stats       = MapPlayerStatBlock(p),
         }).ToList();
     }
+
+    private static int ComputeSortKey(SeasonPlayerDto p) =>
+        p.Position switch
+        {
+            "QB"                                                              => p.Passing?.Yards ?? 0,
+            "RB" or "FB"                                                      => p.Rushing?.Yards ?? 0,
+            "WR" or "TE"                                                      => p.Receiving?.Yards ?? 0,
+            "LB" or "MLB" or "OLB" or "DL" or "DE" or "DT"
+                or "CB" or "FS" or "SS" or "SAF" or "DB"                     => p.Defense?.Tackles ?? 0,
+            "K"                                                               => p.FieldGoals?.Made ?? 0,
+            "P"                                                               => p.Punts?.Yards ?? 0,
+            _                                                                 => p.GamesPlayed,
+        };
 
     private static PlayerStatBlock MapPlayerStatBlock(SeasonPlayerDto p) => new()
     {

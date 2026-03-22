@@ -2,6 +2,9 @@ using System.Diagnostics;
 using System.Text.Json;
 using Hangfire;
 using Microsoft.Extensions.Logging;
+using PatriotIndex.Application.Dtos.SeasonalStatistics;
+using PatriotIndex.Application.Mappers;
+using PatriotIndex.Application.Mappers.Results;
 using PatriotIndex.Domain.DTOs;
 using PatriotIndex.Domain.Entities;
 using PatriotIndex.Domain.Repository;
@@ -26,7 +29,7 @@ public class SeasonalStatsJob(SportsApiClient apiClient, ILogger<SeasonalStatsJo
 
         try
         {
-            string? data = null;
+            SeasonalStatisticsDto? data = null;
 
             var rawResponse = await syncLogRepository.IsDuplicateEntry(entityId, cancellationToken);
 
@@ -43,7 +46,7 @@ public class SeasonalStatsJob(SportsApiClient apiClient, ILogger<SeasonalStatsJo
                 var respId = await syncLogRepository.InsertEntry(log, cancellationToken);
 
                 // 1. call the api to get the game data
-                data = await apiClient.GetAsync($"seasons/{seasonInput.SeasonYear}/{seasonInput.SeasonType}/teams/{teamId}/statistics.json", cancellationToken);
+                data = await apiClient.GetAsync<SeasonalStatisticsDto>($"seasons/{seasonInput.SeasonYear}/{seasonInput.SeasonType}/teams/{teamId}/statistics.json", cancellationToken);
 
                 activity?.AddEvent(new ActivityEvent("http.fetch.complete"));
 
@@ -60,18 +63,22 @@ public class SeasonalStatsJob(SportsApiClient apiClient, ILogger<SeasonalStatsJo
             }
             else
             {
-                data = rawResponse.RootElement.GetRawText();
+                data = JsonSerializer.Deserialize<SeasonalStatisticsDto>(rawResponse);
             }
 
-            if (string.IsNullOrWhiteSpace(data)) throw new Exception("game data is null");
+            if (data == null) throw new Exception("game data is null");
 
-            var sst = new SeasonalStatsTransformer(JsonSerializer.Deserialize<SeasonalStatsApiResponse>(data));
-            var (team, players, playerStats) = sst.Transform();
+            var mapped = SeasonalStatisticsMapper.Map(data);
+            
+            
+            
+            //var sst = new SeasonalStatsTransformer(data);
+            //var (team, players, playerStats) = sst.Transform();
             activity?.AddEvent(new ActivityEvent("transform.complete"));
 
-            if(team == null || players == null || playerStats == null) throw new Exception("stats is null");
+            //if(team == null || players == null || playerStats == null) throw new Exception("stats is null");
 
-            await statsRepository.SaveAsync(team, players, playerStats, cancellationToken);
+            await statsRepository.SaveAsync(mapped.TeamStats, mapped.PlayerStats, cancellationToken);
 
             activity?.AddEvent(new ActivityEvent("db.save.complete"));
 

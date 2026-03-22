@@ -12,7 +12,7 @@ using PatriotIndex.Domain.Context;
 
 namespace PatriotIndex.Domain.Migrations
 {
-    [DbContext(typeof(PatriotIndexDbContext))]
+    [DbContext(typeof(PatriotIndexDbContext_OLD))]
     [Migration("20260301190959_UpdateGameCols")]
     partial class UpdateGameCols
     {

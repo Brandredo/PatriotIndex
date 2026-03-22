@@ -2,6 +2,9 @@ using Projects;
 
 var builder = DistributedApplication.CreateBuilder(args);
 
+// var apiKey = builder.AddParameter("");
+// var apiBaseUrl = builder.AddParameter("");
+
 var postgresdb = builder.AddConnectionString("PostgresDb");
 var cache = builder.AddConnectionString("Cache");
 

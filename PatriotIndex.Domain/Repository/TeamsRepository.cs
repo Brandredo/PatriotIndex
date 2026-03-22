@@ -5,7 +5,7 @@ using PatriotIndex.Domain.Entities;
 
 namespace PatriotIndex.Domain.Repository;
 
-public class TeamsRepository(PatriotIndexDbContext ctx, ILogger<TeamsRepository> logger)
+public class TeamsRepository(PatriotIndexDbContext_OLD ctx, ILogger<TeamsRepository> logger)
 {
     public async Task<IEnumerable<Team>> GetTeamsAsync(CancellationToken cancellationToken = default)
     {

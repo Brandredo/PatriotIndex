@@ -7,7 +7,8 @@ namespace PatriotIndex.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class LeaderboardController(IConnectionMultiplexer connectionMux, ILeaderboardRepository leaderboard) : ControllerBase
+public class LeaderboardController(IConnectionMultiplexer connectionMux, ILeaderboardRepository leaderboard)
+    : ControllerBase
 {
     [HttpGet]
     public async Task<IActionResult> Get(
@@ -16,5 +17,7 @@ public class LeaderboardController(IConnectionMultiplexer connectionMux, ILeader
         [FromQuery] string seasonType = "REG",
         [FromQuery] PlayerPosition? position = null,
         [FromQuery] int limit = 25)
-        => Ok(await leaderboard.GetLeaderboardAsync(category, season, seasonType, position, limit));
+    {
+        return Ok(await leaderboard.GetLeaderboardAsync(category, season, seasonType, position, limit));
+    }
 }

@@ -4,6 +4,7 @@
         <TargetFramework>net10.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
+        <UserSecretsId>291ad194-f8e6-4c4d-9e5e-2ce6a7173d27</UserSecretsId>
     </PropertyGroup>
 
     <ItemGroup>
@@ -26,6 +27,7 @@
     </ItemGroup>
 
     <ItemGroup>
+        <ProjectReference Include="..\..\..\Projects\PatriotIndex.SPA\src\PatriotIndex.Application\PatriotIndex.Application.csproj" />
         <ProjectReference Include="..\PatriotIndex.ServiceDefaults\PatriotIndex.ServiceDefaults.csproj" />
     </ItemGroup>
 

@@ -21,7 +21,9 @@ public class PlayerController(IConnectionMultiplexer connectionMux, IPlayerRepos
         Guid id,
         [FromQuery] int? season,
         [FromQuery] string? seasonType)
-        => Ok(await players.GetGameLogAsync(id, season, seasonType));
+    {
+        return Ok(await players.GetGameLogAsync(id, season, seasonType));
+    }
 
     [HttpGet]
     public async Task<IActionResult> Search(
@@ -29,5 +31,7 @@ public class PlayerController(IConnectionMultiplexer connectionMux, IPlayerRepos
         [FromQuery] Guid? teamId,
         [FromQuery] PlayerPosition? position,
         [FromQuery] string? status)
-        => Ok(await players.SearchAsync(search, teamId, position, status));
+    {
+        return Ok(await players.SearchAsync(search, teamId, position, status));
+    }
 }

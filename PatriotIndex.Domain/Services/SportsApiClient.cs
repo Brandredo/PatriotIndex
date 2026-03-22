@@ -1,5 +1,7 @@
+using System.Text.Json;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using PatriotIndex.Application.Mappers.Results;
 
 namespace PatriotIndex.Domain.Services;
 
@@ -19,7 +21,7 @@ public class SportsApiClient
         _client.Timeout = TimeSpan.FromSeconds(30); // this may interfere with rate limiting/Polly
     }
 
-    public async Task<string> GetAsync(string endpoint, CancellationToken cancellationToken)
+    public async Task<T?> GetAsync<T>(string endpoint, CancellationToken cancellationToken)
     {
         var response = await _client.GetAsync(endpoint, cancellationToken);
 
@@ -28,6 +30,17 @@ public class SportsApiClient
 
         response.EnsureSuccessStatusCode();
         var content = await response.Content.ReadAsStringAsync(cancellationToken);
-        return string.IsNullOrWhiteSpace(content) ? throw new Exception("Empty response") : content;
+        
+        return DeserializeApiResponse<T>(content, cancellationToken);
+        
+        //return string.IsNullOrWhiteSpace(content) ? throw new Exception("Empty response") : content;
     }
+
+    private static T? DeserializeApiResponse<T>(string response, CancellationToken cancellationToken)
+    {
+        var result = JsonSerializer.Deserialize<T>(response);
+        return result;
+    }
+    
+    
 }

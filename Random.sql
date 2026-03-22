@@ -7,6 +7,11 @@ commit;
 
 select A.id, count(1) from divisions A join teams B on A.id = B.division_id group by A.id having count(1) >= 1;
 
+insert into app_configs (key, value) values ('current_season', 'fbe26310-feb8-11ef-a86e-d5de4289b45b');
+commit;
+--truncate table app_configs;
+
+select * from app_configs;
 select * from sync_logs;
 select * from conferences;
 select * from divisions;
@@ -21,11 +26,23 @@ select * from seasons;
 select * from team_season_stats;
 select * from player_season_stats;
 
-truncate table players cascade;
+select * from hangfire.job;
+delete from hangfire.job where statename='Enqueued';
+
+select * from hangfire.jobqueue;
+truncate table hangfire.jobqueue;
+
+select * from player_game_stats;
+
+select * from team_season_stats;
+select * from player_season_stats;
+
+-- truncate games cascade;
+-- truncate table players cascade;
 truncate table team_season_stats;
 truncate table player_season_stats;
-truncate table team_game_stats;
-
+-- truncate table team_game_stats;
+-- 
 
 
 -- delete from team_season_stats where season_year = 2026;
@@ -45,6 +62,14 @@ truncate table team_game_stats;
 
 select * from seasons;
 
+select * from players where name = 'Drake Maye';
+
+
+select * from player_season_stats where player_id='d0c0630e-8925-4b81-a32b-e4146d95f01f';
+
+select B.name, stats->'Passing'->'Yards' AS pass_yards from player_season_stats A join players B on A.player_id=B.id where B.position='QB' and A.season_year=2025 and A.season_type='REG' order by (stats->'Passing'->'Yards')::numeric desc, A.player_id asc;
+
+select * from player_season_stats order by;
 
 select * from periods where game_id='2ae62361-eb2f-431f-84b1-def2a80f98d5';
 

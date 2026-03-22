@@ -2,13 +2,21 @@ using System.Threading.RateLimiting;
 using Hangfire;
 using Hangfire.PostgreSql;
 using Microsoft.EntityFrameworkCore;
-using PatriotIndex.Domain;
-using PatriotIndex.Domain.Context;
 using PatriotIndex.Domain.Jobs;
-using PatriotIndex.Domain.Repository;
 using PatriotIndex.Domain.Services;
+using PatriotIndex.Infrastructure.Data;
+using PatriotIndex.Infrastructure.Repositories;
 using PatriotIndex.ServiceDefaults;
 using Polly;
+using CurrentWeekScheduleJob = PatriotIndex.Scheduler.Jobs.CurrentWeekScheduleJob;
+using GamePbpJob = PatriotIndex.Scheduler.Jobs.GamePbpJob;
+using GamePbpJobOrchestrator = PatriotIndex.Scheduler.Jobs.GamePbpJobOrchestrator;
+using GameSummaryStatsJob = PatriotIndex.Scheduler.Jobs.GameSummaryStatsJob;
+using SeasonalStatsJob = PatriotIndex.Scheduler.Jobs.SeasonalStatsJob;
+using SeasonalStatsJobOrchestrator = PatriotIndex.Scheduler.Jobs.SeasonalStatsJobOrchestrator;
+using SyncLogRepository = PatriotIndex.Domain.Repository.SyncLogRepository;
+using TeamProfileJob = PatriotIndex.Scheduler.Jobs.TeamProfileJob;
+using TeamProfileJobOrchestrator = PatriotIndex.Scheduler.Jobs.TeamProfileJobOrchestrator;
 
 namespace PatriotIndex.Scheduler;
 
@@ -57,12 +65,12 @@ public class Program
         builder.Services.AddScoped<GameSummaryStatsJob>();
 
         // Register repository classes
-        builder.Services.AddScoped<TeamsRepository>();
-        builder.Services.AddScoped<GamesRepository>();
+        builder.Services.AddScoped<TeamProfileRepository>();
+        builder.Services.AddScoped<GameStatisticsRepository>();
         builder.Services.AddScoped<SyncLogRepository>();
-        builder.Services.AddScoped<StatsRepository>();
+        builder.Services.AddScoped<SeasonalStatisticsRepository>();
         builder.Services.AddScoped<SeasonsRepository>();
-        builder.Services.AddScoped<GameStatsRepository>();
+        builder.Services.AddScoped<GamePlayByPlayRepository>();
 
         // Register services
         builder.Services.AddHttpClient<SportsApiClient>()
@@ -99,13 +107,13 @@ public class Program
         {
             Authorization = []
         });
-        
+
         // Misfire modes
         // Relaxed: (Default) If a job was missed, fire it once immediately on startup
         // Ignorable: If a job was missed, skip it and wait for the next scheduled time
         // Strict: Fire the job for every missed occurrence (use with caution)
-        
-        
+
+
         // Hangfire recurring jobs
         RecurringJob.AddOrUpdate<TeamProfileJobOrchestrator>(
             "team_profile-orchestrator",
@@ -115,7 +123,7 @@ public class Program
             {
                 MisfireHandling = MisfireHandlingMode.Ignorable // Key setting
             });
-        
+
         RecurringJob.AddOrUpdate<CurrentWeekScheduleJob>(
             "week-schedule-orchestrator",
             job => job.RunAsync(),
@@ -124,7 +132,7 @@ public class Program
             {
                 MisfireHandling = MisfireHandlingMode.Ignorable // Key setting
             });
-        
+
         RecurringJob.AddOrUpdate<SeasonalStatsJobOrchestrator>(
             "seasonal_stats-orchestrator",
             job => job.RunAsync(),
@@ -133,7 +141,7 @@ public class Program
             {
                 MisfireHandling = MisfireHandlingMode.Ignorable // Key setting
             });
-        
+
         RecurringJob.AddOrUpdate<GamePbpJobOrchestrator>(
             "game-pbp-orchestrator",
             job => job.RunAsync(),

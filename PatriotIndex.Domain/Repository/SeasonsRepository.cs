@@ -6,7 +6,7 @@ using PatriotIndex.Domain.Jobs;
 
 namespace PatriotIndex.Domain.Repository;
 
-public class SeasonsRepository(ILogger<SeasonsRepository> logger, PatriotIndexDbContext ctx)
+public class SeasonsRepository(ILogger<SeasonsRepository> logger, PatriotIndexDbContext_OLD ctx)
 {
     public async Task<List<Season>> GetAllSeasonsAsync(CancellationToken cancellationToken = default)
     {

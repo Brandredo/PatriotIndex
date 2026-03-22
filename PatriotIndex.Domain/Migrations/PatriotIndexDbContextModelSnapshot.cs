@@ -11,7 +11,7 @@ using PatriotIndex.Domain.Context;
 
 namespace PatriotIndex.Domain.Migrations
 {
-    [DbContext(typeof(PatriotIndexDbContext))]
+    [DbContext(typeof(PatriotIndexDbContext_OLD))]
     partial class PatriotIndexDbContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)
@@ -840,6 +840,10 @@ namespace PatriotIndex.Domain.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("season_year");
 
+                    b.Property<int?>("SortKey")
+                        .HasColumnType("integer")
+                        .HasColumnName("sort_key");
+
                     b.Property<Guid?>("TeamId")
                         .HasColumnType("uuid")
                         .HasColumnName("team_id");
@@ -852,6 +856,9 @@ namespace PatriotIndex.Domain.Migrations
 
                     b.HasIndex("TeamId")
                         .HasDatabaseName("ix_player_season_stats_team_id");
+
+                    b.HasIndex("SortKey", "PlayerId")
+                        .HasDatabaseName("ix_player_season_stats_sort_key_player_id");
 
                     b.HasIndex("PlayerId", "SeasonYear", "SeasonType")
                         .IsUnique()
@@ -1360,6 +1367,68 @@ namespace PatriotIndex.Domain.Migrations
                         .HasForeignKey("PeriodId")
                         .HasConstraintName("fk_plays_periods_period_id");
 
+                    b.OwnsMany("PatriotIndex.Domain.Entities.PlayDetail", "Details", b1 =>
+                        {
+                            b1.Property<Guid>("PlayId");
+
+                            b1.Property<int>("__synthesizedOrdinal")
+                                .ValueGeneratedOnAdd();
+
+                            b1.Property<string>("Category")
+                                .IsRequired()
+                                .HasMaxLength(100);
+
+                            b1.Property<string>("Description")
+                                .HasMaxLength(500);
+
+                            b1.Property<long>("Sequence");
+
+                            b1.HasKey("PlayId", "__synthesizedOrdinal")
+                                .HasName("pk_plays");
+
+                            b1.ToTable("plays", (string)null);
+
+                            b1.ToJson("details");
+
+                            b1.WithOwner()
+                                .HasForeignKey("PlayId")
+                                .HasConstraintName("fk_plays_plays_play_id");
+
+                            b1.OwnsMany("PatriotIndex.Domain.Entities.PlayDetailPlayer", "Players", b2 =>
+                                {
+                                    b2.Property<Guid>("PlayDetailPlayId");
+
+                                    b2.Property<int>("PlayDetail__synthesizedOrdinal");
+
+                                    b2.Property<int>("__synthesizedOrdinal")
+                                        .ValueGeneratedOnAdd();
+
+                                    b2.Property<Guid>("Id");
+
+                                    b2.Property<string>("Name")
+                                        .IsRequired()
+                                        .HasMaxLength(100);
+
+                                    b2.Property<string>("Position")
+                                        .HasMaxLength(5);
+
+                                    b2.Property<string>("Role")
+                                        .IsRequired()
+                                        .HasMaxLength(50);
+
+                                    b2.HasKey("PlayDetailPlayId", "PlayDetail__synthesizedOrdinal", "__synthesizedOrdinal")
+                                        .HasName("pk_plays");
+
+                                    b2.ToTable("plays", (string)null);
+
+                                    b2.WithOwner()
+                                        .HasForeignKey("PlayDetailPlayId", "PlayDetail__synthesizedOrdinal")
+                                        .HasConstraintName("fk_plays_plays_play_detail_play_id_play_detail__synthesized_ordinal");
+                                });
+
+                            b1.Navigation("Players");
+                        });
+
                     b.OwnsOne("PatriotIndex.Domain.Entities.GameSituation", "EndSituation", b1 =>
                         {
                             b1.Property<Guid>("PlayId")
@@ -1398,7 +1467,7 @@ namespace PatriotIndex.Domain.Migrations
                             b1.HasIndex("PossessionTeamId")
                                 .HasDatabaseName("ix_plays_end_possession_team_id");
 
-                            b1.ToTable("plays");
+                            b1.ToTable("plays", (string)null);
 
                             b1.WithOwner()
                                 .HasForeignKey("PlayId")
@@ -1449,7 +1518,7 @@ namespace PatriotIndex.Domain.Migrations
                             b1.HasIndex("PossessionTeamId")
                                 .HasDatabaseName("ix_plays_start_possession_team_id");
 
-                            b1.ToTable("plays");
+                            b1.ToTable("plays", (string)null);
 
                             b1.WithOwner()
                                 .HasForeignKey("PlayId")
@@ -1460,68 +1529,6 @@ namespace PatriotIndex.Domain.Migrations
                                 .HasForeignKey("PossessionTeamId")
                                 .OnDelete(DeleteBehavior.Restrict)
                                 .HasConstraintName("fk_plays_teams_start_possession_team_id");
-                        });
-
-                    b.OwnsMany("PatriotIndex.Domain.Entities.PlayDetail", "Details", b1 =>
-                        {
-                            b1.Property<Guid>("PlayId");
-
-                            b1.Property<int>("__synthesizedOrdinal")
-                                .ValueGeneratedOnAdd();
-
-                            b1.Property<string>("Category")
-                                .IsRequired()
-                                .HasMaxLength(100);
-
-                            b1.Property<string>("Description")
-                                .HasMaxLength(500);
-
-                            b1.Property<long>("Sequence");
-
-                            b1.HasKey("PlayId", "__synthesizedOrdinal")
-                                .HasName("pk_plays");
-
-                            b1.ToTable("plays");
-
-                            b1.ToJson("details");
-
-                            b1.WithOwner()
-                                .HasForeignKey("PlayId")
-                                .HasConstraintName("fk_plays_plays_play_id");
-
-                            b1.OwnsMany("PatriotIndex.Domain.Entities.PlayDetailPlayer", "Players", b2 =>
-                                {
-                                    b2.Property<Guid>("PlayDetailPlayId");
-
-                                    b2.Property<int>("PlayDetail__synthesizedOrdinal");
-
-                                    b2.Property<int>("__synthesizedOrdinal")
-                                        .ValueGeneratedOnAdd();
-
-                                    b2.Property<Guid>("Id");
-
-                                    b2.Property<string>("Name")
-                                        .IsRequired()
-                                        .HasMaxLength(100);
-
-                                    b2.Property<string>("Position")
-                                        .HasMaxLength(5);
-
-                                    b2.Property<string>("Role")
-                                        .IsRequired()
-                                        .HasMaxLength(50);
-
-                                    b2.HasKey("PlayDetailPlayId", "PlayDetail__synthesizedOrdinal", "__synthesizedOrdinal")
-                                        .HasName("pk_plays");
-
-                                    b2.ToTable("plays");
-
-                                    b2.WithOwner()
-                                        .HasForeignKey("PlayDetailPlayId", "PlayDetail__synthesizedOrdinal")
-                                        .HasConstraintName("fk_plays_plays_play_detail_play_id_play_detail__synthesized_ordinal");
-                                });
-
-                            b1.Navigation("Players");
                         });
 
                     b.OwnsMany("PatriotIndex.Domain.Entities.PlayStat", "Statistics", b1 =>
@@ -1661,7 +1668,7 @@ namespace PatriotIndex.Domain.Migrations
                             b1.HasKey("PlayId", "__synthesizedOrdinal")
                                 .HasName("pk_plays");
 
-                            b1.ToTable("plays");
+                            b1.ToTable("plays", (string)null);
 
                             b1.ToJson("statistics");
 
@@ -1692,7 +1699,7 @@ namespace PatriotIndex.Domain.Migrations
 
                                     b2.HasKey("PlayStatPlayId", "PlayStat__synthesizedOrdinal");
 
-                                    b2.ToTable("plays");
+                                    b2.ToTable("plays", (string)null);
 
                                     b2.WithOwner()
                                         .HasForeignKey("PlayStatPlayId", "PlayStat__synthesizedOrdinal")
@@ -1720,7 +1727,7 @@ namespace PatriotIndex.Domain.Migrations
 
                                     b2.HasKey("PlayStatPlayId", "PlayStat__synthesizedOrdinal");
 
-                                    b2.ToTable("plays");
+                                    b2.ToTable("plays", (string)null);
 
                                     b2.WithOwner()
                                         .HasForeignKey("PlayStatPlayId", "PlayStat__synthesizedOrdinal")
@@ -1798,7 +1805,7 @@ namespace PatriotIndex.Domain.Migrations
 
                             b1.HasKey("PlayerGameStatsId");
 
-                            b1.ToTable("player_game_stats");
+                            b1.ToTable("player_game_stats", (string)null);
 
                             b1.ToJson("stats");
 
@@ -1878,7 +1885,7 @@ namespace PatriotIndex.Domain.Migrations
 
                                     b2.HasKey("PlayerGameStatsBlockPlayerGameStatsId");
 
-                                    b2.ToTable("player_game_stats");
+                                    b2.ToTable("player_game_stats", (string)null);
 
                                     b2.WithOwner()
                                         .HasForeignKey("PlayerGameStatsBlockPlayerGameStatsId")
@@ -1901,7 +1908,7 @@ namespace PatriotIndex.Domain.Migrations
 
                                     b2.HasKey("PlayerGameStatsBlockPlayerGameStatsId");
 
-                                    b2.ToTable("player_game_stats");
+                                    b2.ToTable("player_game_stats", (string)null);
 
                                     b2.WithOwner()
                                         .HasForeignKey("PlayerGameStatsBlockPlayerGameStatsId")
@@ -1950,7 +1957,7 @@ namespace PatriotIndex.Domain.Migrations
 
                                     b2.HasKey("PlayerGameStatsBlockPlayerGameStatsId");
 
-                                    b2.ToTable("player_game_stats");
+                                    b2.ToTable("player_game_stats", (string)null);
 
                                     b2.WithOwner()
                                         .HasForeignKey("PlayerGameStatsBlockPlayerGameStatsId")
@@ -1985,7 +1992,7 @@ namespace PatriotIndex.Domain.Migrations
 
                                     b2.HasKey("PlayerGameStatsBlockPlayerGameStatsId");
 
-                                    b2.ToTable("player_game_stats");
+                                    b2.ToTable("player_game_stats", (string)null);
 
                                     b2.WithOwner()
                                         .HasForeignKey("PlayerGameStatsBlockPlayerGameStatsId")
@@ -2010,7 +2017,7 @@ namespace PatriotIndex.Domain.Migrations
 
                                     b2.HasKey("PlayerGameStatsBlockPlayerGameStatsId");
 
-                                    b2.ToTable("player_game_stats");
+                                    b2.ToTable("player_game_stats", (string)null);
 
                                     b2.WithOwner()
                                         .HasForeignKey("PlayerGameStatsBlockPlayerGameStatsId")
@@ -2037,7 +2044,7 @@ namespace PatriotIndex.Domain.Migrations
 
                                     b2.HasKey("PlayerGameStatsBlockPlayerGameStatsId");
 
-                                    b2.ToTable("player_game_stats");
+                                    b2.ToTable("player_game_stats", (string)null);
 
                                     b2.WithOwner()
                                         .HasForeignKey("PlayerGameStatsBlockPlayerGameStatsId")
@@ -2072,7 +2079,7 @@ namespace PatriotIndex.Domain.Migrations
 
                                     b2.HasKey("PlayerGameStatsBlockPlayerGameStatsId");
 
-                                    b2.ToTable("player_game_stats");
+                                    b2.ToTable("player_game_stats", (string)null);
 
                                     b2.WithOwner()
                                         .HasForeignKey("PlayerGameStatsBlockPlayerGameStatsId")
@@ -2145,7 +2152,7 @@ namespace PatriotIndex.Domain.Migrations
 
                                     b2.HasKey("PlayerGameStatsBlockPlayerGameStatsId");
 
-                                    b2.ToTable("player_game_stats");
+                                    b2.ToTable("player_game_stats", (string)null);
 
                                     b2.WithOwner()
                                         .HasForeignKey("PlayerGameStatsBlockPlayerGameStatsId")
@@ -2164,7 +2171,7 @@ namespace PatriotIndex.Domain.Migrations
 
                                     b2.HasKey("PlayerGameStatsBlockPlayerGameStatsId");
 
-                                    b2.ToTable("player_game_stats");
+                                    b2.ToTable("player_game_stats", (string)null);
 
                                     b2.WithOwner()
                                         .HasForeignKey("PlayerGameStatsBlockPlayerGameStatsId")
@@ -2191,7 +2198,7 @@ namespace PatriotIndex.Domain.Migrations
 
                                     b2.HasKey("PlayerGameStatsBlockPlayerGameStatsId");
 
-                                    b2.ToTable("player_game_stats");
+                                    b2.ToTable("player_game_stats", (string)null);
 
                                     b2.WithOwner()
                                         .HasForeignKey("PlayerGameStatsBlockPlayerGameStatsId")
@@ -2228,7 +2235,7 @@ namespace PatriotIndex.Domain.Migrations
 
                                     b2.HasKey("PlayerGameStatsBlockPlayerGameStatsId");
 
-                                    b2.ToTable("player_game_stats");
+                                    b2.ToTable("player_game_stats", (string)null);
 
                                     b2.WithOwner()
                                         .HasForeignKey("PlayerGameStatsBlockPlayerGameStatsId")
@@ -2271,7 +2278,7 @@ namespace PatriotIndex.Domain.Migrations
 
                                     b2.HasKey("PlayerGameStatsBlockPlayerGameStatsId");
 
-                                    b2.ToTable("player_game_stats");
+                                    b2.ToTable("player_game_stats", (string)null);
 
                                     b2.WithOwner()
                                         .HasForeignKey("PlayerGameStatsBlockPlayerGameStatsId")
@@ -2312,7 +2319,7 @@ namespace PatriotIndex.Domain.Migrations
 
                                     b2.HasKey("PlayerGameStatsBlockPlayerGameStatsId");
 
-                                    b2.ToTable("player_game_stats");
+                                    b2.ToTable("player_game_stats", (string)null);
 
                                     b2.WithOwner()
                                         .HasForeignKey("PlayerGameStatsBlockPlayerGameStatsId")
@@ -2377,7 +2384,7 @@ namespace PatriotIndex.Domain.Migrations
 
                             b1.HasKey("PlayerSeasonStatsId");
 
-                            b1.ToTable("player_season_stats");
+                            b1.ToTable("player_season_stats", (string)null);
 
                             b1.ToJson("stats");
 
@@ -2457,7 +2464,7 @@ namespace PatriotIndex.Domain.Migrations
 
                                     b2.HasKey("PlayerStatBlockPlayerSeasonStatsId");
 
-                                    b2.ToTable("player_season_stats");
+                                    b2.ToTable("player_season_stats", (string)null);
 
                                     b2.WithOwner()
                                         .HasForeignKey("PlayerStatBlockPlayerSeasonStatsId")
@@ -2480,7 +2487,7 @@ namespace PatriotIndex.Domain.Migrations
 
                                     b2.HasKey("PlayerStatBlockPlayerSeasonStatsId");
 
-                                    b2.ToTable("player_season_stats");
+                                    b2.ToTable("player_season_stats", (string)null);
 
                                     b2.WithOwner()
                                         .HasForeignKey("PlayerStatBlockPlayerSeasonStatsId")
@@ -2529,7 +2536,7 @@ namespace PatriotIndex.Domain.Migrations
 
                                     b2.HasKey("PlayerStatBlockPlayerSeasonStatsId");
 
-                                    b2.ToTable("player_season_stats");
+                                    b2.ToTable("player_season_stats", (string)null);
 
                                     b2.WithOwner()
                                         .HasForeignKey("PlayerStatBlockPlayerSeasonStatsId")
@@ -2564,7 +2571,7 @@ namespace PatriotIndex.Domain.Migrations
 
                                     b2.HasKey("PlayerStatBlockPlayerSeasonStatsId");
 
-                                    b2.ToTable("player_season_stats");
+                                    b2.ToTable("player_season_stats", (string)null);
 
                                     b2.WithOwner()
                                         .HasForeignKey("PlayerStatBlockPlayerSeasonStatsId")
@@ -2589,7 +2596,7 @@ namespace PatriotIndex.Domain.Migrations
 
                                     b2.HasKey("PlayerStatBlockPlayerSeasonStatsId");
 
-                                    b2.ToTable("player_season_stats");
+                                    b2.ToTable("player_season_stats", (string)null);
 
                                     b2.WithOwner()
                                         .HasForeignKey("PlayerStatBlockPlayerSeasonStatsId")
@@ -2616,7 +2623,7 @@ namespace PatriotIndex.Domain.Migrations
 
                                     b2.HasKey("PlayerStatBlockPlayerSeasonStatsId");
 
-                                    b2.ToTable("player_season_stats");
+                                    b2.ToTable("player_season_stats", (string)null);
 
                                     b2.WithOwner()
                                         .HasForeignKey("PlayerStatBlockPlayerSeasonStatsId")
@@ -2651,7 +2658,7 @@ namespace PatriotIndex.Domain.Migrations
 
                                     b2.HasKey("PlayerStatBlockPlayerSeasonStatsId");
 
-                                    b2.ToTable("player_season_stats");
+                                    b2.ToTable("player_season_stats", (string)null);
 
                                     b2.WithOwner()
                                         .HasForeignKey("PlayerStatBlockPlayerSeasonStatsId")
@@ -2680,7 +2687,7 @@ namespace PatriotIndex.Domain.Migrations
 
                                     b2.HasKey("PlayerStatBlockPlayerSeasonStatsId");
 
-                                    b2.ToTable("player_season_stats");
+                                    b2.ToTable("player_season_stats", (string)null);
 
                                     b2.WithOwner()
                                         .HasForeignKey("PlayerStatBlockPlayerSeasonStatsId")
@@ -2753,7 +2760,7 @@ namespace PatriotIndex.Domain.Migrations
 
                                     b2.HasKey("PlayerStatBlockPlayerSeasonStatsId");
 
-                                    b2.ToTable("player_season_stats");
+                                    b2.ToTable("player_season_stats", (string)null);
 
                                     b2.WithOwner()
                                         .HasForeignKey("PlayerStatBlockPlayerSeasonStatsId")
@@ -2772,7 +2779,7 @@ namespace PatriotIndex.Domain.Migrations
 
                                     b2.HasKey("PlayerStatBlockPlayerSeasonStatsId");
 
-                                    b2.ToTable("player_season_stats");
+                                    b2.ToTable("player_season_stats", (string)null);
 
                                     b2.WithOwner()
                                         .HasForeignKey("PlayerStatBlockPlayerSeasonStatsId")
@@ -2799,7 +2806,7 @@ namespace PatriotIndex.Domain.Migrations
 
                                     b2.HasKey("PlayerStatBlockPlayerSeasonStatsId");
 
-                                    b2.ToTable("player_season_stats");
+                                    b2.ToTable("player_season_stats", (string)null);
 
                                     b2.WithOwner()
                                         .HasForeignKey("PlayerStatBlockPlayerSeasonStatsId")
@@ -2836,7 +2843,7 @@ namespace PatriotIndex.Domain.Migrations
 
                                     b2.HasKey("PlayerStatBlockPlayerSeasonStatsId");
 
-                                    b2.ToTable("player_season_stats");
+                                    b2.ToTable("player_season_stats", (string)null);
 
                                     b2.WithOwner()
                                         .HasForeignKey("PlayerStatBlockPlayerSeasonStatsId")
@@ -2879,7 +2886,7 @@ namespace PatriotIndex.Domain.Migrations
 
                                     b2.HasKey("PlayerStatBlockPlayerSeasonStatsId");
 
-                                    b2.ToTable("player_season_stats");
+                                    b2.ToTable("player_season_stats", (string)null);
 
                                     b2.WithOwner()
                                         .HasForeignKey("PlayerStatBlockPlayerSeasonStatsId")
@@ -2920,7 +2927,7 @@ namespace PatriotIndex.Domain.Migrations
 
                                     b2.HasKey("PlayerStatBlockPlayerSeasonStatsId");
 
-                                    b2.ToTable("player_season_stats");
+                                    b2.ToTable("player_season_stats", (string)null);
 
                                     b2.WithOwner()
                                         .HasForeignKey("PlayerStatBlockPlayerSeasonStatsId")
@@ -3031,7 +3038,7 @@ namespace PatriotIndex.Domain.Migrations
 
                             b1.HasKey("TeamGameStatsId");
 
-                            b1.ToTable("team_game_stats");
+                            b1.ToTable("team_game_stats", (string)null);
 
                             b1.ToJson("stats");
 
@@ -3111,7 +3118,7 @@ namespace PatriotIndex.Domain.Migrations
 
                                     b2.HasKey("TeamGameStatsBlockTeamGameStatsId");
 
-                                    b2.ToTable("team_game_stats");
+                                    b2.ToTable("team_game_stats", (string)null);
 
                                     b2.WithOwner()
                                         .HasForeignKey("TeamGameStatsBlockTeamGameStatsId")
@@ -3160,7 +3167,7 @@ namespace PatriotIndex.Domain.Migrations
 
                                     b2.HasKey("TeamGameStatsBlockTeamGameStatsId");
 
-                                    b2.ToTable("team_game_stats");
+                                    b2.ToTable("team_game_stats", (string)null);
 
                                     b2.WithOwner()
                                         .HasForeignKey("TeamGameStatsBlockTeamGameStatsId")
@@ -3195,7 +3202,7 @@ namespace PatriotIndex.Domain.Migrations
 
                                     b2.HasKey("TeamGameStatsBlockTeamGameStatsId");
 
-                                    b2.ToTable("team_game_stats");
+                                    b2.ToTable("team_game_stats", (string)null);
 
                                     b2.WithOwner()
                                         .HasForeignKey("TeamGameStatsBlockTeamGameStatsId")
@@ -3220,7 +3227,7 @@ namespace PatriotIndex.Domain.Migrations
 
                                     b2.HasKey("TeamGameStatsBlockTeamGameStatsId");
 
-                                    b2.ToTable("team_game_stats");
+                                    b2.ToTable("team_game_stats", (string)null);
 
                                     b2.WithOwner()
                                         .HasForeignKey("TeamGameStatsBlockTeamGameStatsId")
@@ -3247,7 +3254,7 @@ namespace PatriotIndex.Domain.Migrations
 
                                     b2.HasKey("TeamGameStatsBlockTeamGameStatsId");
 
-                                    b2.ToTable("team_game_stats");
+                                    b2.ToTable("team_game_stats", (string)null);
 
                                     b2.WithOwner()
                                         .HasForeignKey("TeamGameStatsBlockTeamGameStatsId")
@@ -3282,7 +3289,7 @@ namespace PatriotIndex.Domain.Migrations
 
                                     b2.HasKey("TeamGameStatsBlockTeamGameStatsId");
 
-                                    b2.ToTable("team_game_stats");
+                                    b2.ToTable("team_game_stats", (string)null);
 
                                     b2.WithOwner()
                                         .HasForeignKey("TeamGameStatsBlockTeamGameStatsId")
@@ -3355,7 +3362,7 @@ namespace PatriotIndex.Domain.Migrations
 
                                     b2.HasKey("TeamGameStatsBlockTeamGameStatsId");
 
-                                    b2.ToTable("team_game_stats");
+                                    b2.ToTable("team_game_stats", (string)null);
 
                                     b2.WithOwner()
                                         .HasForeignKey("TeamGameStatsBlockTeamGameStatsId")
@@ -3374,7 +3381,7 @@ namespace PatriotIndex.Domain.Migrations
 
                                     b2.HasKey("TeamGameStatsBlockTeamGameStatsId");
 
-                                    b2.ToTable("team_game_stats");
+                                    b2.ToTable("team_game_stats", (string)null);
 
                                     b2.WithOwner()
                                         .HasForeignKey("TeamGameStatsBlockTeamGameStatsId")
@@ -3401,7 +3408,7 @@ namespace PatriotIndex.Domain.Migrations
 
                                     b2.HasKey("TeamGameStatsBlockTeamGameStatsId");
 
-                                    b2.ToTable("team_game_stats");
+                                    b2.ToTable("team_game_stats", (string)null);
 
                                     b2.WithOwner()
                                         .HasForeignKey("TeamGameStatsBlockTeamGameStatsId")
@@ -3438,7 +3445,7 @@ namespace PatriotIndex.Domain.Migrations
 
                                     b2.HasKey("TeamGameStatsBlockTeamGameStatsId");
 
-                                    b2.ToTable("team_game_stats");
+                                    b2.ToTable("team_game_stats", (string)null);
 
                                     b2.WithOwner()
                                         .HasForeignKey("TeamGameStatsBlockTeamGameStatsId")
@@ -3481,7 +3488,7 @@ namespace PatriotIndex.Domain.Migrations
 
                                     b2.HasKey("TeamGameStatsBlockTeamGameStatsId");
 
-                                    b2.ToTable("team_game_stats");
+                                    b2.ToTable("team_game_stats", (string)null);
 
                                     b2.WithOwner()
                                         .HasForeignKey("TeamGameStatsBlockTeamGameStatsId")
@@ -3522,7 +3529,7 @@ namespace PatriotIndex.Domain.Migrations
 
                                     b2.HasKey("TeamGameStatsBlockTeamGameStatsId");
 
-                                    b2.ToTable("team_game_stats");
+                                    b2.ToTable("team_game_stats", (string)null);
 
                                     b2.WithOwner()
                                         .HasForeignKey("TeamGameStatsBlockTeamGameStatsId")
@@ -3555,7 +3562,7 @@ namespace PatriotIndex.Domain.Migrations
 
                                     b2.HasKey("TeamGameStatsBlockTeamGameStatsId");
 
-                                    b2.ToTable("team_game_stats");
+                                    b2.ToTable("team_game_stats", (string)null);
 
                                     b2.WithOwner()
                                         .HasForeignKey("TeamGameStatsBlockTeamGameStatsId")
@@ -3612,7 +3619,7 @@ namespace PatriotIndex.Domain.Migrations
 
                             b1.HasKey("TeamSeasonStatsId");
 
-                            b1.ToTable("team_season_stats");
+                            b1.ToTable("team_season_stats", (string)null);
 
                             b1.ToJson("opponents");
 
@@ -3692,7 +3699,7 @@ namespace PatriotIndex.Domain.Migrations
 
                                     b2.HasKey("TeamStatBlockTeamSeasonStatsId");
 
-                                    b2.ToTable("team_season_stats");
+                                    b2.ToTable("team_season_stats", (string)null);
 
                                     b2.WithOwner()
                                         .HasForeignKey("TeamStatBlockTeamSeasonStatsId")
@@ -3705,7 +3712,7 @@ namespace PatriotIndex.Domain.Migrations
 
                                     b2.HasKey("TeamStatBlockTeamSeasonStatsId");
 
-                                    b2.ToTable("team_season_stats");
+                                    b2.ToTable("team_season_stats", (string)null);
 
                                     b2.WithOwner()
                                         .HasForeignKey("TeamStatBlockTeamSeasonStatsId")
@@ -3723,7 +3730,7 @@ namespace PatriotIndex.Domain.Migrations
 
                                             b3.HasKey("SeasonEfficiencyStatsTeamStatBlockTeamSeasonStatsId");
 
-                                            b3.ToTable("team_season_stats");
+                                            b3.ToTable("team_season_stats", (string)null);
 
                                             b3.WithOwner()
                                                 .HasForeignKey("SeasonEfficiencyStatsTeamStatBlockTeamSeasonStatsId")
@@ -3742,7 +3749,7 @@ namespace PatriotIndex.Domain.Migrations
 
                                             b3.HasKey("SeasonEfficiencyStatsTeamStatBlockTeamSeasonStatsId");
 
-                                            b3.ToTable("team_season_stats");
+                                            b3.ToTable("team_season_stats", (string)null);
 
                                             b3.WithOwner()
                                                 .HasForeignKey("SeasonEfficiencyStatsTeamStatBlockTeamSeasonStatsId")
@@ -3761,7 +3768,7 @@ namespace PatriotIndex.Domain.Migrations
 
                                             b3.HasKey("SeasonEfficiencyStatsTeamStatBlockTeamSeasonStatsId");
 
-                                            b3.ToTable("team_season_stats");
+                                            b3.ToTable("team_season_stats", (string)null);
 
                                             b3.WithOwner()
                                                 .HasForeignKey("SeasonEfficiencyStatsTeamStatBlockTeamSeasonStatsId")
@@ -3780,7 +3787,7 @@ namespace PatriotIndex.Domain.Migrations
 
                                             b3.HasKey("SeasonEfficiencyStatsTeamStatBlockTeamSeasonStatsId");
 
-                                            b3.ToTable("team_season_stats");
+                                            b3.ToTable("team_season_stats", (string)null);
 
                                             b3.WithOwner()
                                                 .HasForeignKey("SeasonEfficiencyStatsTeamStatBlockTeamSeasonStatsId")
@@ -3802,7 +3809,7 @@ namespace PatriotIndex.Domain.Migrations
 
                                     b2.HasKey("TeamStatBlockTeamSeasonStatsId");
 
-                                    b2.ToTable("team_season_stats");
+                                    b2.ToTable("team_season_stats", (string)null);
 
                                     b2.WithOwner()
                                         .HasForeignKey("TeamStatBlockTeamSeasonStatsId")
@@ -3828,7 +3835,7 @@ namespace PatriotIndex.Domain.Migrations
 
                                             b3.HasKey("SeasonTeamExtraPointStatsTeamStatBlockTeamSeasonStatsId");
 
-                                            b3.ToTable("team_season_stats");
+                                            b3.ToTable("team_season_stats", (string)null);
 
                                             b3.WithOwner()
                                                 .HasForeignKey("SeasonTeamExtraPointStatsTeamStatBlockTeamSeasonStatsId")
@@ -3849,7 +3856,7 @@ namespace PatriotIndex.Domain.Migrations
 
                                             b3.HasKey("SeasonTeamExtraPointStatsTeamStatBlockTeamSeasonStatsId");
 
-                                            b3.ToTable("team_season_stats");
+                                            b3.ToTable("team_season_stats", (string)null);
 
                                             b3.WithOwner()
                                                 .HasForeignKey("SeasonTeamExtraPointStatsTeamStatBlockTeamSeasonStatsId")
@@ -3903,7 +3910,7 @@ namespace PatriotIndex.Domain.Migrations
 
                                     b2.HasKey("TeamStatBlockTeamSeasonStatsId");
 
-                                    b2.ToTable("team_season_stats");
+                                    b2.ToTable("team_season_stats", (string)null);
 
                                     b2.WithOwner()
                                         .HasForeignKey("TeamStatBlockTeamSeasonStatsId")
@@ -3924,7 +3931,7 @@ namespace PatriotIndex.Domain.Migrations
 
                                     b2.HasKey("TeamStatBlockTeamSeasonStatsId");
 
-                                    b2.ToTable("team_season_stats");
+                                    b2.ToTable("team_season_stats", (string)null);
 
                                     b2.WithOwner()
                                         .HasForeignKey("TeamStatBlockTeamSeasonStatsId")
@@ -3959,7 +3966,7 @@ namespace PatriotIndex.Domain.Migrations
 
                                     b2.HasKey("TeamStatBlockTeamSeasonStatsId");
 
-                                    b2.ToTable("team_season_stats");
+                                    b2.ToTable("team_season_stats", (string)null);
 
                                     b2.WithOwner()
                                         .HasForeignKey("TeamStatBlockTeamSeasonStatsId")
@@ -3984,7 +3991,7 @@ namespace PatriotIndex.Domain.Migrations
 
                                     b2.HasKey("TeamStatBlockTeamSeasonStatsId");
 
-                                    b2.ToTable("team_season_stats");
+                                    b2.ToTable("team_season_stats", (string)null);
 
                                     b2.WithOwner()
                                         .HasForeignKey("TeamStatBlockTeamSeasonStatsId")
@@ -4003,7 +4010,7 @@ namespace PatriotIndex.Domain.Migrations
 
                                     b2.HasKey("TeamStatBlockTeamSeasonStatsId");
 
-                                    b2.ToTable("team_season_stats");
+                                    b2.ToTable("team_season_stats", (string)null);
 
                                     b2.WithOwner()
                                         .HasForeignKey("TeamStatBlockTeamSeasonStatsId")
@@ -4030,7 +4037,7 @@ namespace PatriotIndex.Domain.Migrations
 
                                     b2.HasKey("TeamStatBlockTeamSeasonStatsId");
 
-                                    b2.ToTable("team_season_stats");
+                                    b2.ToTable("team_season_stats", (string)null);
 
                                     b2.WithOwner()
                                         .HasForeignKey("TeamStatBlockTeamSeasonStatsId")
@@ -4065,7 +4072,7 @@ namespace PatriotIndex.Domain.Migrations
 
                                     b2.HasKey("TeamStatBlockTeamSeasonStatsId");
 
-                                    b2.ToTable("team_season_stats");
+                                    b2.ToTable("team_season_stats", (string)null);
 
                                     b2.WithOwner()
                                         .HasForeignKey("TeamStatBlockTeamSeasonStatsId")
@@ -4094,7 +4101,7 @@ namespace PatriotIndex.Domain.Migrations
 
                                     b2.HasKey("TeamStatBlockTeamSeasonStatsId");
 
-                                    b2.ToTable("team_season_stats");
+                                    b2.ToTable("team_season_stats", (string)null);
 
                                     b2.WithOwner()
                                         .HasForeignKey("TeamStatBlockTeamSeasonStatsId")
@@ -4167,7 +4174,7 @@ namespace PatriotIndex.Domain.Migrations
 
                                     b2.HasKey("TeamStatBlockTeamSeasonStatsId");
 
-                                    b2.ToTable("team_season_stats");
+                                    b2.ToTable("team_season_stats", (string)null);
 
                                     b2.WithOwner()
                                         .HasForeignKey("TeamStatBlockTeamSeasonStatsId")
@@ -4186,7 +4193,7 @@ namespace PatriotIndex.Domain.Migrations
 
                                     b2.HasKey("TeamStatBlockTeamSeasonStatsId");
 
-                                    b2.ToTable("team_season_stats");
+                                    b2.ToTable("team_season_stats", (string)null);
 
                                     b2.WithOwner()
                                         .HasForeignKey("TeamStatBlockTeamSeasonStatsId")
@@ -4213,7 +4220,7 @@ namespace PatriotIndex.Domain.Migrations
 
                                     b2.HasKey("TeamStatBlockTeamSeasonStatsId");
 
-                                    b2.ToTable("team_season_stats");
+                                    b2.ToTable("team_season_stats", (string)null);
 
                                     b2.WithOwner()
                                         .HasForeignKey("TeamStatBlockTeamSeasonStatsId")
@@ -4250,7 +4257,7 @@ namespace PatriotIndex.Domain.Migrations
 
                                     b2.HasKey("TeamStatBlockTeamSeasonStatsId");
 
-                                    b2.ToTable("team_season_stats");
+                                    b2.ToTable("team_season_stats", (string)null);
 
                                     b2.WithOwner()
                                         .HasForeignKey("TeamStatBlockTeamSeasonStatsId")
@@ -4293,7 +4300,7 @@ namespace PatriotIndex.Domain.Migrations
 
                                     b2.HasKey("TeamStatBlockTeamSeasonStatsId");
 
-                                    b2.ToTable("team_season_stats");
+                                    b2.ToTable("team_season_stats", (string)null);
 
                                     b2.WithOwner()
                                         .HasForeignKey("TeamStatBlockTeamSeasonStatsId")
@@ -4334,7 +4341,7 @@ namespace PatriotIndex.Domain.Migrations
 
                                     b2.HasKey("TeamStatBlockTeamSeasonStatsId");
 
-                                    b2.ToTable("team_season_stats");
+                                    b2.ToTable("team_season_stats", (string)null);
 
                                     b2.WithOwner()
                                         .HasForeignKey("TeamStatBlockTeamSeasonStatsId")
@@ -4365,7 +4372,7 @@ namespace PatriotIndex.Domain.Migrations
 
                                     b2.HasKey("TeamStatBlockTeamSeasonStatsId");
 
-                                    b2.ToTable("team_season_stats");
+                                    b2.ToTable("team_season_stats", (string)null);
 
                                     b2.WithOwner()
                                         .HasForeignKey("TeamStatBlockTeamSeasonStatsId")
@@ -4415,7 +4422,7 @@ namespace PatriotIndex.Domain.Migrations
 
                             b1.HasKey("TeamSeasonStatsId");
 
-                            b1.ToTable("team_season_stats");
+                            b1.ToTable("team_season_stats", (string)null);
 
                             b1.ToJson("record");
 
@@ -4495,7 +4502,7 @@ namespace PatriotIndex.Domain.Migrations
 
                                     b2.HasKey("TeamStatBlockTeamSeasonStatsId");
 
-                                    b2.ToTable("team_season_stats");
+                                    b2.ToTable("team_season_stats", (string)null);
 
                                     b2.WithOwner()
                                         .HasForeignKey("TeamStatBlockTeamSeasonStatsId")
@@ -4508,7 +4515,7 @@ namespace PatriotIndex.Domain.Migrations
 
                                     b2.HasKey("TeamStatBlockTeamSeasonStatsId");
 
-                                    b2.ToTable("team_season_stats");
+                                    b2.ToTable("team_season_stats", (string)null);
 
                                     b2.WithOwner()
                                         .HasForeignKey("TeamStatBlockTeamSeasonStatsId")
@@ -4526,7 +4533,7 @@ namespace PatriotIndex.Domain.Migrations
 
                                             b3.HasKey("SeasonEfficiencyStatsTeamStatBlockTeamSeasonStatsId");
 
-                                            b3.ToTable("team_season_stats");
+                                            b3.ToTable("team_season_stats", (string)null);
 
                                             b3.WithOwner()
                                                 .HasForeignKey("SeasonEfficiencyStatsTeamStatBlockTeamSeasonStatsId")
@@ -4545,7 +4552,7 @@ namespace PatriotIndex.Domain.Migrations
 
                                             b3.HasKey("SeasonEfficiencyStatsTeamStatBlockTeamSeasonStatsId");
 
-                                            b3.ToTable("team_season_stats");
+                                            b3.ToTable("team_season_stats", (string)null);
 
                                             b3.WithOwner()
                                                 .HasForeignKey("SeasonEfficiencyStatsTeamStatBlockTeamSeasonStatsId")
@@ -4564,7 +4571,7 @@ namespace PatriotIndex.Domain.Migrations
 
                                             b3.HasKey("SeasonEfficiencyStatsTeamStatBlockTeamSeasonStatsId");
 
-                                            b3.ToTable("team_season_stats");
+                                            b3.ToTable("team_season_stats", (string)null);
 
                                             b3.WithOwner()
                                                 .HasForeignKey("SeasonEfficiencyStatsTeamStatBlockTeamSeasonStatsId")
@@ -4583,7 +4590,7 @@ namespace PatriotIndex.Domain.Migrations
 
                                             b3.HasKey("SeasonEfficiencyStatsTeamStatBlockTeamSeasonStatsId");
 
-                                            b3.ToTable("team_season_stats");
+                                            b3.ToTable("team_season_stats", (string)null);
 
                                             b3.WithOwner()
                                                 .HasForeignKey("SeasonEfficiencyStatsTeamStatBlockTeamSeasonStatsId")
@@ -4605,7 +4612,7 @@ namespace PatriotIndex.Domain.Migrations
 
                                     b2.HasKey("TeamStatBlockTeamSeasonStatsId");
 
-                                    b2.ToTable("team_season_stats");
+                                    b2.ToTable("team_season_stats", (string)null);
 
                                     b2.WithOwner()
                                         .HasForeignKey("TeamStatBlockTeamSeasonStatsId")
@@ -4631,7 +4638,7 @@ namespace PatriotIndex.Domain.Migrations
 
                                             b3.HasKey("SeasonTeamExtraPointStatsTeamStatBlockTeamSeasonStatsId");
 
-                                            b3.ToTable("team_season_stats");
+                                            b3.ToTable("team_season_stats", (string)null);
 
                                             b3.WithOwner()
                                                 .HasForeignKey("SeasonTeamExtraPointStatsTeamStatBlockTeamSeasonStatsId")
@@ -4652,7 +4659,7 @@ namespace PatriotIndex.Domain.Migrations
 
                                             b3.HasKey("SeasonTeamExtraPointStatsTeamStatBlockTeamSeasonStatsId");
 
-                                            b3.ToTable("team_season_stats");
+                                            b3.ToTable("team_season_stats", (string)null);
 
                                             b3.WithOwner()
                                                 .HasForeignKey("SeasonTeamExtraPointStatsTeamStatBlockTeamSeasonStatsId")
@@ -4706,7 +4713,7 @@ namespace PatriotIndex.Domain.Migrations
 
                                     b2.HasKey("TeamStatBlockTeamSeasonStatsId");
 
-                                    b2.ToTable("team_season_stats");
+                                    b2.ToTable("team_season_stats", (string)null);
 
                                     b2.WithOwner()
                                         .HasForeignKey("TeamStatBlockTeamSeasonStatsId")
@@ -4727,7 +4734,7 @@ namespace PatriotIndex.Domain.Migrations
 
                                     b2.HasKey("TeamStatBlockTeamSeasonStatsId");
 
-                                    b2.ToTable("team_season_stats");
+                                    b2.ToTable("team_season_stats", (string)null);
 
                                     b2.WithOwner()
                                         .HasForeignKey("TeamStatBlockTeamSeasonStatsId")
@@ -4762,7 +4769,7 @@ namespace PatriotIndex.Domain.Migrations
 
                                     b2.HasKey("TeamStatBlockTeamSeasonStatsId");
 
-                                    b2.ToTable("team_season_stats");
+                                    b2.ToTable("team_season_stats", (string)null);
 
                                     b2.WithOwner()
                                         .HasForeignKey("TeamStatBlockTeamSeasonStatsId")
@@ -4787,7 +4794,7 @@ namespace PatriotIndex.Domain.Migrations
 
                                     b2.HasKey("TeamStatBlockTeamSeasonStatsId");
 
-                                    b2.ToTable("team_season_stats");
+                                    b2.ToTable("team_season_stats", (string)null);
 
                                     b2.WithOwner()
                                         .HasForeignKey("TeamStatBlockTeamSeasonStatsId")
@@ -4806,7 +4813,7 @@ namespace PatriotIndex.Domain.Migrations
 
                                     b2.HasKey("TeamStatBlockTeamSeasonStatsId");
 
-                                    b2.ToTable("team_season_stats");
+                                    b2.ToTable("team_season_stats", (string)null);
 
                                     b2.WithOwner()
                                         .HasForeignKey("TeamStatBlockTeamSeasonStatsId")
@@ -4833,7 +4840,7 @@ namespace PatriotIndex.Domain.Migrations
 
                                     b2.HasKey("TeamStatBlockTeamSeasonStatsId");
 
-                                    b2.ToTable("team_season_stats");
+                                    b2.ToTable("team_season_stats", (string)null);
 
                                     b2.WithOwner()
                                         .HasForeignKey("TeamStatBlockTeamSeasonStatsId")
@@ -4868,7 +4875,7 @@ namespace PatriotIndex.Domain.Migrations
 
                                     b2.HasKey("TeamStatBlockTeamSeasonStatsId");
 
-                                    b2.ToTable("team_season_stats");
+                                    b2.ToTable("team_season_stats", (string)null);
 
                                     b2.WithOwner()
                                         .HasForeignKey("TeamStatBlockTeamSeasonStatsId")
@@ -4897,7 +4904,7 @@ namespace PatriotIndex.Domain.Migrations
 
                                     b2.HasKey("TeamStatBlockTeamSeasonStatsId");
 
-                                    b2.ToTable("team_season_stats");
+                                    b2.ToTable("team_season_stats", (string)null);
 
                                     b2.WithOwner()
                                         .HasForeignKey("TeamStatBlockTeamSeasonStatsId")
@@ -4970,7 +4977,7 @@ namespace PatriotIndex.Domain.Migrations
 
                                     b2.HasKey("TeamStatBlockTeamSeasonStatsId");
 
-                                    b2.ToTable("team_season_stats");
+                                    b2.ToTable("team_season_stats", (string)null);
 
                                     b2.WithOwner()
                                         .HasForeignKey("TeamStatBlockTeamSeasonStatsId")
@@ -4989,7 +4996,7 @@ namespace PatriotIndex.Domain.Migrations
 
                                     b2.HasKey("TeamStatBlockTeamSeasonStatsId");
 
-                                    b2.ToTable("team_season_stats");
+                                    b2.ToTable("team_season_stats", (string)null);
 
                                     b2.WithOwner()
                                         .HasForeignKey("TeamStatBlockTeamSeasonStatsId")
@@ -5016,7 +5023,7 @@ namespace PatriotIndex.Domain.Migrations
 
                                     b2.HasKey("TeamStatBlockTeamSeasonStatsId");
 
-                                    b2.ToTable("team_season_stats");
+                                    b2.ToTable("team_season_stats", (string)null);
 
                                     b2.WithOwner()
                                         .HasForeignKey("TeamStatBlockTeamSeasonStatsId")
@@ -5053,7 +5060,7 @@ namespace PatriotIndex.Domain.Migrations
 
                                     b2.HasKey("TeamStatBlockTeamSeasonStatsId");
 
-                                    b2.ToTable("team_season_stats");
+                                    b2.ToTable("team_season_stats", (string)null);
 
                                     b2.WithOwner()
                                         .HasForeignKey("TeamStatBlockTeamSeasonStatsId")
@@ -5096,7 +5103,7 @@ namespace PatriotIndex.Domain.Migrations
 
                                     b2.HasKey("TeamStatBlockTeamSeasonStatsId");
 
-                                    b2.ToTable("team_season_stats");
+                                    b2.ToTable("team_season_stats", (string)null);
 
                                     b2.WithOwner()
                                         .HasForeignKey("TeamStatBlockTeamSeasonStatsId")
@@ -5137,7 +5144,7 @@ namespace PatriotIndex.Domain.Migrations
 
                                     b2.HasKey("TeamStatBlockTeamSeasonStatsId");
 
-                                    b2.ToTable("team_season_stats");
+                                    b2.ToTable("team_season_stats", (string)null);
 
                                     b2.WithOwner()
                                         .HasForeignKey("TeamStatBlockTeamSeasonStatsId")
@@ -5168,7 +5175,7 @@ namespace PatriotIndex.Domain.Migrations
 
                                     b2.HasKey("TeamStatBlockTeamSeasonStatsId");
 
-                                    b2.ToTable("team_season_stats");
+                                    b2.ToTable("team_season_stats", (string)null);
 
                                     b2.WithOwner()
                                         .HasForeignKey("TeamStatBlockTeamSeasonStatsId")

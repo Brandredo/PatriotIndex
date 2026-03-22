@@ -11,6 +11,7 @@ public class PlayerSeasonStats
     public string SeasonType { get; set; } = "";
     public int GamesPlayed { get; set; }
     public int GamesStarted { get; set; }
+    public int? SortKey { get; set; }
 
     // Stored as a JSONB column — see DbContext configuration
     public PlayerStatBlock Stats { get; set; } = new();

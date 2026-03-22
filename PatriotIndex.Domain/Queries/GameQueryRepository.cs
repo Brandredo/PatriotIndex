@@ -5,7 +5,7 @@ using PatriotIndex.Domain.Interfaces;
 
 namespace PatriotIndex.Domain.Queries;
 
-public class GameQueryRepository(PatriotIndexDbContext db) : IGameRepository
+public class GameQueryRepository(PatriotIndexDbContext_OLD db) : IGameRepository
 {
     public async Task<IReadOnlyList<GameSummaryDto>> GetGamesAsync(
         int? season, string? seasonType, int? week, Guid? teamId)

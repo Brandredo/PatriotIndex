@@ -1,5 +1,8 @@
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using Microsoft.EntityFrameworkCore;
 using PatriotIndex.Domain.Context;
+using PatriotIndex.Domain.Frontend;
 using PatriotIndex.Domain.Interfaces;
 using PatriotIndex.Domain.Queries;
 using PatriotIndex.Domain.Services;
@@ -16,7 +19,7 @@ builder.AddNpgsqlDbContext<PatriotIndexDbContext>("PostgresDb", configureDbConte
     options.EnableDetailedErrors();
 });
 
-builder.AddRedisClient(connectionName: "Cache");
+builder.AddRedisClient("Cache");
 
 // Read repositories
 builder.Services.AddScoped<ITeamRepository, TeamQueryRepository>();
@@ -24,23 +27,28 @@ builder.Services.AddScoped<IPlayerRepository, PlayerQueryRepository>();
 builder.Services.AddScoped<IGameRepository, GameQueryRepository>();
 builder.Services.AddScoped<ILeaderboardRepository, LeaderboardQueryRepository>();
 builder.Services.AddScoped<IConferenceRepository, ConferenceQueryRepository>();
+builder.Services.AddScoped<IPlayerStatsService, PlayerStatsService>();
+builder.Services.AddScoped<ITeamStatsService, TeamStatsService>();
 
+builder.Services.AddScoped<StatisticsQueryService>();
+
+// Write repositories
 builder.Services.AddSingleton<ICacheService, CacheService>();
 
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
-        options.JsonSerializerOptions.PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase;
+        options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
         options.JsonSerializerOptions.DefaultIgnoreCondition =
-            System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull;
+            JsonIgnoreCondition.WhenWritingNull;
     });
 
 builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy =>
         policy.WithOrigins("http://localhost:4200")
-              .AllowAnyHeader()
-              .AllowAnyMethod());
+            .AllowAnyHeader()
+            .AllowAnyMethod());
 });
 
 

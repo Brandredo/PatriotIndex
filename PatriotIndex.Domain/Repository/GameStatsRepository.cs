@@ -5,7 +5,7 @@ using PatriotIndex.Domain.Entities;
 
 namespace PatriotIndex.Domain.Repository;
 
-public class GameStatsRepository(PatriotIndexDbContext ctx, ILogger<GameStatsRepository> logger)
+public class GameStatsRepository(PatriotIndexDbContext_OLD ctx, ILogger<GameStatsRepository> logger)
 {
     public async Task SaveAsync(
         List<TeamGameStats> teamStats,

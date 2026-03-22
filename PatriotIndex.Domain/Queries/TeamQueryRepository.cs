@@ -6,7 +6,7 @@ using PatriotIndex.Domain.Interfaces;
 
 namespace PatriotIndex.Domain.Queries;
 
-public class TeamQueryRepository(PatriotIndexDbContext db, ICacheService cache) : ITeamRepository
+public class TeamQueryRepository(PatriotIndexDbContext_OLD db, ICacheService cache) : ITeamRepository
 {
     public async Task<IReadOnlyList<TeamSummaryDto>> GetAllAsync()
     {
@@ -427,162 +427,194 @@ public class TeamQueryRepository(PatriotIndexDbContext db, ICacheService cache) 
 
     // ── Stats page ────────────────────────────────────────────────────────
 
-    public async Task<PagedResultDto<TeamStatsSummaryDto>> GetAllTeamsStatsAsync(
+    public async Task<PagedResultDto<TeamSeasonStats>> GetAllTeamsStatsAsync(
         int season, string seasonType,
         string? cursor, int limit, CancellationToken ct = default)
     {
-        var cacheKey = $"stats:teams:{season}:{seasonType}";
-        var full = await cache.GetOrSetAsync(
-            cacheKey,
-            () => FetchAllTeamsFromDb(season, seasonType),
-            season < DateTime.UtcNow.Year ? TimeSpan.FromHours(24) : TimeSpan.FromMinutes(30),
-            ct);
+        int? cursorGp = null;
+        Guid? cursorTeamId = null;
+        if (cursor is not null)
+        {
+            var parts = cursor.Split(':');
+            if (parts.Length == 2 && int.TryParse(parts[0], out var gp) && Guid.TryParse(parts[1], out var tid))
+            {
+                cursorGp = gp;
+                cursorTeamId = tid;
+            }
+        }
 
-        return PaginateTeams(full ?? [], cursor, limit);
-    }
-
-    private async Task<TeamStatsSummaryDto[]> FetchAllTeamsFromDb(int season, string seasonType)
-    {
-        // 1. All season stats
-        var allStats = await db.TeamSeasonStats
+        var baseQuery = db.TeamSeasonStats
             .AsNoTracking()
             .Include(s => s.Team!.Colors)
-            .Where(s => s.SeasonYear == season && s.SeasonType == seasonType)
-            .ToListAsync();
+            .Where(s => s.SeasonYear == season && s.SeasonType == seasonType);
 
-        if (allStats.Count == 0) return [];
+        if (cursorGp.HasValue && cursorTeamId.HasValue)
+        {
+            var cgp = cursorGp.Value;
+            var cid = cursorTeamId.Value;
+            baseQuery = baseQuery.Where(s =>
+                s.GamesPlayed < cgp || (s.GamesPlayed == cgp && s.TeamId > cid));
+        }
 
-        var teamIds = allStats.Select(s => s.TeamId).ToHashSet();
+        var items = await baseQuery
+            .OrderByDescending(s => s.GamesPlayed)
+            .ThenBy(s => s.TeamId)
+            .Take(limit + 1)
+            .ToListAsync(ct);
 
-        // 2. Closed games for scoring
-        var games = await db.Games
-            .AsNoTracking()
-            .Where(g => g.SeasonYear == season && g.SeasonType == seasonType
-                        && g.Status == "closed" && g.HomePoints != null)
-            .ToListAsync();
+        var hasNextPage = items.Count > limit;
+        if (hasNextPage) items.RemoveAt(items.Count - 1);
 
-        // 3. Possession time from game stats
-        var gameLogs = await db.TeamGameStats
-            .AsNoTracking()
-            .Include(tgs => tgs.Game)
-            .Where(tgs => teamIds.Contains(tgs.TeamId)
-                          && tgs.Game!.SeasonYear == season
-                          && tgs.Game.SeasonType == seasonType
-                          && tgs.Game.Status == "closed")
-            .Select(tgs => new { tgs.TeamId, tgs.Stats.Summary!.PossessionTime })
-            .ToListAsync();
+        var nextCursor = hasNextPage
+            ? $"{items[^1].GamesPlayed}:{items[^1].TeamId}"
+            : null;
 
-        // 4. Drive efficiency
-        var drives = await db.Drives
-            .AsNoTracking()
-            .Include(d => d.Game)
-            .Where(d => d.OffensiveTeamId != null
-                        && teamIds.Contains(d.OffensiveTeamId!.Value)
-                        && d.Game!.SeasonYear == season
-                        && d.Game.SeasonType == seasonType
-                        && d.Game.Status == "closed")
-            .Select(d => new
-            {
-                TeamId        = d.OffensiveTeamId!.Value,
-                d.NetYards,
-                d.PlayCount,
-                d.OffensivePoints,
-            })
-            .ToListAsync();
-
-        // Group by team in memory
-        var scoresByTeam = games
-            .SelectMany(g => new[]
-            {
-                new { TeamId = g.HomeTeamId, Points = g.HomePoints!.Value, OppPoints = g.AwayPoints!.Value },
-                new { TeamId = g.AwayTeamId, Points = g.AwayPoints!.Value, OppPoints = g.HomePoints!.Value }
-            })
-            .Where(x => x.TeamId.HasValue && teamIds.Contains(x.TeamId.Value))
-            .GroupBy(x => x.TeamId!.Value)
-            .ToDictionary(g => g.Key, g => (
-                TotalPts:    g.Sum(x => x.Points),
-                TotalOpp:    g.Sum(x => x.OppPoints),
-                GameCount:   g.Count()
-            ));
-
-        var possessionByTeam = gameLogs
-            .GroupBy(x => x.TeamId)
-            .ToDictionary(g => g.Key, g =>
-            {
-                var totalSecs = g.Sum(x => ParsePossessionSeconds(x.PossessionTime));
-                return g.Count() > 0 ? totalSecs / g.Count() : 0.0;
-            });
-
-        var drivesByTeam = drives
-            .GroupBy(x => x.TeamId)
-            .ToDictionary(g => g.Key, g => (
-                Count:  g.Count(),
-                Yards:  g.Sum(x => x.NetYards ?? 0),
-                Plays:  g.Sum(x => x.PlayCount ?? 0),
-                Points: g.Sum(x => x.OffensivePoints ?? 0)
-            ));
-
-        return allStats
-            .Select(s =>
-            {
-                var t   = s.Team!;
-                var r   = s.Record;
-                var opp = s.Opponents;
-                int gp  = Math.Max(s.GamesPlayed, 1);
-
-                scoresByTeam.TryGetValue(s.TeamId, out var sc);
-                possessionByTeam.TryGetValue(s.TeamId, out var topAvg);
-                drivesByTeam.TryGetValue(s.TeamId, out var drv);
-
-                int drvCount = Math.Max(drv.Count, 1);
-
-                // Turnovers: takeaways - giveaways
-                int takeaways = (r.Defense?.Interceptions ?? 0) + (r.Fumbles?.OppRec ?? 0);
-                int giveaways = (r.Passing?.Interceptions ?? 0) + (r.Fumbles?.LostFumbles ?? 0);
-
-                // Pressure rate: (def hurries + sacks + knockdowns) / opp pass att
-                int pressures = (r.Defense?.Hurries ?? 0)
-                              + (int)(r.Defense?.Sacks ?? 0)
-                              + (r.Defense?.Knockdowns ?? 0);
-                int oppPassAtt = opp.Passing?.Attempts ?? 1;
-
-                return new TeamStatsSummaryDto(
-                    t.Id,
-                    t.Name,
-                    t.Market,
-                    t.Alias,
-                    t.Colors,
-                    s.GamesPlayed,
-                    // Core scoring
-                    sc.GameCount > 0 ? Math.Round((decimal)sc.TotalPts / sc.GameCount, 1) : 0m,
-                    sc.GameCount > 0 ? Math.Round((decimal)sc.TotalOpp / sc.GameCount, 1) : 0m,
-                    // Core yards
-                    Math.Round((decimal)((r.Passing?.Yards ?? 0) + (r.Rushing?.Yards ?? 0)) / gp, 1),
-                    Math.Round((decimal)(r.Passing?.Yards ?? 0) / gp, 1),
-                    Math.Round((decimal)(r.Rushing?.Yards ?? 0) / gp, 1),
-                    // Core efficiency
-                    takeaways - giveaways,
-                    r.Efficiency?.Thirddown?.Pct ?? 0m,
-                    r.Efficiency?.Redzone?.Pct   ?? 0m,
-                    r.Efficiency?.Goaltogo?.Pct  ?? 0m,
-                    // Core misc
-                    Math.Round((decimal)(r.Penalties?.Penalties ?? 0) / gp, 1),
-                    Math.Round((decimal)(r.Penalties?.Yards ?? 0) / gp, 1),
-                    Math.Round((decimal)topAvg, 0),
-                    // Advanced drives
-                    Math.Round((decimal)drv.Points / drvCount, 2),
-                    Math.Round((decimal)drv.Yards  / drvCount, 1),
-                    Math.Round((decimal)drv.Plays  / drvCount, 1),
-                    // Advanced defense (confirmed populated)
-                    r.Defense?.ThreeAndOutsForced ?? 0,
-                    r.Defense?.MissedTackles      ?? 0,
-                    r.Defense?.Blitzes            ?? 0,
-                    oppPassAtt > 0 ? Math.Round((decimal)pressures / oppPassAtt * 100, 1) : 0m
-                );
-            })
-            .OrderByDescending(x => x.PtsPerGame)
-            .ToArray();
+        return new PagedResultDto<TeamSeasonStats>(items.ToArray(), nextCursor, items.Count);
     }
+    
+
+    // private async Task<TeamStatsSummaryDto[]> FetchAllTeamsFromDb(int season, string seasonType)
+    // {
+    //     // 1. All season stats
+    //     var allStats = await db.TeamSeasonStats
+    //         .AsNoTracking()
+    //         .Include(s => s.Team!.Colors)
+    //         .Where(s => s.SeasonYear == season && s.SeasonType == seasonType)
+    //         .ToListAsync();
+    //
+    //     if (allStats.Count == 0) return [];
+    //
+    //     var teamIds = allStats.Select(s => s.TeamId).ToHashSet();
+    //
+    //     // 2. Closed games for scoring
+    //     var games = await db.Games
+    //         .AsNoTracking()
+    //         .Where(g => g.SeasonYear == season && g.SeasonType == seasonType
+    //                     && g.Status == "closed" && g.HomePoints != null)
+    //         .ToListAsync();
+    //
+    //     // 3. Possession time from game stats
+    //     var gameLogs = await db.TeamGameStats
+    //         .AsNoTracking()
+    //         .Include(tgs => tgs.Game)
+    //         .Where(tgs => teamIds.Contains(tgs.TeamId)
+    //                       && tgs.Game!.SeasonYear == season
+    //                       && tgs.Game.SeasonType == seasonType
+    //                       && tgs.Game.Status == "closed")
+    //         .Select(tgs => new { tgs.TeamId, tgs.Stats.Summary!.PossessionTime })
+    //         .ToListAsync();
+    //
+    //     // 4. Drive efficiency
+    //     var drives = await db.Drives
+    //         .AsNoTracking()
+    //         .Include(d => d.Game)
+    //         .Where(d => d.OffensiveTeamId != null
+    //                     && teamIds.Contains(d.OffensiveTeamId!.Value)
+    //                     && d.Game!.SeasonYear == season
+    //                     && d.Game.SeasonType == seasonType
+    //                     && d.Game.Status == "closed")
+    //         .Select(d => new
+    //         {
+    //             TeamId        = d.OffensiveTeamId!.Value,
+    //             d.NetYards,
+    //             d.PlayCount,
+    //             d.OffensivePoints,
+    //         })
+    //         .ToListAsync();
+    //
+    //     // Group by team in memory
+    //     var scoresByTeam = games
+    //         .SelectMany(g => new[]
+    //         {
+    //             new { TeamId = g.HomeTeamId, Points = g.HomePoints!.Value, OppPoints = g.AwayPoints!.Value },
+    //             new { TeamId = g.AwayTeamId, Points = g.AwayPoints!.Value, OppPoints = g.HomePoints!.Value }
+    //         })
+    //         .Where(x => x.TeamId.HasValue && teamIds.Contains(x.TeamId.Value))
+    //         .GroupBy(x => x.TeamId!.Value)
+    //         .ToDictionary(g => g.Key, g => (
+    //             TotalPts:    g.Sum(x => x.Points),
+    //             TotalOpp:    g.Sum(x => x.OppPoints),
+    //             GameCount:   g.Count()
+    //         ));
+    //
+    //     var possessionByTeam = gameLogs
+    //         .GroupBy(x => x.TeamId)
+    //         .ToDictionary(g => g.Key, g =>
+    //         {
+    //             var totalSecs = g.Sum(x => ParsePossessionSeconds(x.PossessionTime));
+    //             return g.Count() > 0 ? totalSecs / g.Count() : 0.0;
+    //         });
+    //
+    //     var drivesByTeam = drives
+    //         .GroupBy(x => x.TeamId)
+    //         .ToDictionary(g => g.Key, g => (
+    //             Count:  g.Count(),
+    //             Yards:  g.Sum(x => x.NetYards ?? 0),
+    //             Plays:  g.Sum(x => x.PlayCount ?? 0),
+    //             Points: g.Sum(x => x.OffensivePoints ?? 0)
+    //         ));
+    //
+    //     return allStats
+    //         .Select(s =>
+    //         {
+    //             var t   = s.Team!;
+    //             var r   = s.Record;
+    //             var opp = s.Opponents;
+    //             int gp  = Math.Max(s.GamesPlayed, 1);
+    //
+    //             scoresByTeam.TryGetValue(s.TeamId, out var sc);
+    //             possessionByTeam.TryGetValue(s.TeamId, out var topAvg);
+    //             drivesByTeam.TryGetValue(s.TeamId, out var drv);
+    //
+    //             int drvCount = Math.Max(drv.Count, 1);
+    //
+    //             // Turnovers: takeaways - giveaways
+    //             int takeaways = (r.Defense?.Interceptions ?? 0) + (r.Fumbles?.OppRec ?? 0);
+    //             int giveaways = (r.Passing?.Interceptions ?? 0) + (r.Fumbles?.LostFumbles ?? 0);
+    //
+    //             // Pressure rate: (def hurries + sacks + knockdowns) / opp pass att
+    //             int pressures = (r.Defense?.Hurries ?? 0)
+    //                           + (int)(r.Defense?.Sacks ?? 0)
+    //                           + (r.Defense?.Knockdowns ?? 0);
+    //             int oppPassAtt = opp.Passing?.Attempts ?? 1;
+    //
+    //             return new TeamStatsSummaryDto(
+    //                 t.Id,
+    //                 t.Name,
+    //                 t.Market,
+    //                 t.Alias,
+    //                 t.Colors,
+    //                 s.GamesPlayed,
+    //                 // Core scoring
+    //                 sc.GameCount > 0 ? Math.Round((decimal)sc.TotalPts / sc.GameCount, 1) : 0m,
+    //                 sc.GameCount > 0 ? Math.Round((decimal)sc.TotalOpp / sc.GameCount, 1) : 0m,
+    //                 // Core yards
+    //                 Math.Round((decimal)((r.Passing?.Yards ?? 0) + (r.Rushing?.Yards ?? 0)) / gp, 1),
+    //                 Math.Round((decimal)(r.Passing?.Yards ?? 0) / gp, 1),
+    //                 Math.Round((decimal)(r.Rushing?.Yards ?? 0) / gp, 1),
+    //                 // Core efficiency
+    //                 takeaways - giveaways,
+    //                 r.Efficiency?.Thirddown?.Pct ?? 0m,
+    //                 r.Efficiency?.Redzone?.Pct   ?? 0m,
+    //                 r.Efficiency?.Goaltogo?.Pct  ?? 0m,
+    //                 // Core misc
+    //                 Math.Round((decimal)(r.Penalties?.Penalties ?? 0) / gp, 1),
+    //                 Math.Round((decimal)(r.Penalties?.Yards ?? 0) / gp, 1),
+    //                 Math.Round((decimal)topAvg, 0),
+    //                 // Advanced drives
+    //                 Math.Round((decimal)drv.Points / drvCount, 2),
+    //                 Math.Round((decimal)drv.Yards  / drvCount, 1),
+    //                 Math.Round((decimal)drv.Plays  / drvCount, 1),
+    //                 // Advanced defense (confirmed populated)
+    //                 r.Defense?.ThreeAndOutsForced ?? 0,
+    //                 r.Defense?.MissedTackles      ?? 0,
+    //                 r.Defense?.Blitzes            ?? 0,
+    //                 oppPassAtt > 0 ? Math.Round((decimal)pressures / oppPassAtt * 100, 1) : 0m
+    //             );
+    //         })
+    //         .OrderByDescending(x => x.PtsPerGame)
+    //         .ToArray();
+    // }
 
     private static double ParsePossessionSeconds(string? time)
     {
